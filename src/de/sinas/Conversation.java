@@ -23,6 +23,10 @@ public class Conversation {
 		messages.add(message);
 	}
 
+	public String getId() {
+		return id;
+	}
+
 	public List<Message> getMessages() {
 		return Collections.unmodifiableList(messages);
 	}
