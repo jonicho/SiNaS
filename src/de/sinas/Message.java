@@ -1,6 +1,7 @@
 package de.sinas;
 
 public class Message {
+	private String id;
 	private String content;
 	private long timestamp;
 	private User sender;
@@ -27,5 +28,9 @@ public class Message {
 
 	public boolean isFile() {
 		return isFile;
+	}
+	
+	public String getId() {
+		return id;
 	}
 }
