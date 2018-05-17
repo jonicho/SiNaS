@@ -41,6 +41,10 @@ public class Conversation {
 		return id;
 	}
 
+	public String getId() {
+		return id;
+	}
+
 	public List<Message> getMessages() {
 		return Collections.unmodifiableList(messages);
 	}
