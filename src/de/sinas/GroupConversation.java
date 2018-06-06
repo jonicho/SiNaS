@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * A group conversation containing an arbitrary amount of users
+ */
 public class GroupConversation {
 	private String id;
 	private String name;
@@ -15,7 +18,7 @@ public class GroupConversation {
 		this.id = id;
 		this.users.addAll(Arrays.asList(users));
 	}
-	
+
 	public void addUser(User user) {
 		users.add(user);
 	}
@@ -32,11 +35,11 @@ public class GroupConversation {
 	public List<Message> getMessages() {
 		return Collections.unmodifiableList(messages);
 	}
-	
+
 	public List<User> getUsers() {
 		return Collections.unmodifiableList(users);
 	}
-	
+
 	public String getName() {
 		return name;
 	}
