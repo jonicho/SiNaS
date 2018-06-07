@@ -19,5 +19,13 @@ public class Users {
 		}
 		return null;
 	}
+	
+	/**
+	 * Adds a user to the list of users
+	 * @param user
+	 */
+	public void addUser(User user) {
+		users.add(user);
+	}
 
 }

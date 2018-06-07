@@ -6,7 +6,7 @@ import de.sinas.Conversation;
 import de.sinas.User;
 
 /**
- * The database for SiNaS. Stores user and conversation data in the diven
+ * The database for SiNaS. Stores user and conversation data in the given
  * directory
  */
 public class Database {
