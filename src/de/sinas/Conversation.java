@@ -14,7 +14,7 @@ public class Conversation {
 	private User user2;
 
 	/**
-	 * Creates a nes conversation object.
+	 * Creates a new conversation object.
 	 * 
 	 * @param id    the conversation's id
 	 * @param user1 the first user
@@ -58,7 +58,7 @@ public class Conversation {
 	}
 
 	/**
-	 * Resturns an unmodifiable list containing all messages in this conversation.
+	 * Returns an unmodifiable list containing all messages in this conversation.
 	 * 
 	 * @return the messages
 	 */
