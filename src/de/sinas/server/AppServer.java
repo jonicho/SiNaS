@@ -35,7 +35,7 @@ public class AppServer extends Server {
 		String[] msgParts = message.split(PROTOCOL.SPLIT);
 		switch (msgParts[0]) {
 		case PROTOCOL.CS.MSG:
-			
+			handleMessage(msgParts);
 			break;
 		case PROTOCOL.CS.LOGIN:
 			handleLogin(user);
@@ -67,12 +67,12 @@ public class AppServer extends Server {
         
 	}
 	
+	private void handleMessage(String[] msgParts) {
+		
+	}
+	
 	@Override
 	public void processClosingConnection(String pClientIP, int pClientPort) {
 		System.out.println("Closing connection: " + pClientIP + ":" + pClientPort);
-	}
-
-	public static void main(String[] args) {
-		new AppServer(PROTOCOL.PORT);
 	}
 }
