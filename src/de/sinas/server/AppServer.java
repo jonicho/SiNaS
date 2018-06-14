@@ -43,8 +43,4 @@ public class AppServer extends Server {
 	public void processClosingConnection(String pClientIP, int pClientPort) {
 		System.out.println("Closing connection: " + pClientIP + ":" + pClientPort);
 	}
-
-	public static void main(String[] args) {
-		new AppServer(PROTOCOL.PORT);
-	}
 }
