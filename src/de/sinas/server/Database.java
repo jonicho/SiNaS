@@ -1,6 +1,8 @@
 package de.sinas.server;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import de.sinas.Conversation;
 import de.sinas.User;
@@ -49,13 +51,27 @@ public class Database {
 	 * Saves the given user
 	 */
 	public void saveUser(User user) {
-
+		File userfile = new File(databaseDirectory + "\\users\\"+ user.getUsername() +".txt");
+		if(!userfile.exists()) {
+			try {
+				userfile.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} 
 	}
 
 	/**
 	 * Saves the given conversation
 	 */
 	public void saveConversation(Conversation conversation) {
-
+		File conversationfile = new File(databaseDirectory + "\\conversations\\"+ conversation.getId() +".txt");
+		if(!conversationfile.exists()) {
+			try {
+				conversationfile.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }

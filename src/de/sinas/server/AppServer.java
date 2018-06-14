@@ -7,7 +7,7 @@ import de.sinas.net.PROTOCOL;
 import de.sinas.net.Server;
 
 public class AppServer extends Server {
-	private Database db = new Database(new File("SiNaS-Database/"));
+	private Database db = new Database(new File("C:\\Users\\jan-frederic.ruhl\\Desktop\\SiNaS-Database"));
 	private Users users = new Users();
 
 	public AppServer(int pPort) {
