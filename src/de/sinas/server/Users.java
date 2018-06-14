@@ -1,7 +1,6 @@
 package de.sinas.server;
 
 import java.util.ArrayList;
-import de.sinas.*;
 
 import de.sinas.User;
 
