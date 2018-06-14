@@ -12,6 +12,7 @@ public final class PROTOCOL {
 
 		public static final String ERROR = "err", // Base [split] errorcode
 				OK = "ok", // Base
+				LOGIN_OK = "lgnok", //Base [split] username
 				MSG = "msg"; // Base [split] conversation id [split] message id [split] is file [split] content
 	}
 
@@ -25,7 +26,8 @@ public final class PROTOCOL {
 	public final class ERRORCODES {
 		private ERRORCODES() {}
 
-		public static final int UNKNOWN_ERROR = -1;
+		public static final int UNKNOWN_ERROR = -1,
+				LOGIN_FAILED = 0;
 	}
 
 	/**

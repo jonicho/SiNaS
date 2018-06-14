@@ -14,6 +14,22 @@ public class User {
 		this.nickname = nickname;
 		
 	}
+	
+	public boolean isAuthed() {
+		return isAuthed;
+	}
+	
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	
+	public void setAuthed(boolean isAuthed) {
+		if(!isAuthed) {
+			this.isAuthed = isAuthed;
+		}
+		else throw new IllegalArgumentException("Tried to deauthorize the User!");
+		
+	}
 
 	public String getIp() {
 		return ip;
