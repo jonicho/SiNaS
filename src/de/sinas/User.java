@@ -24,7 +24,7 @@ public class User {
 	}
 	
 	public void setAuthed(boolean isAuthed) {
-		if(!isAuthed) {
+		if(!this.isAuthed) {
 			this.isAuthed = isAuthed;
 		}
 		else throw new IllegalArgumentException("Tried to deauthorize the User!");

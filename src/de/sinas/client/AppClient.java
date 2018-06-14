@@ -19,7 +19,6 @@ public class AppClient extends Client {
 	public AppClient(String pServerIP, int pServerPort, Gui gui) {
 		super(pServerIP, pServerPort);
 		this.gui = gui;
-		login();
 	}
 
 	@Override

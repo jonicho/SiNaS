@@ -13,7 +13,7 @@ import de.sinas.net.PROTOCOL;
 import de.sinas.net.Server;
 
 public class AppServer extends Server {
-	private Database db = new Database(new File("C:\\Users\\jan-frederic.ruhl\\Desktop\\SiNaS-Database"));
+	private Database db = new Database(new File("C:\\Users\\jonas.keller\\Desktop\\SiNaS-Database"));
 	private Users users = new Users();
 
 	public AppServer(int pPort) {
@@ -58,7 +58,7 @@ public class AppServer extends Server {
         FileOwnerAttributeView ownerAttributeView = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
         try {
         	UserPrincipal owner = ownerAttributeView.getOwner();
-        	String[] splt = owner.getName().split("\\");
+        	String[] splt = owner.getName().split("\\\\");
 			pUser.setUsername(splt[1]);
 			pUser.setAuthed(true);
 		} catch (IOException e) {

@@ -31,13 +31,14 @@ public class Gui extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		appClient = new AppClient("localhost", PROTOCOL.PORT, this);
+		appClient = new AppClient("10.37.235.1", PROTOCOL.PORT, this);
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("gui.fxml"));
 		fxmlLoader.setController(this);
 		Pane root = (Pane) fxmlLoader.load();
 		Scene scene = new Scene(root);
 		primaryStage.setScene(scene);
 		primaryStage.show();
+		appClient.login();
 	}
 
 	@FXML
