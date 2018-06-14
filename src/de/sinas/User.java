@@ -5,12 +5,14 @@ public class User {
 	private int port;
 	private String username;
 	private String nickname;
+	private boolean isAuthed;
 	
 	public User(String ip, int port, String username, String nickname) {
 		this.ip = ip;
 		this.port = port;
 		this.username = username;
 		this.nickname = nickname;
+		
 	}
 
 	public String getIp() {

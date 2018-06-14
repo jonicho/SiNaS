@@ -58,7 +58,7 @@ public class Conversation {
 	}
 
 	/**
-	 * Resturns an unmodifiable list containing all messages in this conversation.
+	 * Returns an unmodifiable list containing all messages in this conversation.
 	 * 
 	 * @return the messages
 	 */
