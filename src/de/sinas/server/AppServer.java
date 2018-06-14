@@ -17,6 +17,7 @@ public class AppServer extends Server {
 	@Override
 	public void processNewConnection(String clientIP, int clientPort) {
 		System.out.println("New connection: " + clientIP + ":" + clientPort);
+		
 	}
 
 	@Override
@@ -33,7 +34,11 @@ public class AppServer extends Server {
 			break;
 		}
 	}
-
+	
+	private void handleLogin() {
+		
+	}
+	
 	@Override
 	public void processClosingConnection(String pClientIP, int pClientPort) {
 		System.out.println("Closing connection: " + pClientIP + ":" + pClientPort);
