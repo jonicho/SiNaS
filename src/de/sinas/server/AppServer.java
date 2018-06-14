@@ -27,7 +27,7 @@ public class AppServer extends Server {
 		String[] msgParts = message.split(PROTOCOL.SPLIT);
 		switch (msgParts[0]) {
 		case PROTOCOL.CS.MSG:
-			
+			handleMessage(msgParts);
 			break;
 
 		default:
@@ -36,6 +36,10 @@ public class AppServer extends Server {
 	}
 	
 	private void handleLogin() {
+		
+	}
+	
+	private void handleMessage(String[] msgParts) {
 		
 	}
 	
