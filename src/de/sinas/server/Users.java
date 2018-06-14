@@ -7,6 +7,15 @@ import de.sinas.User;
 public class Users {
 	private ArrayList<User> users = new ArrayList<User>();
 
+	public boolean doesUserExist(String ip, int port) {
+		for(User u : users) {
+			if(u.getIp().equals(ip)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	/**
 	 * @return The user with the given ip and port. {@code null} if such a user does
 	 *         not exist
