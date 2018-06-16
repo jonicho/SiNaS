@@ -23,14 +23,14 @@ public class AppServer extends Server {
 	@Override
 	public void processNewConnection(String clientIP, int clientPort) {
 		System.out.println("New connection: " + clientIP + ":" + clientPort);
-		if(!users.doesUserExist(clientIP, clientPort)) {
-			users.addUser(new User(clientIP,clientPort,"",""));
-		}
 	}
 
 	@Override
 	public void processMessage(String clientIP, int clientPort, String message) {
 		System.out.println("New message: " + clientIP + ":" + clientPort + ", " + message);
+		if(!users.doesUserExist(clientIP, clientPort)) {
+			users.addUser(new User(clientIP,clientPort,"",""));
+		}
 		User user = users.getUser(clientIP, clientPort);
 		String[] msgParts = message.split(PROTOCOL.SPLIT);
 		switch (msgParts[0]) {
