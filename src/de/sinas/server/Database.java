@@ -1,7 +1,6 @@
 package de.sinas.server;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 
 import de.sinas.Conversation;
@@ -17,10 +16,9 @@ public class Database {
 	/**
 	 * Creates a new database object
 	 * 
-	 * @param databaseDirectory
-	 *            the directory in which the data is to be stored
-	 * @throws IllegalArgumentException
-	 *             when given database directory is not a directory
+	 * @param databaseDirectory the directory in which the data is to be stored
+	 * @throws IllegalArgumentException when given database directory is not a
+	 *                                  directory
 	 */
 	public Database(File databaseDirectory) throws IllegalArgumentException {
 		if (!databaseDirectory.isDirectory()) {
@@ -34,8 +32,8 @@ public class Database {
 	 * 
 	 * @return The user with the given username
 	 */
-	public User getUser(String username) {
-		return null;
+	public User getUser(String username, String ip, int port) {
+		return new User(ip, port, username, username); // TODO load user from database
 	}
 
 	/**
@@ -51,22 +49,22 @@ public class Database {
 	 * Saves the given user
 	 */
 	public void saveUser(User user) {
-		File userfile = new File(databaseDirectory + "\\users\\"+ user.getUsername() +".txt");
-		if(!userfile.exists()) {
+		File userfile = new File(databaseDirectory + "\\users\\" + user.getUsername() + ".txt");
+		if (!userfile.exists()) {
 			try {
 				userfile.createNewFile();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		} 
+		}
 	}
 
 	/**
 	 * Saves the given conversation
 	 */
 	public void saveConversation(Conversation conversation) {
-		File conversationfile = new File(databaseDirectory + "\\conversations\\"+ conversation.getId() +".txt");
-		if(!conversationfile.exists()) {
+		File conversationfile = new File(databaseDirectory + "\\conversations\\" + conversation.getId() + ".txt");
+		if (!conversationfile.exists()) {
 			try {
 				conversationfile.createNewFile();
 			} catch (IOException e) {

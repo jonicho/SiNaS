@@ -28,49 +28,44 @@ public class AppServer extends Server {
 	@Override
 	public void processMessage(String clientIP, int clientPort, String message) {
 		System.out.println("New message: " + clientIP + ":" + clientPort + ", " + message);
-		if(!users.doesUserExist(clientIP, clientPort)) {
-			users.addUser(new User(clientIP,clientPort,"",""));
-		}
-		User user = users.getUser(clientIP, clientPort);
 		String[] msgParts = message.split(PROTOCOL.SPLIT);
+		User user = users.getUser(clientIP, clientPort);
+		if (user == null) {
+			if (!msgParts[0].equals(PROTOCOL.CS.LOGIN)) {
+				send(clientIP, clientPort, PROTOCOL.getErrorMessage(PROTOCOL.ERRORCODES.NOT_LOGGED_IN));
+			} else {
+				handleLogin(clientIP, clientPort);
+			}
+			return;
+		}
 		switch (msgParts[0]) {
 		case PROTOCOL.CS.MSG:
-			handleMessage(msgParts);
-			break;
-		case PROTOCOL.CS.LOGIN:
-			handleLogin(user);
-			if(user.isAuthed()) {
-				send(clientIP, clientPort, PROTOCOL.buildMessage(PROTOCOL.SC.LOGIN_OK,user.getUsername()));
-			}
-			else send(clientIP, clientPort, PROTOCOL.buildMessage(PROTOCOL.SC.ERROR,PROTOCOL.ERRORCODES.LOGIN_FAILED));
+			handleMessage(user, msgParts);
 			break;
 		default:
 			break;
 		}
 	}
-	
-	
-	private void handleLogin(User pUser) {
-		if(pUser.isAuthed()) {
-			return;
-		}
-		Path path = Paths.get("T:\\Schulweiter Tausch\\"+pUser.getIp());
-        FileOwnerAttributeView ownerAttributeView = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
-        try {
-        	UserPrincipal owner = ownerAttributeView.getOwner();
-        	String[] splt = owner.getName().split("\\\\");
-			pUser.setUsername(splt[1]);
-			pUser.setAuthed(true);
+
+	private void handleLogin(String clientIP, int clientPort) {
+		Path path = Paths.get("T:\\Schulweiter Tausch\\" + clientIP);
+		FileOwnerAttributeView ownerAttributeView = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
+		try {
+			String[] ownerName = ownerAttributeView.getOwner().getName().split("\\\\");
+			User user = db.getUser(ownerName[ownerName.length - 1], clientIP, clientPort);
+			send(user.getIp(), user.getPort(),
+					PROTOCOL.buildMessage(PROTOCOL.SC.LOGIN_OK, user.getUsername(), user.getNickname()));
 		} catch (IOException e) {
 			e.printStackTrace();
+			send(clientIP, clientPort, PROTOCOL.getErrorMessage(PROTOCOL.ERRORCODES.LOGIN_FAILED));
 		}
-        
+
 	}
-	
-	private void handleMessage(String[] msgParts) {
-		
+
+	private void handleMessage(User user, String[] msgParts) {
+
 	}
-	
+
 	@Override
 	public void processClosingConnection(String pClientIP, int pClientPort) {
 		System.out.println("Closing connection: " + pClientIP + ":" + pClientPort);

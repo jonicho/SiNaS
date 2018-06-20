@@ -14,7 +14,6 @@ public class AppClient extends Client {
 	private Gui gui;
 	private User thisUser;
 	private File authFile;
-	private boolean loggedIn;
 
 	public AppClient(String pServerIP, int pServerPort, Gui gui) {
 		super(pServerIP, pServerPort);
@@ -25,8 +24,8 @@ public class AppClient extends Client {
 	public void processMessage(String message) {
 		String[] msgParts = message.split(PROTOCOL.SPLIT);
 		switch (msgParts[0]) {
-		case PROTOCOL.SC.OK:
-			handleOk();
+		case PROTOCOL.SC.LOGIN_OK:
+			handleLoginOk(msgParts[1], msgParts[2]);
 			break;
 		case PROTOCOL.SC.ERROR:
 			handleError(msgParts[1]);
@@ -42,14 +41,14 @@ public class AppClient extends Client {
 
 	}
 
-	private void handleOk() {
+	private void handleLoginOk(String username, String nickname) {
 		if (authFile != null) {
 			try {
 				Files.delete(authFile.toPath());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			loggedIn = true;
+			thisUser = new User(null, 0, username, username);
 		}
 	}
 
@@ -68,7 +67,7 @@ public class AppClient extends Client {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			loggedIn = false;
+			thisUser = null;
 			break;
 
 		default:
@@ -84,7 +83,7 @@ public class AppClient extends Client {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		send(PROTOCOL.CS.LOGIN);
+		send(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN));
 	}
 
 	public User getThisUser() {
@@ -92,7 +91,7 @@ public class AppClient extends Client {
 	}
 
 	public boolean isLoggedIn() {
-		return loggedIn;
+		return thisUser != null;
 	}
 
 }

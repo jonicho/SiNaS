@@ -5,7 +5,6 @@ public class User {
 	private int port;
 	private String username;
 	private String nickname;
-	private boolean isAuthed;
 	
 	public User(String ip, int port, String username, String nickname) {
 		this.ip = ip;
@@ -15,20 +14,8 @@ public class User {
 		
 	}
 	
-	public boolean isAuthed() {
-		return isAuthed;
-	}
-	
 	public void setUsername(String username) {
 		this.username = username;
-	}
-	
-	public void setAuthed(boolean isAuthed) {
-		if(!this.isAuthed) {
-			this.isAuthed = isAuthed;
-		}
-		else throw new IllegalArgumentException("Tried to deauthorize the User!");
-		
 	}
 
 	public String getIp() {
