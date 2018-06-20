@@ -53,4 +53,9 @@ public class User {
 				&& ((User) obj).getNickname().equals(getNickname()) && ((User) obj).getIp().equals(getIp())
 				&& ((User) obj).getPort() == getPort();
 	}
+
+	@Override
+	public String toString() {
+		return username + "@" + ip + ":" + port;
+	}
 }

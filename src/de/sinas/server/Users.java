@@ -56,8 +56,7 @@ public class Users {
 	 */
 	public void addUser(User user) throws IllegalArgumentException {
 		if (doesUserExist(user.getIp(), user.getPort()) || doesUserExist(user.getUsername())) {
-			throw new IllegalArgumentException("The user " + user.getUsername() + "@" + user.getIp() + ":"
-					+ user.getPort() + " does already exist!");
+			throw new IllegalArgumentException("The user " + user + " does already exist!");
 		}
 		users.add(user);
 	}
