@@ -13,7 +13,14 @@ public class Users {
 	public boolean doesUserExist(String clientIP, int clientPort) {
 		return getUser(clientIP, clientPort) != null;
 	}
-	
+
+	/**
+	 * @return whether the user with the given username exists
+	 */
+	public boolean doesUserExist(String username) {
+		return getUser(username) != null;
+	}
+
 	/**
 	 * @return The user with the given ip and port. {@code null} if such a user does
 	 *         not exist
@@ -26,12 +33,32 @@ public class Users {
 		}
 		return null;
 	}
-	
+
+	/**
+	 * @return The user with the given username. {@code null} if such a user does
+	 *         not exist
+	 */
+	public User getUser(String username) {
+		for (User user : users) {
+			if (user.getUsername().equals(username)) {
+				return user;
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Adds a user to the list of users
+	 * 
 	 * @param user
+	 * @throws IllegalArgumentException if a user with the same ip and port already
+	 *                                  exists
 	 */
-	public void addUser(User user) {
+	public void addUser(User user) throws IllegalArgumentException {
+		if (doesUserExist(user.getIp(), user.getPort()) || doesUserExist(user.getUsername())) {
+			throw new IllegalArgumentException("The user " + user.getUsername() + "@" + user.getIp() + ":"
+					+ user.getPort() + " does already exist!");
+		}
 		users.add(user);
 	}
 
