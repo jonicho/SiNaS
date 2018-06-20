@@ -1,6 +1,5 @@
 package de.sinas.client.gui;
 
-import java.awt.GridLayout;
 import java.io.IOException;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
@@ -9,12 +8,9 @@ import de.sinas.Message;
 import de.sinas.User;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 
 public class ChatMessageCell extends ListCell<Message> {
     @FXML

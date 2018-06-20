@@ -37,7 +37,12 @@ public class Gui extends Application {
 		Pane root = (Pane) fxmlLoader.load();
 		Scene scene = new Scene(root);
 		primaryStage.setScene(scene);
-		primaryStage.show();
+		primaryStage.setOnCloseRequest((e) -> {
+			e.consume();
+		});
+		new SiNaSTrayIcon(this, () -> {
+			primaryStage.show();
+		});
 		appClient.login();
 	}
 
