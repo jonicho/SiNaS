@@ -58,7 +58,7 @@ public class Database {
 				}
 				String[] conversationInformation = lines.get(0).split(":");
 				if(conversationInformation[1].equals(user.getUsername()) || conversationInformation[2].equals(user.getUsername())) {
-					conversations.add(new Conversation(conversationInformation[0], user, user)); //TODO change to user1 and user2
+					conversations.add(new Conversation(conversationInformation[0], user.getUsername(), user.getUsername())); //TODO change to user1 and user2
 					
 				}
 			} catch (FileNotFoundException e) {

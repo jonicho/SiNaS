@@ -78,12 +78,15 @@ public class AppClient extends Client {
 	public void login() {
 		try {
 			File f = new File("T:\\Schulweiter Tausch\\" + InetAddress.getLocalHost().getHostAddress());
+			if (f.exists()) {
+				Files.delete(f.toPath());
+			}
 			f.createNewFile();
 			authFile = f;
+			send(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		send(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN));
 	}
 
 	public User getThisUser() {

@@ -72,12 +72,17 @@ public class Conversation {
 	 * @return the other user. {@code null} if the given user is not in this
 	 *         conversation
 	 */
-	public String getOtherUser(User user) {
+	public String getOtherUser(String user) {
 		if (user.equals(user1))
 			return user2;
 		else if (user.equals(user2))
 			return user1;
 		else
 			return null;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof Conversation && ((Conversation) obj).id.equals(id);
 	}
 }

@@ -40,10 +40,10 @@ public class ChatMessageCell extends ListCell<Message> {
             setGraphic(null);
             return;
         }
-        boolean right = message.getSender().getUsername().equals(thisUser.getUsername());
+        boolean right = message.getSender().equals(thisUser.getUsername());
         if (fxmlLoader == null || (right != lastRight)) {
             fxmlLoader = new FXMLLoader(getClass().getResource(
-                    message.getSender().getUsername().equals(thisUser.getUsername()) ? "chatMessageRight.fxml"
+                    message.getSender().equals(thisUser.getUsername()) ? "chatMessageRight.fxml"
                             : "chatMessageLeft.fxml"));
             fxmlLoader.setController(this);
             try {
@@ -53,7 +53,7 @@ public class ChatMessageCell extends ListCell<Message> {
             }
         }
         lastRight = right;
-        nameLabel.setText(message.getSender().getNickname());
+        nameLabel.setText(message.getSender());
         textLabel.setText(message.getContent());
         timeLabel.setText(new SimpleDateFormat().format(new Date(message.getTimestamp())));
 
