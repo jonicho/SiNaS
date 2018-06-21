@@ -10,8 +10,8 @@ import java.util.List;
 public class Conversation {
 	private String id;
 	private ArrayList<Message> messages = new ArrayList<>();
-	private User user1;
-	private User user2;
+	private String user1;
+	private String user2;
 
 	/**
 	 * Creates a new conversation object.
@@ -20,25 +20,25 @@ public class Conversation {
 	 * @param user1 the first user
 	 * @param user2 the second user
 	 */
-	public Conversation(String id, User user1, User user2) {
+	public Conversation(String id, String user1, String user2) {
 		this.id = id;
 		this.user1 = user1;
 		this.user2 = user2;
 	}
 
-	public void setUser1(User user1) {
+	public void setUser1(String user1) {
 		this.user1 = user1;
 	}
 
-	public void setUser2(User user2) {
+	public void setUser2(String user2) {
 		this.user2 = user2;
 	}
 
-	public User getUser1() {
+	public String getUser1() {
 		return user1;
 	}
 
-	public User getUser2() {
+	public String getUser2() {
 		return user2;
 	}
 
@@ -72,7 +72,7 @@ public class Conversation {
 	 * @return the other user. {@code null} if the given user is not in this
 	 *         conversation
 	 */
-	public User getOtherUser(User user) {
+	public String getOtherUser(User user) {
 		if (user.equals(user1))
 			return user2;
 		else if (user.equals(user2))

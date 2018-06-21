@@ -9,7 +9,7 @@ public class Message {
 	private String id;
 	private String content;
 	private long timestamp;
-	private User sender;
+	private String sender;
 	private boolean isFile;
 
 	/**
@@ -24,7 +24,7 @@ public class Message {
 	 * @param isFile
 	 *            whether the message represents a file
 	 */
-	public Message(String content, long timestamp, User sender, boolean isFile) {
+	public Message(String content, long timestamp, String sender, boolean isFile) {
 		this.content = content;
 		this.timestamp = timestamp;
 		this.sender = sender;
@@ -33,7 +33,7 @@ public class Message {
 
 	/**
 	 * Returns this message's content which is plain text or, when this message
-	 * represents a file, the file's server-side localtion
+	 * represents a file, the file's server-side location
 	 * 
 	 * @return the content
 	 */
@@ -45,7 +45,7 @@ public class Message {
 		return timestamp;
 	}
 
-	public User getSender() {
+	public String getSender() {
 		return sender;
 	}
 

@@ -1,7 +1,11 @@
 package de.sinas.server;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import de.sinas.Conversation;
 import de.sinas.User;
@@ -41,7 +45,28 @@ public class Database {
 	 * 
 	 * @return all conversations of the given user
 	 */
-	public Conversation[] getConversations(User user) {
+	public ArrayList<Conversation> getConversations(User user) {
+		ArrayList<Conversation> conversations = new ArrayList<>();
+
+		File[] filelist = databaseDirectory.listFiles();
+		for (int i = 0; i < databaseDirectory.list().length; i++) {
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader(filelist[i]));
+				ArrayList<String> lines = new ArrayList<>();
+				while (reader.readLine() != null) {
+					lines.add(reader.readLine());
+				}
+				String[] conversationInformation = lines.get(0).split(":");
+				if(conversationInformation[1].equals(user.getUsername()) || conversationInformation[2].equals(user.getUsername())) {
+					conversations.add(new Conversation(conversationInformation[0], user, user)); //TODO change to user1 and user2
+					
+				}
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		return null;
 	}
 
