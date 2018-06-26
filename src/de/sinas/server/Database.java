@@ -18,6 +18,23 @@ import de.sinas.User;
 /**
  * The database for SiNaS. Stores user and conversation data in the given
  * directory
+ * 
+ * user file structure (filename = username)
+ * 
+ * 		(1)		nickname 							//only nickname of
+ * 
+ * 
+ * conversation structure (filename = conversation id)
+ * 
+ * 		(1)		user1:user2 						//both conversation participants
+ * 		(2)		id:timestamp:sender:isFile:content	//format of a message's data (if isFile() then content = null)
+ * 		(3)			... following messages
+ * 
+ * 
+ * database folder structure
+ * 		SiNaS 	/ conversations / (conversation files called <id>.txt)
+ * 				/ files / (files called <id>.*)
+ * 				/ users / (userdata files called <username>.txt)
  */
 public class Database {
 	private File databaseDirectory;
@@ -71,8 +88,9 @@ public class Database {
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(file));
 			ArrayList<String> lines = new ArrayList<>();
-			while (reader.readLine() != null) {
-				lines.add(reader.readLine());
+			String var;
+			while ((var = reader.readLine()) != null) {
+				lines.add(var);
 			}
 			reader.close();
 			nickname = lines.get(0);
@@ -106,8 +124,9 @@ public class Database {
 			try {
 				BufferedReader reader = new BufferedReader(new FileReader(file));
 				ArrayList<String> lines = new ArrayList<>();
-				while (reader.readLine() != null) {
-					lines.add(reader.readLine());
+				String var;
+				while ((var = reader.readLine()) != null) {
+					lines.add(var);
 				}
 				reader.close();
 				nickname = lines.get(0);
@@ -135,16 +154,31 @@ public class Database {
 			try {
 				BufferedReader reader = new BufferedReader(new FileReader(filelist[i]));
 				ArrayList<String> lines = new ArrayList<>();
-				while (reader.readLine() != null) {
-					lines.add(reader.readLine());
-				}
-				String[] conversationInformation = lines.get(0).split(":");
-				if (conversationInformation[0].equals(user.getUsername())) {
-					conversations.add(new Conversation(filelist[i].getName(), user.getUsername(), getUserInfo(conversationInformation[1]).getUsername()));
-				} else if (conversationInformation[1].equals(user.getUsername())) {
-					conversations.add(new Conversation(filelist[i].getName(), user.getUsername(), getUserInfo(conversationInformation[0]).getUsername()));
+				String var;
+				while ((var = reader.readLine()) != null) {
+					lines.add(var);
 				}
 				reader.close();
+				String[] conversationInformation = lines.get(0).split(":");
+				if (conversationInformation[0].equals(user.getUsername()) || conversationInformation[1].equals(user.getUsername())) {
+					conversations.add(new Conversation(filelist[i].getName(), getUserInfo(conversationInformation[0]).getUsername(), getUserInfo(conversationInformation[1]).getUsername()));
+					for(int j = 1; j < lines.size(); j++) {
+						String id = lines.get(j).split(":")[0];
+						long timestamp = Long.parseLong(lines.get(j).split(":")[1]);
+						String sender = lines.get(j).split(":")[2];
+						boolean isFile = Boolean.parseBoolean(lines.get(j).split(":")[3]);
+						String content = "";
+						if(isFile) {
+							content = null;
+							//TODO file request?
+						} else {
+							for(int k = 4; k < lines.get(j).split(":").length; k++) {
+								content = content + lines.get(j).split(":")[k] + ":";
+							}
+						}
+						conversations.get(j).addMessage(new Message(id, content, timestamp, sender, isFile));
+					}
+				}
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {

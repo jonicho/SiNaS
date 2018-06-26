@@ -15,6 +15,30 @@ public class Message {
 	/**
 	 * Creates a new message
 	 * 
+	 * @param id
+	 * 			  id from database
+	 * @param content
+	 *            the message content
+	 * @param timestamp
+	 *            the time at which the message was sent
+	 * @param sender
+	 *            the user that sent the message
+	 * @param isFile
+	 *            whether the message represents a file
+	 */
+	public Message(String id, String content, long timestamp, String sender, boolean isFile) {
+		this.content = content;
+		this.timestamp = timestamp;
+		this.sender = sender;
+		this.isFile = isFile;
+		this.id = id;
+	}
+	
+	/**
+	 * Creates a new message
+	 * 
+	 * @param id
+	 * 			  id from database
 	 * @param content
 	 *            the message content
 	 * @param timestamp
@@ -29,6 +53,7 @@ public class Message {
 		this.timestamp = timestamp;
 		this.sender = sender;
 		this.isFile = isFile;
+		//TODO implement id generator
 	}
 
 	/**
