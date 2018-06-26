@@ -13,8 +13,8 @@ public final class PROTOCOL {
 		public static final String ERROR = "err", // Base [split] errorcode
 				OK = "ok", // Base
 				LOGIN_OK = "lgnok", // Base [split] username [split] nickname
-				CONVERSATION_LIST = "conlist", // Base [split] conversation id [split] is group conversation [split] conversation id [split] is group conversation [split] ...
 				CONVERSATION = "con", // Base [split] conversation id [split] is group conversation [split] users ...
+				USER = "user", // Base [split] username [split] nickname
 				MSG = "msg"; // Base [split] conversation id [split] message id [split] is file [split] timestamp [split] content
 	}
 
@@ -22,8 +22,9 @@ public final class PROTOCOL {
 		private CS() {}
 
 		public static final String LOGIN = "lgn", // Base [split] name
-				GET_CONVERSATION_LIST = "getconlist", // Base
-				GET_CONVERSATION = "getcon", // Base [split] conversation id [split] last n messages
+				GET_CONVERSATIONS = "getconlist", // Base
+				GET_USER = "getuser", // Base [split] username
+				GET_MESSAGES = "getmsgs", // Base [split] conversation id [split] amount
 				MSG = "msg"; // Base [split] conversation id [split] is file [split] content
 	}
 
@@ -33,7 +34,8 @@ public final class PROTOCOL {
 		public static final int UNKNOWN_ERROR = -1,
 				LOGIN_FAILED = 0,
 				NOT_LOGGED_IN = 1,
-				INVALID_MESSAGE = 2;
+				INVALID_MESSAGE = 2,
+				USER_DOES_NOT_EXIST = 3;
 	}
 
 	/**

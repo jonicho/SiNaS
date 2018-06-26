@@ -16,12 +16,15 @@ import de.sinas.net.PROTOCOL;
 import de.sinas.net.Server;
 
 public class AppServer extends Server {
-	private Database db = new Database(new File("C:\\Users\\jonas.keller\\Desktop\\SiNaS-Database"));
-	private Users users = new Users();
-	private ArrayList<Conversation> conversations = new ArrayList<>();
+	private final Database db;
+	private final Users users = new Users();
+	private final ArrayList<Conversation> conversations = new ArrayList<>();
+	private final File loginDirectory;
 
-	public AppServer(int pPort) {
+	public AppServer(int pPort, File databaseDirectory, File loginDirectory) {
 		super(pPort);
+		db = new Database(databaseDirectory);
+		this.loginDirectory = loginDirectory;
 	}
 
 	@Override
@@ -46,11 +49,14 @@ public class AppServer extends Server {
 		case PROTOCOL.CS.MSG:
 			handleMessage(user, msgParts);
 			break;
-		case PROTOCOL.CS.GET_CONVERSATION_LIST:
-			handleGetConversationList(user, msgParts);
+		case PROTOCOL.CS.GET_CONVERSATIONS:
+			handleGetConversations(user, msgParts);
 			break;
-		case PROTOCOL.CS.GET_CONVERSATION:
-			handleGetConversation(user, msgParts);
+		case PROTOCOL.CS.GET_USER:
+			handleGetUser(user, msgParts);
+			break;
+		case PROTOCOL.CS.GET_MESSAGES:
+			handleGetMessages(user, msgParts);
 			break;
 		default:
 			break;
@@ -58,18 +64,19 @@ public class AppServer extends Server {
 	}
 
 	private void handleLogin(String clientIP, int clientPort) {
-		Path path = Paths.get("T:\\Schulweiter Tausch\\" + clientIP);
+		Path path = Paths.get(loginDirectory.getAbsolutePath() + clientIP);
 		FileOwnerAttributeView ownerAttributeView = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
 		try {
 			String[] ownerName = ownerAttributeView.getOwner().getName().split("\\\\");
-			User user = db.getUser(ownerName[ownerName.length - 1], clientIP, clientPort);
+			User user = db.getConnectedUser(ownerName[ownerName.length - 1], clientIP, clientPort);
+			// load all conversations of this user and add them if they are not in the
+			// conversation list yet
 			for (Conversation conversation : db.getConversations(user)) {
 				if (!conversations.contains(conversation)) {
 					conversations.add(conversation);
 				}
 			}
-			send(user.getIp(), user.getPort(),
-					PROTOCOL.buildMessage(PROTOCOL.SC.LOGIN_OK, user.getUsername(), user.getNickname()));
+			sendToUser(user, PROTOCOL.SC.LOGIN_OK, user.getUsername(), user.getNickname());
 		} catch (IOException e) {
 			e.printStackTrace();
 			send(clientIP, clientPort, PROTOCOL.getErrorMessage(PROTOCOL.ERRORCODES.LOGIN_FAILED));
@@ -77,24 +84,34 @@ public class AppServer extends Server {
 
 	}
 
-	private void handleGetConversationList(User user, String[] msgParts) {
-		String msg = PROTOCOL.SC.CONVERSATION_LIST;
+	private void handleGetConversations(User user, String[] msgParts) {
 		for (Conversation conversation : conversations) {
 			if (conversation.getUser1().equals(user.getUsername())) {
-				msg += PROTOCOL.SPLIT + conversation.getId() + PROTOCOL.SPLIT + "false"; // TODO: handle group
-																							// conversations
+				sendToUser(user, PROTOCOL.SC.CONVERSATION, conversation.getId(), "false", conversation.getUser1(),
+						conversation.getUser2());// TODO: handle group conversations
 			}
 		}
-		sendToUser(user, msg);
 	}
 
-	private void handleGetConversation(User user, String[] msgParts) {
+	private void handleGetUser(User requestingUser, String[] msgParts) {
+		User user = users.getUser(msgParts[1]);
+		if (user == null) {
+			user = db.getUserInfo(msgParts[1]);
+			if (user == null) {
+				sendError(requestingUser, PROTOCOL.ERRORCODES.USER_DOES_NOT_EXIST);
+			}
+		}
+		sendToUser(requestingUser, PROTOCOL.SC.USER, user.getUsername(), user.getNickname());
+	}
+
+	private void handleGetMessages(User user, String[] msgParts) {
+		// TODO handle group conversations
 		String conversationId = msgParts[1];
 		int lastNMessages = 0;
 		try {
 			lastNMessages = Integer.parseInt(msgParts[2]);
 		} catch (NumberFormatException e) {
-			sendToUser(user, PROTOCOL.getErrorMessage(PROTOCOL.ERRORCODES.INVALID_MESSAGE));
+			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
 		}
 		Conversation conversation = null;
 		for (Conversation c : conversations) {
@@ -104,11 +121,9 @@ public class AppServer extends Server {
 			}
 		}
 		if (conversation == null) {
-			sendToUser(user, PROTOCOL.getErrorMessage(PROTOCOL.ERRORCODES.UNKNOWN_ERROR));
+			sendError(user, PROTOCOL.ERRORCODES.UNKNOWN_ERROR);
 			return;
 		}
-		sendToUser(user, PROTOCOL.buildMessage(PROTOCOL.SC.CONVERSATION, conversation.getId(), false,
-				conversation.getUser1(), conversation.getUser2())); // TODO handle group conversations
 		List<Message> messages = conversation.getMessages();
 		for (int i = 0; i < lastNMessages; i++) {
 			int index = messages.size() - 1 - i;
@@ -116,8 +131,8 @@ public class AppServer extends Server {
 				break;
 			}
 			Message msg = messages.get(index);
-			sendToUser(user, PROTOCOL.buildMessage(PROTOCOL.SC.MSG, conversationId, msg.getId(), msg.isFile(),
-					msg.getTimestamp(), msg.getContent()));
+			sendToUser(user, PROTOCOL.SC.MSG, conversationId, msg.getId(), msg.isFile(), msg.getTimestamp(),
+					msg.getContent());
 		}
 	}
 
@@ -125,8 +140,12 @@ public class AppServer extends Server {
 
 	}
 
-	private void sendToUser(User user, String message) {
-		send(user.getIp(), user.getPort(), message);
+	private void sendToUser(User user, Object... message) {
+		send(user.getIp(), user.getPort(), PROTOCOL.buildMessage(message));
+	}
+
+	private void sendError(User user, int errorCode) {
+		sendToUser(user, PROTOCOL.getErrorMessage(errorCode));
 	}
 
 	@Override

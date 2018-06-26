@@ -32,12 +32,27 @@ public class Database {
 	}
 
 	/**
-	 * Loads the user with the given name
+	 * Loads the user with the given name with ip and port.</br>
+	 * This method is to get a user that connected to the server.</br>
+	 * If no user with the given name exists a new one is created.
 	 * 
 	 * @return The user with the given username
 	 */
-	public User getUser(String username, String ip, int port) {
+	public User getConnectedUser(String username, String ip, int port) {
 		return new User(ip, port, username, username); // TODO load user from database
+	}
+
+	/**
+	 * Loads the user with the given name without ip and port.</br>
+	 * This method is to get information about a user without having the user to
+	 * connect to the server.</br>
+	 * If no user with the given name exists {@code null} is returned.
+	 * 
+	 * @return The user with the given username. {@code null} if no user with the
+	 *         given name exists.
+	 */
+	public User getUserInfo(String username) {
+		return new User("", 0, username, username); // TODO load user from database
 	}
 
 	/**

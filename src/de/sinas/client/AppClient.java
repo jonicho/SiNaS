@@ -11,7 +11,8 @@ import de.sinas.net.Client;
 import de.sinas.net.PROTOCOL;
 
 public class AppClient extends Client {
-	private Gui gui;
+	private final Gui gui;
+	private final File loginDirectory = new File("/home/jonas/");
 	private User thisUser;
 	private File authFile;
 
@@ -77,7 +78,7 @@ public class AppClient extends Client {
 
 	public void login() {
 		try {
-			File f = new File("T:\\Schulweiter Tausch\\" + InetAddress.getLocalHost().getHostAddress());
+			File f = new File(loginDirectory.getAbsolutePath() + InetAddress.getLocalHost().getHostAddress());
 			if (f.exists()) {
 				Files.delete(f.toPath());
 			}

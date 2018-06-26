@@ -11,7 +11,6 @@ public class User {
 		this.port = port;
 		this.username = username;
 		this.nickname = nickname;
-		
 	}
 	
 	public void setUsername(String username) {
