@@ -25,6 +25,13 @@ public class Database {
 	 *                                  directory
 	 */
 	public Database(File databaseDirectory) throws IllegalArgumentException {
+		if(!databaseDirectory.exists()) {
+			databaseDirectory.mkdir();
+			File[] structure = { new File(databaseDirectory + "/conversations"), new File(databaseDirectory + "/files"), new File(databaseDirectory + "/users") };
+			for( File folder : structure) {
+				folder.mkdir();
+			}
+		}
 		if (!databaseDirectory.isDirectory()) {
 			throw new IllegalArgumentException("Database directory has to be a directory!");
 		}
