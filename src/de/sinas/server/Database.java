@@ -5,9 +5,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.ArrayList;
 
 import de.sinas.Conversation;
+import de.sinas.Message;
 import de.sinas.User;
 
 /**
@@ -20,15 +25,17 @@ public class Database {
 	/**
 	 * Creates a new database object
 	 * 
-	 * @param databaseDirectory the directory in which the data is to be stored
-	 * @throws IllegalArgumentException when given database directory is not a
-	 *                                  directory
+	 * @param databaseDirectory
+	 *            the directory in which the data is to be stored
+	 * @throws IllegalArgumentException
+	 *             when given database directory is not a directory
 	 */
 	public Database(File databaseDirectory) throws IllegalArgumentException {
-		if(!databaseDirectory.exists()) {
+		if (!databaseDirectory.exists()) {
 			databaseDirectory.mkdir();
-			File[] structure = { new File(databaseDirectory + "/conversations"), new File(databaseDirectory + "/files"), new File(databaseDirectory + "/users") };
-			for( File folder : structure) {
+			File[] structure = { new File(databaseDirectory + "/conversations"), new File(databaseDirectory + "/files"),
+					new File(databaseDirectory + "/users") };
+			for (File folder : structure) {
 				folder.mkdir();
 			}
 		}
@@ -46,7 +53,39 @@ public class Database {
 	 * @return The user with the given username
 	 */
 	public User getConnectedUser(String username, String ip, int port) {
-		return new User(ip, port, username, username); // TODO load user from database
+		String nickname;
+		File file = new File(databaseDirectory + "/users/ " + username + ".txt");
+		
+		if(!file.exists()) {
+			try {
+				PrintWriter writer = new PrintWriter(file, "UTF-8");
+				writer.println(username);
+				writer.close();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(file));
+			ArrayList<String> lines = new ArrayList<>();
+			while (reader.readLine() != null) {
+				lines.add(reader.readLine());
+			}
+			reader.close();
+			nickname = lines.get(0);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return null;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+
+		return new User(ip, port, username, nickname);
 	}
 
 	/**
@@ -59,7 +98,28 @@ public class Database {
 	 *         given name exists.
 	 */
 	public User getUserInfo(String username) {
-		return new User("", 0, username, username); // TODO load user from database
+		String nickname;
+		File file = new File(databaseDirectory + "/users/ " + username + ".txt");
+		if(!file.exists()) {
+			return null;
+		} else {
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader(file));
+				ArrayList<String> lines = new ArrayList<>();
+				while (reader.readLine() != null) {
+					lines.add(reader.readLine());
+				}
+				reader.close();
+				nickname = lines.get(0);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				return null;
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+		return new User("", 0, username, nickname);
 	}
 
 	/**
@@ -79,30 +139,41 @@ public class Database {
 					lines.add(reader.readLine());
 				}
 				String[] conversationInformation = lines.get(0).split(":");
-				if(conversationInformation[1].equals(user.getUsername()) || conversationInformation[2].equals(user.getUsername())) {
-					conversations.add(new Conversation(conversationInformation[0], user.getUsername(), user.getUsername())); //TODO change to user1 and user2
-					
+				if (conversationInformation[0].equals(user.getUsername())) {
+					conversations.add(new Conversation(filelist[i].getName(), user.getUsername(), getUserInfo(conversationInformation[1]).getUsername()));
+				} else if (conversationInformation[1].equals(user.getUsername())) {
+					conversations.add(new Conversation(filelist[i].getName(), user.getUsername(), getUserInfo(conversationInformation[0]).getUsername()));
 				}
+				reader.close();
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		return null;
+		return conversations;
 	}
 
 	/**
 	 * Saves the given user
 	 */
 	public void saveUser(User user) {
-		File userfile = new File(databaseDirectory + "\\users\\" + user.getUsername() + ".txt");
-		if (!userfile.exists()) {
+		File file = new File(databaseDirectory + "/users/" + user.getUsername() + ".txt");
+		if (!file.exists()) {
 			try {
-				userfile.createNewFile();
+				file.createNewFile();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+		try {
+			PrintWriter writer = new PrintWriter(file, "UTF-8");
+			writer.println(user.getNickname());
+			writer.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -110,13 +181,30 @@ public class Database {
 	 * Saves the given conversation
 	 */
 	public void saveConversation(Conversation conversation) {
-		File conversationfile = new File(databaseDirectory + "\\conversations\\" + conversation.getId() + ".txt");
-		if (!conversationfile.exists()) {
+		File file = new File(databaseDirectory + "/conversations/" + conversation.getId() + ".txt");
+		if (!file.exists()) {
 			try {
-				conversationfile.createNewFile();
+				file.createNewFile();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+		try {
+			PrintWriter writer = new PrintWriter(file, "UTF-8");
+			
+			String conversationInformation = conversation.getUser1() + ":" + conversation.getUser2() ;
+			writer.write(conversationInformation);
+			
+			for(Message message : conversation.getMessages()) {
+				String messageInformation = message.getId() + ":" + message.getTimestamp() + ":" + message.getSender() + ":" + message.isFile() + ":" + message.getContent();
+				writer.write(messageInformation);
+			}
+			
+			writer.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
 		}
 	}
 }
