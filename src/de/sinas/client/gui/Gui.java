@@ -7,6 +7,7 @@ import de.sinas.client.AppClient;
 import de.sinas.net.PROTOCOL;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -64,16 +65,16 @@ public class Gui extends Application {
 				setGraphic(null);
 			}
 		});
+		conversationsListView.setItems(appClient.getConversations());
 	}
 
 	@FXML
 	private void onSomeButton() {
-		User tu = new User("ip", 0, "username", "nickname");
 		User ou = new User("ip", 0, "otherusername", "othernickname");
-		Conversation c = currentConversation == null ? new Conversation("id", tu.getUsername(), ou.getUsername())
+		Conversation c = currentConversation == null ? new Conversation("id", appClient.getThisUser().getUsername(), ou.getUsername())
 				: currentConversation;
 		c.addMessage(new Message("Message content", System.currentTimeMillis(),
-				(Math.random() > 0.5 ? ou : tu).getUsername(), false));
+				(Math.random() > 0.5 ? ou : appClient.getThisUser()).getUsername(), false));
 		setConversation(c);
 	}
 
