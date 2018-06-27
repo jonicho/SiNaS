@@ -15,7 +15,7 @@ public final class PROTOCOL {
 				LOGIN_OK = "lgnok", // Base [split] username [split] nickname
 				CONVERSATION = "con", // Base [split] conversation id [split] is group conversation [split] users ...
 				USER = "user", // Base [split] username [split] nickname
-				MSG = "msg"; // Base [split] conversation id [split] message id [split] is file [split] timestamp [split] content
+				MESSAGE = "msg"; // Base [split] conversation id [split] message id [split] is file [split] timestamp [split] content
 	}
 
 	public final class CS {
@@ -25,7 +25,7 @@ public final class PROTOCOL {
 				GET_CONVERSATIONS = "getconlist", // Base
 				GET_USER = "getuser", // Base [split] username
 				GET_MESSAGES = "getmsgs", // Base [split] conversation id [split] amount
-				MSG = "msg"; // Base [split] conversation id [split] is file [split] content
+				MESSAGE = "msg"; // Base [split] conversation id [split] is file [split] content
 	}
 
 	public final class ERRORCODES {

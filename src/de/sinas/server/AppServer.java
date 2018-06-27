@@ -46,7 +46,7 @@ public class AppServer extends Server {
 			return;
 		}
 		switch (msgParts[0]) {
-		case PROTOCOL.CS.MSG:
+		case PROTOCOL.CS.MESSAGE:
 			handleMessage(user, msgParts);
 			break;
 		case PROTOCOL.CS.GET_CONVERSATIONS:
@@ -131,7 +131,7 @@ public class AppServer extends Server {
 				break;
 			}
 			Message msg = messages.get(index);
-			sendToUser(user, PROTOCOL.SC.MSG, conversationId, msg.getId(), msg.isFile(), msg.getTimestamp(),
+			sendToUser(user, PROTOCOL.SC.MESSAGE, conversationId, msg.getId(), msg.isFile(), msg.getTimestamp(),
 					msg.getContent());
 		}
 	}
