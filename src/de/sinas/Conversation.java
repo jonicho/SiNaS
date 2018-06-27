@@ -43,13 +43,15 @@ public class Conversation {
 	}
 
 	/**
-	 * Adds a message to the conversation. The messages in this conversation will be
+	 * Adds one or more messages to the conversation. The messages in this conversation will be
 	 * sorted by time stamp.
 	 * 
-	 * @param message The message to add
+	 * @param messages The message(s) to add
 	 */
-	public void addMessage(Message message) {
-		messages.add(message);
+	public void addMessages(Message... msgs) {
+		for (int i = 0; i < msgs.length; i++) {
+			messages.add(msgs[i]);
+		}
 		messages.sort((m1, m2) -> (int) Math.signum(m1.getTimestamp() - m2.getTimestamp()));
 	}
 
@@ -80,7 +82,7 @@ public class Conversation {
 		else
 			return null;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof Conversation && ((Conversation) obj).id.equals(id);
