@@ -32,9 +32,9 @@ import de.sinas.User;
  * 
  * 
  * database folder structure
- * 		SiNaS 	/ conversations / (conversation files called <id>.txt)
+ * 		SiNaS 	/ conversations / (conversation files called <id>)
  * 				/ files / (files called <id>.*)
- * 				/ users / (userdata files called <username>.txt)
+ * 				/ users / (userdata files called <username>)
  */
 public class Database {
 	private File databaseDirectory;
@@ -71,7 +71,7 @@ public class Database {
 	 */
 	public User getConnectedUser(String username, String ip, int port) {
 		String nickname;
-		File file = new File(databaseDirectory + "/users/ " + username + ".txt");
+		File file = new File(databaseDirectory + "/users/ " + username);
 		
 		if(!file.exists()) {
 			try {
@@ -117,7 +117,7 @@ public class Database {
 	 */
 	public User getUserInfo(String username) {
 		String nickname;
-		File file = new File(databaseDirectory + "/users/ " + username + ".txt");
+		File file = new File(databaseDirectory + "/users/ " + username);
 		if(!file.exists()) {
 			return null;
 		} else {
@@ -192,7 +192,7 @@ public class Database {
 	 * Saves the given user
 	 */
 	public void saveUser(User user) {
-		File file = new File(databaseDirectory + "/users/" + user.getUsername() + ".txt");
+		File file = new File(databaseDirectory + "/users/" + user.getUsername());
 		if (!file.exists()) {
 			try {
 				file.createNewFile();
@@ -215,7 +215,7 @@ public class Database {
 	 * Saves the given conversation
 	 */
 	public void saveConversation(Conversation conversation) {
-		File file = new File(databaseDirectory + "/conversations/" + conversation.getId() + ".txt");
+		File file = new File(databaseDirectory + "/conversations/" + conversation.getId());
 		if (!file.exists()) {
 			try {
 				file.createNewFile();
