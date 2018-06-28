@@ -73,7 +73,7 @@ public class Gui extends Application {
 		User ou = new User("ip", 0, "otherusername", "othernickname");
 		Conversation c = currentConversation == null ? new Conversation("id", appClient.getThisUser().getUsername(), ou.getUsername())
 				: currentConversation;
-		c.addMessage(new Message("Message content", System.currentTimeMillis(),
+		c.addMessages(new Message("Message content", System.currentTimeMillis(),
 				(Math.random() > 0.5 ? ou : appClient.getThisUser()).getUsername(), false));
 		setConversation(c);
 	}

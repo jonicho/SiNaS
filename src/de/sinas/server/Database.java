@@ -176,7 +176,7 @@ public class Database {
 								content = content + lines.get(j).split(":")[k] + ":";
 							}
 						}
-						conversations.get(j).addMessage(new Message(id, content, timestamp, sender, isFile));
+						conversations.get(j).addMessages(new Message(id, content, timestamp, sender, isFile));
 					}
 				}
 			} catch (FileNotFoundException e) {
