@@ -148,9 +148,9 @@ public class Database {
 	 */
 	public ArrayList<Conversation> getConversations(User user) {
 		ArrayList<Conversation> conversations = new ArrayList<>();
-
-		File[] filelist = databaseDirectory.listFiles();
-		for (int i = 0; i < databaseDirectory.list().length; i++) {
+		File conversationsDirectory = new File(databaseDirectory, "conversations");
+		File[] filelist = conversationsDirectory.listFiles();
+		for (int i = 0; i < conversationsDirectory.list().length; i++) {
 			try {
 				BufferedReader reader = new BufferedReader(new FileReader(filelist[i]));
 				ArrayList<String> lines = new ArrayList<>();
