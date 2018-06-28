@@ -16,7 +16,7 @@ import javafx.collections.ObservableList;
 
 public class AppClient extends Client {
 	private final Gui gui;
-	private final File loginDirectory = new File("/home/jonas/");
+	private final File loginDirectory = new File("T:\\Schulweiter Tausch\\");
 	private User thisUser;
 	private File authFile;
 	private ObservableList<Conversation> conversations = FXCollections.observableArrayList();
@@ -28,6 +28,7 @@ public class AppClient extends Client {
 
 	@Override
 	public void processMessage(String message) {
+		System.out.println("New message: " + message);
 		String[] msgParts = message.split(PROTOCOL.SPLIT);
 		switch (msgParts[0]) {
 		case PROTOCOL.SC.LOGIN_OK:
@@ -55,10 +56,10 @@ public class AppClient extends Client {
 			try {
 				Files.delete(authFile.toPath());
 			} catch (IOException e) {
-				e.printStackTrace();
 			}
 			thisUser = new User(null, 0, username, username);
 		}
+		send(PROTOCOL.buildMessage(PROTOCOL.CS.GET_CONVERSATIONS));
 	}
 
 	private void handleError(String error) {
@@ -109,7 +110,7 @@ public class AppClient extends Client {
 
 	public void login() {
 		try {
-			File f = new File(loginDirectory.getAbsolutePath() + InetAddress.getLocalHost().getHostAddress());
+			File f = new File(loginDirectory.getAbsolutePath() + "\\" + InetAddress.getLocalHost().getHostAddress());
 			if (f.exists()) {
 				Files.delete(f.toPath());
 			}

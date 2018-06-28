@@ -65,7 +65,7 @@ public class AppServer extends Server {
 	}
 
 	private void handleLogin(String clientIP, int clientPort) {
-		Path path = Paths.get(loginDirectory.getAbsolutePath() + clientIP);
+		Path path = Paths.get(loginDirectory.getAbsolutePath() + "\\" + clientIP);
 		FileOwnerAttributeView ownerAttributeView = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
 		try {
 			String[] ownerName = ownerAttributeView.getOwner().getName().split("\\\\");
@@ -77,6 +77,7 @@ public class AppServer extends Server {
 					conversations.add(conversation);
 				}
 			}
+			users.addUser(user);
 			sendToUser(user, PROTOCOL.SC.LOGIN_OK, user.getUsername(), user.getNickname());
 		} catch (IOException e) {
 			e.printStackTrace();

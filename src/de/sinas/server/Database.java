@@ -161,7 +161,8 @@ public class Database {
 				reader.close();
 				String[] conversationInformation = lines.get(0).split(":");
 				if (conversationInformation[0].equals(user.getUsername()) || conversationInformation[1].equals(user.getUsername())) {
-					conversations.add(new Conversation(filelist[i].getName(), getUserInfo(conversationInformation[0]).getUsername(), getUserInfo(conversationInformation[1]).getUsername()));
+					Conversation newConv = new Conversation(filelist[i].getName(), conversationInformation[0], conversationInformation[1]);
+					conversations.add(newConv);
 					for(int j = 1; j < lines.size(); j++) {
 						String id = lines.get(j).split(":")[0];
 						long timestamp = Long.parseLong(lines.get(j).split(":")[1]);
@@ -176,7 +177,7 @@ public class Database {
 								content = content + lines.get(j).split(":")[k] + ":";
 							}
 						}
-						conversations.get(j).addMessages(new Message(id, content, timestamp, sender, isFile));
+						newConv.addMessages(new Message(id, content, timestamp, sender, isFile));
 					}
 				}
 			} catch (FileNotFoundException e) {
