@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.FileOwnerAttributeView;
 import java.util.ArrayList;
 import java.util.List;
+import java.security.*;
 
 import de.sinas.Conversation;
 import de.sinas.Message;
@@ -137,7 +138,31 @@ public class AppServer extends Server {
 	}
 
 	private void handleMessage(User user, String[] msgParts) {
-
+		long ms = System.currentTimeMillis();
+		Conversation conv = null;
+		String convID = msgParts[1];
+		for (Conversation c : conversations) {
+			if (c.getId().equals(convID)) {
+				conv = c;
+			}
+		}
+		boolean isFile = Boolean.parseBoolean(msgParts[2]);
+		String hString = msgParts[3] + ms;
+		String hashString = "";
+		try {
+			byte[] stringBytes = hString.getBytes("UTF-8");
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			byte[] hashBytes = md.digest(stringBytes);
+			hashString = new String(hashBytes);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			sendToUser(user, PROTOCOL.SC.ERROR,PROTOCOL.ERRORCODES.UNKNOWN_ERROR);
+			return;
+		}
+		Message cMessage = new Message(hashString, msgParts[3], ms, user.getUsername(), isFile);
+		conv.addMessages(cMessage);
+		sendToUser(user, PROTOCOL.SC.MESSAGE,conv.getId(),cMessage.getId(),cMessage.isFile(),cMessage.getTimestamp(),cMessage.getContent());
+		sendToUser(users.getUser(conv.getOtherUser(user.getUsername())), PROTOCOL.SC.MESSAGE,conv.getId(),cMessage.getId(),cMessage.isFile(),cMessage.getTimestamp(),cMessage.getContent());
 	}
 
 	private void sendToUser(User user, Object... message) {
