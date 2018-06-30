@@ -20,8 +20,9 @@ public class Conversation {
 	 * @param id    the conversation id
 	 * @param users an arbitrary amount of users
 	 */
-	public Conversation(String id, String... users) {
+	public Conversation(String id, String name, String... users) {
 		this.id = id;
+		this.name = name;
 		this.users.addAll(Arrays.asList(users));
 	}
 

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import de.sinas.Conversation;
 import de.sinas.Message;
@@ -47,12 +48,12 @@ public class Database {
 	 *                                  directory
 	 */
 	public Database(File databaseDirectory) throws IllegalArgumentException {
-			databaseDirectory.mkdir();
+		databaseDirectory.mkdir();
 		File[] structure = { new File(databaseDirectory, "conversations"), new File(databaseDirectory, "files"),
 				new File(databaseDirectory, "users") };
-			for (File folder : structure) {
-				folder.mkdir();
-			}
+		for (File folder : structure) {
+			folder.mkdir();
+		}
 		if (!databaseDirectory.isDirectory()) {
 			throw new IllegalArgumentException("Database directory has to be a directory!");
 		}
@@ -69,7 +70,7 @@ public class Database {
 	public User getConnectedUser(String username, String ip, int port) {
 		String nickname;
 		File file = new File(databaseDirectory + "/users/ " + username);
-		
+
 		if (!file.exists()) {
 			try {
 				PrintWriter writer = new PrintWriter(file, "UTF-8");
@@ -81,7 +82,7 @@ public class Database {
 				e.printStackTrace();
 			}
 		}
-		
+
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(file));
 			ArrayList<String> lines = new ArrayList<>();
@@ -98,7 +99,7 @@ public class Database {
 			e.printStackTrace();
 			return null;
 		}
-		
+
 		return new User(ip, port, username, nickname);
 	}
 
@@ -144,40 +145,53 @@ public class Database {
 	 */
 	public ArrayList<Conversation> getConversations(User user) {
 		ArrayList<Conversation> conversations = new ArrayList<>();
-		File conversationsDirectory = new File(databaseDirectory, "conversations");
-		File[] filelist = conversationsDirectory.listFiles();
-		for (int i = 0; i < conversationsDirectory.list().length; i++) {
+		File convsDirectory = new File(databaseDirectory, "conversations");
+		for (File convFile : convsDirectory.listFiles()) {
 			try {
-				BufferedReader reader = new BufferedReader(new FileReader(filelist[i]));
-				ArrayList<String> lines = new ArrayList<>();
-				String var;
-				while ((var = reader.readLine()) != null) {
-					lines.add(var);
+				BufferedReader reader = new BufferedReader(new FileReader(convFile));
+				String line = reader.readLine();
+				if (line == null) {
+					reader.close();
+					continue;
 				}
-				reader.close();
-				String[] conversationInformation = lines.get(0).split(SPLIT);
-				if (conversationInformation[0].equals(user.getUsername())
-						|| conversationInformation[1].equals(user.getUsername())) {
-					Conversation newConv = new Conversation(filelist[i].getName(), conversationInformation[0],
-							conversationInformation[1]);
-					conversations.add(newConv);
-					for (int j = 1; j < lines.size(); j++) {
-						String id = lines.get(j).split(SPLIT)[0];
-						long timestamp = Long.parseLong(lines.get(j).split(SPLIT)[1]);
-						String sender = lines.get(j).split(SPLIT)[2];
-						boolean isFile = Boolean.parseBoolean(lines.get(j).split(SPLIT)[3]);
-						String content = "";
-						if (isFile) {
-							content = null;
-							// TODO file request?
-						} else {
-							for (int k = 4; k < lines.get(j).split(SPLIT).length; k++) {
-								content = content + lines.get(j).split(SPLIT)[k] + SPLIT;
-							}
-						}
-						newConv.addMessages(new Message(id, content, timestamp, sender, isFile));
+				String[] convInfo = line.split(SPLIT);
+				boolean convContainsUser = false;
+				for (int i = 1; i < convInfo.length; i++) {
+					if (convInfo[i].equals(user.getUsername())) {
+						convContainsUser = true;
+						break;
 					}
 				}
+				if (!convContainsUser) {
+					reader.close();
+					continue;
+				}
+
+				Conversation newConv = new Conversation(convFile.getName(), convInfo[0],
+						Arrays.copyOfRange(convInfo, 1, convInfo.length));
+
+				ArrayList<Message> messages = new ArrayList<Message>();
+				while ((line = reader.readLine()) != null) {
+					String[] msgInfo = line.split(SPLIT);
+					String id = msgInfo[0];
+					long timestamp = Long.parseLong(msgInfo[1]);
+					String sender = msgInfo[2];
+					boolean isFile = Boolean.parseBoolean(msgInfo[3]);
+					String content = "";
+					if (isFile) {
+						content = null;
+						// TODO file
+					} else {
+						content = msgInfo[4];
+						for (int k = 5; k < msgInfo.length; k++) {
+							content += SPLIT + msgInfo[k];
+						}
+					}
+					messages.add(new Message(id, content, timestamp, sender, isFile));
+				}
+				reader.close();
+				newConv.addMessages(messages.toArray(new Message[0]));
+				conversations.add(newConv);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -224,7 +238,7 @@ public class Database {
 		}
 		try {
 			PrintWriter writer = new PrintWriter(file, "UTF-8");
-			
+
 			writer.print(conversation.getName());
 			for (int i = 0; i < conversation.getUsers().size(); i++) {
 				writer.print(SPLIT + conversation.getUsers().get(i));
