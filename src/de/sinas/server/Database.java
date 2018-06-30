@@ -225,8 +225,8 @@ public class Database {
 		try {
 			PrintWriter writer = new PrintWriter(file, "UTF-8");
 			
-			writer.print(conversation.getUsers().get(0));
-			for (int i = 1; i < conversation.getUsers().size(); i++) {
+			writer.print(conversation.getName());
+			for (int i = 0; i < conversation.getUsers().size(); i++) {
 				writer.print(SPLIT + conversation.getUsers().get(i));
 			}
 			writer.println();
