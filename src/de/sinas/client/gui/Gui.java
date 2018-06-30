@@ -7,7 +7,6 @@ import de.sinas.client.AppClient;
 import de.sinas.net.PROTOCOL;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -44,6 +43,7 @@ public class Gui extends Application {
 		new SiNaSTrayIcon(this, () -> {
 			primaryStage.show();
 		});
+		primaryStage.show();
 		appClient.login();
 	}
 
@@ -61,7 +61,7 @@ public class Gui extends Application {
 					setGraphic(null);
 					return;
 				}
-				setText(conversation.getOtherUser(appClient.getThisUser().getUsername()));
+				setText(conversation.getName());
 				setGraphic(null);
 			}
 		});
@@ -71,7 +71,8 @@ public class Gui extends Application {
 	@FXML
 	private void onSomeButton() {
 		User ou = new User("ip", 0, "otherusername", "othernickname");
-		Conversation c = currentConversation == null ? new Conversation("id", appClient.getThisUser().getUsername(), ou.getUsername())
+		Conversation c = currentConversation == null
+				? new Conversation("id", appClient.getThisUser().getUsername(), ou.getUsername())
 				: currentConversation;
 		c.addMessages(new Message("Message content", System.currentTimeMillis(),
 				(Math.random() > 0.5 ? ou : appClient.getThisUser()).getUsername(), false));

@@ -5,14 +5,14 @@ public class User {
 	private int port;
 	private String username;
 	private String nickname;
-	
+
 	public User(String ip, int port, String username, String nickname) {
 		this.ip = ip;
 		this.port = port;
 		this.username = username;
 		this.nickname = nickname;
 	}
-	
+
 	public void setUsername(String username) {
 		this.username = username;
 	}
@@ -32,7 +32,7 @@ public class User {
 	public String getNickname() {
 		return nickname;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof User && ((User) obj).getUsername().equals(getUsername())

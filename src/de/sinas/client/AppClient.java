@@ -16,7 +16,7 @@ import javafx.collections.ObservableList;
 
 public class AppClient extends Client {
 	private final Gui gui;
-	private final File loginDirectory = new File("T:\\Schulweiter Tausch\\");
+	private final File loginDirectory = new File("/home/jonas");
 	private User thisUser;
 	private File authFile;
 	private ObservableList<Conversation> conversations = FXCollections.observableArrayList();

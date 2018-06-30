@@ -7,8 +7,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.util.ArrayList;
 
 import de.sinas.Conversation;
@@ -42,20 +40,17 @@ public class Database {
 	/**
 	 * Creates a new database object
 	 * 
-	 * @param databaseDirectory
-	 *            the directory in which the data is to be stored
-	 * @throws IllegalArgumentException
-	 *             when given database directory is not a directory
+	 * @param databaseDirectory the directory in which the data is to be stored
+	 * @throws IllegalArgumentException when given database directory is not a
+	 *                                  directory
 	 */
 	public Database(File databaseDirectory) throws IllegalArgumentException {
-		if (!databaseDirectory.exists()) {
 			databaseDirectory.mkdir();
-			File[] structure = { new File(databaseDirectory + "/conversations"), new File(databaseDirectory + "/files"),
-					new File(databaseDirectory + "/users") };
+		File[] structure = { new File(databaseDirectory, "conversations"), new File(databaseDirectory, "files"),
+				new File(databaseDirectory, "users") };
 			for (File folder : structure) {
 				folder.mkdir();
 			}
-		}
 		if (!databaseDirectory.isDirectory()) {
 			throw new IllegalArgumentException("Database directory has to be a directory!");
 		}
@@ -73,7 +68,7 @@ public class Database {
 		String nickname;
 		File file = new File(databaseDirectory + "/users/ " + username);
 		
-		if(!file.exists()) {
+		if (!file.exists()) {
 			try {
 				PrintWriter writer = new PrintWriter(file, "UTF-8");
 				writer.println(username);
@@ -102,7 +97,6 @@ public class Database {
 			return null;
 		}
 		
-
 		return new User(ip, port, username, nickname);
 	}
 
@@ -118,7 +112,7 @@ public class Database {
 	public User getUserInfo(String username) {
 		String nickname;
 		File file = new File(databaseDirectory + "/users/ " + username);
-		if(!file.exists()) {
+		if (!file.exists()) {
 			return null;
 		} else {
 			try {
@@ -160,20 +154,22 @@ public class Database {
 				}
 				reader.close();
 				String[] conversationInformation = lines.get(0).split(":");
-				if (conversationInformation[0].equals(user.getUsername()) || conversationInformation[1].equals(user.getUsername())) {
-					Conversation newConv = new Conversation(filelist[i].getName(), conversationInformation[0], conversationInformation[1]);
+				if (conversationInformation[0].equals(user.getUsername())
+						|| conversationInformation[1].equals(user.getUsername())) {
+					Conversation newConv = new Conversation(filelist[i].getName(), conversationInformation[0],
+							conversationInformation[1]);
 					conversations.add(newConv);
-					for(int j = 1; j < lines.size(); j++) {
+					for (int j = 1; j < lines.size(); j++) {
 						String id = lines.get(j).split(":")[0];
 						long timestamp = Long.parseLong(lines.get(j).split(":")[1]);
 						String sender = lines.get(j).split(":")[2];
 						boolean isFile = Boolean.parseBoolean(lines.get(j).split(":")[3]);
 						String content = "";
-						if(isFile) {
+						if (isFile) {
 							content = null;
-							//TODO file request?
+							// TODO file request?
 						} else {
-							for(int k = 4; k < lines.get(j).split(":").length; k++) {
+							for (int k = 4; k < lines.get(j).split(":").length; k++) {
 								content = content + lines.get(j).split(":")[k] + ":";
 							}
 						}
@@ -227,11 +223,12 @@ public class Database {
 		try {
 			PrintWriter writer = new PrintWriter(file, "UTF-8");
 			
-			String conversationInformation = conversation.getUser1() + ":" + conversation.getUser2() ;
+			String conversationInformation = conversation.getUsers().get(0) + ":" + conversation.getUsers().get(1);
 			writer.write(conversationInformation);
 			
-			for(Message message : conversation.getMessages()) {
-				String messageInformation = message.getId() + ":" + message.getTimestamp() + ":" + message.getSender() + ":" + message.isFile() + ":" + message.getContent();
+			for (Message message : conversation.getMessages()) {
+				String messageInformation = message.getId() + ":" + message.getTimestamp() + ":" + message.getSender()
+						+ ":" + message.isFile() + ":" + message.getContent();
 				writer.write(messageInformation);
 			}
 			

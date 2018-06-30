@@ -42,8 +42,8 @@ public class ChatMessageCell extends ListCell<Message> {
         }
         boolean right = message.getSender().equals(thisUser.getUsername());
         if (fxmlLoader == null || (right != lastRight)) {
-            fxmlLoader = new FXMLLoader(getClass().getResource(
-                    message.getSender().equals(thisUser.getUsername()) ? "chatMessageRight.fxml"
+            fxmlLoader = new FXMLLoader(
+                    getClass().getResource(message.getSender().equals(thisUser.getUsername()) ? "chatMessageRight.fxml"
                             : "chatMessageLeft.fxml"));
             fxmlLoader.setController(this);
             try {

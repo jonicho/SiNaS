@@ -6,9 +6,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileOwnerAttributeView;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
-import java.security.*;
 
 import de.sinas.Conversation;
 import de.sinas.Message;
@@ -65,7 +65,7 @@ public class AppServer extends Server {
 	}
 
 	private void handleLogin(String clientIP, int clientPort) {
-		Path path = Paths.get(loginDirectory.getAbsolutePath() + "\\" + clientIP);
+		Path path = Paths.get(loginDirectory.getAbsolutePath() + "/" + clientIP);
 		FileOwnerAttributeView ownerAttributeView = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
 		try {
 			String[] ownerName = ownerAttributeView.getOwner().getName().split("\\\\");
@@ -88,9 +88,10 @@ public class AppServer extends Server {
 
 	private void handleGetConversations(User user, String[] msgParts) {
 		for (Conversation conversation : conversations) {
-			if (conversation.getUser1().equals(user.getUsername())) {
-				sendToUser(user, PROTOCOL.SC.CONVERSATION, conversation.getId(), "false", conversation.getUser1(),
-						conversation.getUser2());// TODO: handle group conversations
+			if (conversation.contains(user.getUsername())) {
+				sendToUser(user, PROTOCOL.SC.CONVERSATION, conversation.getId(), "false",
+						conversation.getUsers().get(0), conversation.getUsers().get(1));// TODO: handle group
+																						// conversations
 			}
 		}
 	}
@@ -157,13 +158,15 @@ public class AppServer extends Server {
 			hashString = new String(hashBytes);
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			sendToUser(user, PROTOCOL.SC.ERROR,PROTOCOL.ERRORCODES.UNKNOWN_ERROR);
+			sendToUser(user, PROTOCOL.SC.ERROR, PROTOCOL.ERRORCODES.UNKNOWN_ERROR);
 			return;
 		}
 		Message cMessage = new Message(hashString, msgParts[3], ms, user.getUsername(), isFile);
 		conv.addMessages(cMessage);
-		sendToUser(user, PROTOCOL.SC.MESSAGE,conv.getId(),cMessage.getId(),cMessage.isFile(),cMessage.getTimestamp(),cMessage.getContent());
-		sendToUser(users.getUser(conv.getOtherUser(user.getUsername())), PROTOCOL.SC.MESSAGE,conv.getId(),cMessage.getId(),cMessage.isFile(),cMessage.getTimestamp(),cMessage.getContent());
+		sendToUser(users.getUser(conv.getUsers().get(0)), PROTOCOL.SC.MESSAGE, conv.getId(), cMessage.getId(),
+				cMessage.isFile(), cMessage.getTimestamp(), cMessage.getContent());
+		sendToUser(users.getUser(conv.getUsers().get(1)), PROTOCOL.SC.MESSAGE, conv.getId(), cMessage.getId(),
+				cMessage.isFile(), cMessage.getTimestamp(), cMessage.getContent());
 	}
 
 	private void sendToUser(User user, Object... message) {
