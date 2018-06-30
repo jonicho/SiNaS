@@ -94,7 +94,7 @@ public class AppServer extends Server {
 				for (int i = 1; i < conversation.getUsers().size(); i++) {
 					usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
 				}
-				sendToUser(user, PROTOCOL.SC.CONVERSATION, conversation.getId(), usersString);
+				sendToUser(user, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(), usersString);
 			}
 		}
 	}
