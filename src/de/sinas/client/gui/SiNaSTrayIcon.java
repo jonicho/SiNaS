@@ -8,10 +8,7 @@ import java.awt.TrayIcon;
 import javafx.application.Platform;
 
 public class SiNaSTrayIcon {
-    private Gui gui;
-
-    public SiNaSTrayIcon(Gui gui, Runnable onTrayIconClicked) {
-        this.gui = gui;
+    public SiNaSTrayIcon(Runnable onTrayIconClicked) {
         try {
             TrayIcon trayIcon = new TrayIcon(Toolkit.getDefaultToolkit()
                     .getImage("http://icons.iconarchive.com/icons/paomedia/small-n-flat/256/sign-check-icon.png")); // TODO: replace place holder icon

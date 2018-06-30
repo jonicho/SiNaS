@@ -40,7 +40,7 @@ public class Gui extends Application {
 		primaryStage.setOnCloseRequest((e) -> {
 			e.consume();
 		});
-		new SiNaSTrayIcon(this, () -> {
+		new SiNaSTrayIcon(() -> {
 			primaryStage.show();
 		});
 		primaryStage.show();
