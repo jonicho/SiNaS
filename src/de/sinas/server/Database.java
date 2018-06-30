@@ -225,14 +225,17 @@ public class Database {
 		try {
 			PrintWriter writer = new PrintWriter(file, "UTF-8");
 			
-			String conversationInformation = conversation.getUsers().get(0) + SPLIT + conversation.getUsers().get(1);
-			writer.write(conversationInformation);
-			
-			for (Message message : conversation.getMessages()) {
-				String messageInformation = message.getId() + SPLIT + message.getTimestamp() + SPLIT + message.getSender()
-						+ SPLIT + message.isFile() + SPLIT + message.getContent();
-				writer.write(messageInformation);
+			writer.print(conversation.getUsers().get(0));
+			for (int i = 1; i < conversation.getUsers().size(); i++) {
+				writer.print(SPLIT + conversation.getUsers().get(i));
 			}
+			writer.println();
+
+			for (Message message : conversation.getMessages()) {
+				writer.println(message.getId() + SPLIT + message.getTimestamp() + SPLIT + message.getSender() + SPLIT
+						+ message.isFile() + SPLIT + message.getContent());
+			}
+
 			writer.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
