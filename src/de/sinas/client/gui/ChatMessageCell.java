@@ -20,7 +20,6 @@ public class ChatMessageCell extends ListCell<Message> {
     @FXML
     private Label timeLabel;
 
-    private ListView<Message> parentListView;
     private FXMLLoader fxmlLoader;
 
     private User thisUser;
@@ -29,7 +28,6 @@ public class ChatMessageCell extends ListCell<Message> {
     public ChatMessageCell(ListView<Message> parentListView, User thisUser) {
         setFocusTraversable(false);
         this.thisUser = thisUser;
-        this.parentListView = parentListView;
     }
 
     @Override
