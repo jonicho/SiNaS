@@ -153,24 +153,24 @@ public class Database {
 					lines.add(var);
 				}
 				reader.close();
-				String[] conversationInformation = lines.get(0).split(":");
+				String[] conversationInformation = lines.get(0).split("_");
 				if (conversationInformation[0].equals(user.getUsername())
 						|| conversationInformation[1].equals(user.getUsername())) {
 					Conversation newConv = new Conversation(filelist[i].getName(), conversationInformation[0],
 							conversationInformation[1]);
 					conversations.add(newConv);
 					for (int j = 1; j < lines.size(); j++) {
-						String id = lines.get(j).split(":")[0];
-						long timestamp = Long.parseLong(lines.get(j).split(":")[1]);
-						String sender = lines.get(j).split(":")[2];
-						boolean isFile = Boolean.parseBoolean(lines.get(j).split(":")[3]);
+						String id = lines.get(j).split("_")[0];
+						long timestamp = Long.parseLong(lines.get(j).split("_")[1]);
+						String sender = lines.get(j).split("_")[2];
+						boolean isFile = Boolean.parseBoolean(lines.get(j).split("_")[3]);
 						String content = "";
 						if (isFile) {
 							content = null;
 							// TODO file request?
 						} else {
-							for (int k = 4; k < lines.get(j).split(":").length; k++) {
-								content = content + lines.get(j).split(":")[k] + ":";
+							for (int k = 4; k < lines.get(j).split("_").length; k++) {
+								content = content + lines.get(j).split("_")[k] + "_";
 							}
 						}
 						newConv.addMessages(new Message(id, content, timestamp, sender, isFile));
@@ -223,15 +223,14 @@ public class Database {
 		try {
 			PrintWriter writer = new PrintWriter(file, "UTF-8");
 			
-			String conversationInformation = conversation.getUsers().get(0) + ":" + conversation.getUsers().get(1);
+			String conversationInformation = conversation.getUsers().get(0) + "_" + conversation.getUsers().get(1);
 			writer.write(conversationInformation);
 			
 			for (Message message : conversation.getMessages()) {
-				String messageInformation = message.getId() + ":" + message.getTimestamp() + ":" + message.getSender()
-						+ ":" + message.isFile() + ":" + message.getContent();
+				String messageInformation = message.getId() + "_" + message.getTimestamp() + "_" + message.getSender()
+						+ "_" + message.isFile() + "_" + message.getContent();
 				writer.write(messageInformation);
 			}
-			
 			writer.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
