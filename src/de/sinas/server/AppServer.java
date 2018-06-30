@@ -9,6 +9,7 @@ import java.nio.file.attribute.FileOwnerAttributeView;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import de.sinas.Conversation;
 import de.sinas.Message;
@@ -51,7 +52,7 @@ public class AppServer extends Server {
 			handleMessage(user, msgParts);
 			break;
 		case PROTOCOL.CS.GET_CONVERSATIONS:
-			handleGetConversations(user, msgParts);
+			handleGetConversations(user);
 			break;
 		case PROTOCOL.CS.GET_USER:
 			handleGetUser(user, msgParts);
@@ -86,12 +87,14 @@ public class AppServer extends Server {
 
 	}
 
-	private void handleGetConversations(User user, String[] msgParts) {
+	private void handleGetConversations(User user) {
 		for (Conversation conversation : conversations) {
 			if (conversation.contains(user.getUsername())) {
-				sendToUser(user, PROTOCOL.SC.CONVERSATION, conversation.getId(), "false",
-						conversation.getUsers().get(0), conversation.getUsers().get(1));// TODO: handle group
-																						// conversations
+				String usersString = conversation.getUsers().get(0);
+				for (int i = 1; i < conversation.getUsers().size(); i++) {
+					usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
+				}
+				sendToUser(user, PROTOCOL.SC.CONVERSATION, conversation.getId(), usersString);
 			}
 		}
 	}
@@ -108,7 +111,6 @@ public class AppServer extends Server {
 	}
 
 	private void handleGetMessages(User user, String[] msgParts) {
-		// TODO handle group conversations
 		String conversationId = msgParts[1];
 		int lastNMessages = 0;
 		try {
@@ -118,7 +120,11 @@ public class AppServer extends Server {
 		}
 		Conversation conversation = null;
 		for (Conversation c : conversations) {
-			if (c.getId().equals(conversationId)) { // TODO check whether the conversation contains the requesting user
+			if (c.getId().equals(conversationId)) {
+				if (!c.contains(user.getUsername())) {
+					sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
+					return;
+				}
 				conversation = c;
 				break;
 			}
@@ -135,7 +141,7 @@ public class AppServer extends Server {
 			}
 			Message msg = messages.get(index);
 			sendToUser(user, PROTOCOL.SC.MESSAGE, conversationId, msg.getId(), msg.isFile(), msg.getTimestamp(),
-					msg.getContent());
+					msg.getSender(), msg.getContent());
 		}
 	}
 
@@ -163,14 +169,21 @@ public class AppServer extends Server {
 		}
 		Message cMessage = new Message(hashString, msgParts[3], ms, user.getUsername(), isFile);
 		conv.addMessages(cMessage);
-		sendToUser(users.getUser(conv.getUsers().get(0)), PROTOCOL.SC.MESSAGE, conv.getId(), cMessage.getId(),
-				cMessage.isFile(), cMessage.getTimestamp(), cMessage.getContent());
-		sendToUser(users.getUser(conv.getUsers().get(1)), PROTOCOL.SC.MESSAGE, conv.getId(), cMessage.getId(),
-				cMessage.isFile(), cMessage.getTimestamp(), cMessage.getContent());
+		sendToConversation(conv, PROTOCOL.SC.MESSAGE, conv.getId(), cMessage.getId(), cMessage.isFile(),
+				cMessage.getTimestamp(), cMessage.getContent());
 	}
 
 	private void sendToUser(User user, Object... message) {
 		send(user.getIp(), user.getPort(), PROTOCOL.buildMessage(message));
+	}
+
+	private void sendToConversation(Conversation conversation, Object... message) {
+		for (String username : conversation.getUsers()) {
+			User user = users.getUser(username);
+			if (user != null) {
+				sendToUser(user, message);
+			}
+		}
 	}
 
 	private void sendError(User user, int errorCode) {

@@ -13,9 +13,9 @@ public final class PROTOCOL {
 		public static final String ERROR = "err", // Base [split] errorcode
 				OK = "ok", // Base
 				LOGIN_OK = "lgnok", // Base [split] username [split] nickname
-				CONVERSATION = "con", // Base [split] conversation id [split] is group conversation [split] users ...
+				CONVERSATION = "con", // Base [split] conversation id [split] users ...
 				USER = "user", // Base [split] username [split] nickname
-				MESSAGE = "msg"; // Base [split] conversation id [split] message id [split] is file [split] timestamp [split] content
+				MESSAGE = "msg"; // Base [split] conversation id [split] message id [split] is file [split] timestamp [split] sender [split] content
 	}
 
 	public final class CS {
@@ -35,7 +35,8 @@ public final class PROTOCOL {
 				LOGIN_FAILED = 0,
 				NOT_LOGGED_IN = 1,
 				INVALID_MESSAGE = 2,
-				USER_DOES_NOT_EXIST = 3;
+				USER_DOES_NOT_EXIST = 3,
+				REQUEST_NOT_ALLOWED = 4;
 	}
 
 	/**

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.file.Files;
+import java.util.Arrays;
 
 import de.sinas.Conversation;
 import de.sinas.Message;
@@ -87,24 +88,20 @@ public class AppClient extends Client {
 
 	private void handleConversation(String[] msgParts) {
 		String conversationId = msgParts[1];
-		boolean isGroupConversation = Boolean.parseBoolean(msgParts[2]);
-		if (isGroupConversation) {
-			// TODO handle group conversation
-		} else {
-			boolean updated = false;
-			for (int i = 0; i < conversations.size(); i++) {
-				Conversation c = conversations.get(i);
-				if (c.getId().equals(conversationId)) {
-					Conversation newConversation = new Conversation(conversationId, msgParts[3], msgParts[4]);
-					newConversation.addMessages(c.getMessages().toArray(new Message[0]));
-					conversations.set(i, newConversation);
-					updated = true;
-					break;
-				}
+		String[] usernames = Arrays.copyOfRange(msgParts, 2, msgParts.length);
+		boolean updated = false;
+		for (int i = 0; i < conversations.size(); i++) {
+			Conversation c = conversations.get(i);
+			if (c.getId().equals(conversationId)) {
+				Conversation newConversation = new Conversation(conversationId, usernames);
+				newConversation.addMessages(c.getMessages().toArray(new Message[0]));
+				conversations.set(i, newConversation);
+				updated = true;
+				break;
 			}
-			if (!updated) {
-				conversations.add(new Conversation(conversationId, msgParts[3], msgParts[4]));
-			}
+		}
+		if (!updated) {
+			conversations.add(new Conversation(conversationId, usernames));
 		}
 	}
 
