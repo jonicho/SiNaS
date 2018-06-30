@@ -1,5 +1,7 @@
 package de.sinas;
 
+import java.util.UUID;
+
 /**
  * A message that can represent a plain text message or a file message, in which
  * case the content attribute contains the file's server-side location.
@@ -30,9 +32,8 @@ public class Message {
 	}
 
 	/**
-	 * Creates a new message
+	 * Creates a new message with a new id.
 	 * 
-	 * @param id        id from database
 	 * @param content   the message content
 	 * @param timestamp the time at which the message was sent
 	 * @param sender    the user that sent the message
@@ -43,7 +44,7 @@ public class Message {
 		this.timestamp = timestamp;
 		this.sender = sender;
 		this.isFile = isFile;
-		// TODO implement id generator
+		this.id = UUID.randomUUID().toString();
 	}
 
 	/**
