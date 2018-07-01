@@ -61,4 +61,12 @@ public class Users {
 		users.add(user);
 	}
 
+	/**
+	 * Removes the given user
+	 * 
+	 * @return {@code true} if this list contained the specified element
+	 */
+	public boolean removeUser(User user) {
+		return users.remove(user);
+	} 
 }

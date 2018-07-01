@@ -223,5 +223,6 @@ public class AppServer extends Server {
 	@Override
 	public void processClosingConnection(String pClientIP, int pClientPort) {
 		System.out.println("Closing connection: " + pClientIP + ":" + pClientPort);
+		users.removeUser(users.getUser(pClientIP, pClientPort));
 	}
 }
