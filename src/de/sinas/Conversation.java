@@ -50,7 +50,9 @@ public class Conversation {
 	 */
 	public void addMessages(Message... msgs) {
 		for (int i = 0; i < msgs.length; i++) {
-			messages.add(msgs[i]);
+			if (!messages.contains(msgs[i])) {
+				messages.add(msgs[i]);
+			}
 		}
 		messages.sort((m1, m2) -> (int) Math.signum(m1.getTimestamp() - m2.getTimestamp()));
 	}
