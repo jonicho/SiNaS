@@ -12,6 +12,7 @@ import de.sinas.User;
 import de.sinas.client.gui.Gui;
 import de.sinas.net.Client;
 import de.sinas.net.PROTOCOL;
+import de.sinas.server.Users;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -21,6 +22,7 @@ public class AppClient extends Client {
 	private User thisUser;
 	private File authFile;
 	private ObservableList<Conversation> conversations = FXCollections.observableArrayList();
+	private Users users;
 
 	public AppClient(String pServerIP, int pServerPort, Gui gui) {
 		super(pServerIP, pServerPort);
@@ -40,6 +42,12 @@ public class AppClient extends Client {
 			break;
 		case PROTOCOL.SC.CONVERSATION:
 			handleConversation(msgParts);
+			break;
+		case PROTOCOL.SC.USER:
+			handleUser(msgParts);
+			break;
+		case PROTOCOL.SC.MESSAGE:
+			handleMessage(msgParts);
 			break;
 		default:
 			break;
@@ -104,6 +112,28 @@ public class AppClient extends Client {
 		if (!updated) {
 			conversations.add(new Conversation(conversationId, conversationName, usernames));
 		}
+	}
+
+	private void handleUser(String[] msgParts) {
+		if (users.doesUserExist(msgParts[1])) {
+			users.removeUser(users.getUser(msgParts[1]));
+		}
+		users.addUser(new User("", 0, msgParts[1], msgParts[2]));
+	}
+
+	private void handleMessage(String[] msgParts) {
+		Conversation conversation = null;
+		for (Conversation con : conversations) {
+			if (con.getId().equals(msgParts[1])) {
+				conversation = con;
+				break;
+			}
+		}
+		if (conversation == null) {
+			return;
+		}
+		conversation.addMessages(new Message(msgParts[1], msgParts[6], Long.parseLong(msgParts[4]), msgParts[5],
+				Boolean.parseBoolean(msgParts[3])));
 	}
 
 	public void login() {
