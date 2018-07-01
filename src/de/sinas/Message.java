@@ -87,4 +87,9 @@ public class Message {
 	public String getId() {
 		return id;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof Message && ((Message) obj).getId().equals(id);
+	}
 }
