@@ -175,6 +175,7 @@ public class AppServer extends Server {
 		}
 		Message cMessage = new Message(idString, msgParts[3], ms, user.getUsername(), isFile);
 		conv.addMessages(cMessage);
+		db.saveConversation(conv);
 		sendToConversation(conv, PROTOCOL.SC.MESSAGE, conv.getId(), cMessage.getId(), cMessage.isFile(),
 				cMessage.getTimestamp(), cMessage.getContent());
 	}
