@@ -170,15 +170,19 @@ public class AppServer extends Server {
 			return;
 		}
 		long ms = System.currentTimeMillis();
-		Conversation conv = null;
 		String convID = msgParts[1];
+		boolean isFile = Boolean.parseBoolean(msgParts[2]);
+		String content = msgParts[3];
+		Conversation conv = null;
 		for (Conversation c : conversations) {
 			if (c.getId().equals(convID)) {
 				conv = c;
 			}
 		}
-		boolean isFile = Boolean.parseBoolean(msgParts[2]);
-		String content = msgParts[3];
+		if (!conv.contains(user.getUsername())) {
+			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
+			return;
+		}
 		Message message;
 		try {
 			message = new Message(content, ms, user.getUsername(), isFile);
