@@ -88,6 +88,7 @@ public class AppServer extends Server {
 	
 	private void handleChangeNick(User user,String[] msgParts) {
 		user.setNickname(msgParts[1]);
+		db.saveUser(user);
 		sendToUser(user, PROTOCOL.SC.USER,user.getUsername(),user.getNickname());
 	}
 	
