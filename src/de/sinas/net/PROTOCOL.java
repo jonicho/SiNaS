@@ -22,7 +22,8 @@ public final class PROTOCOL {
 		private CS() {}
 
 		public static final String LOGIN = "lgn", // Base [split] name
-				GET_CONVERSATIONS = "getconlist", // Base
+				CREATE_CONVERSATION = "crtcon", // Base [split] name [split] users ...
+				GET_CONVERSATIONS = "getcons", // Base
 				GET_USER = "getuser", // Base [split] username
 				GET_MESSAGES = "getmsgs", // Base [split] conversation id [split] amount
 				MESSAGE = "msg"; // Base [split] conversation id [split] is file [split] content

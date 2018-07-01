@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.FileOwnerAttributeView;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Base64;
 
@@ -59,6 +60,9 @@ public class AppServer extends Server {
 			break;
 		case PROTOCOL.CS.GET_MESSAGES:
 			handleGetMessages(user, msgParts);
+			break;
+		case PROTOCOL.CS.CREATE_CONVERSATION:
+			handleCreateConversation(user, msgParts);
 			break;
 		default:
 			break;
@@ -173,6 +177,30 @@ public class AppServer extends Server {
 		conv.addMessages(cMessage);
 		sendToConversation(conv, PROTOCOL.SC.MESSAGE, conv.getId(), cMessage.getId(), cMessage.isFile(),
 				cMessage.getTimestamp(), cMessage.getContent());
+	}
+
+	private void handleCreateConversation(User user, String[] msgParts) {
+		String name = msgParts[1];
+		String[] users = Arrays.copyOfRange(msgParts, 2, msgParts.length);
+		if (!Arrays.asList(users).contains(user.getUsername())) {
+			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
+			return;
+		}
+		for (String u : users) {
+			if (db.getUserInfo(u) == null) {
+				sendError(user, PROTOCOL.ERRORCODES.USER_DOES_NOT_EXIST);
+				return;
+			}
+		}
+		Conversation newConversation = new Conversation(name, users);
+		conversations.add(newConversation);
+		db.saveConversation(newConversation);
+		String usersString = newConversation.getUsers().get(0);
+		for (int i = 1; i < newConversation.getUsers().size(); i++) {
+			usersString += PROTOCOL.SPLIT + newConversation.getUsers().get(i);
+		}
+		sendToConversation(newConversation, PROTOCOL.SC.CONVERSATION, newConversation.getId(),
+				newConversation.getName(), usersString);
 	}
 
 	private void sendToUser(User user, Object... message) {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * A conversation containing an arbitrary amount of users
@@ -15,13 +16,24 @@ public class Conversation {
 	private ArrayList<String> users = new ArrayList<>();
 
 	/**
-	 * Creates a new conversation with an id and an arbitrary amount of users.
+	 * Creates a new conversation with an arbitrary amount of users.
 	 * 
 	 * @param id    the conversation id
 	 * @param users an arbitrary amount of users
 	 */
 	public Conversation(String id, String name, String... users) {
 		this.id = id;
+		this.name = name;
+		this.users.addAll(Arrays.asList(users));
+	}
+
+	/**
+	 * Creates a new conversation with a new id and an arbitrary amount of users.
+	 * 
+	 * @param users an arbitrary amount of users
+	 */
+	public Conversation(String name, String... users) {
+		this.id = UUID.randomUUID().toString();
 		this.name = name;
 		this.users.addAll(Arrays.asList(users));
 	}
