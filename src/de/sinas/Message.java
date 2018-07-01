@@ -1,6 +1,9 @@
 package de.sinas;
 
-import java.util.UUID;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 /**
  * A message that can represent a plain text message or a file message, in which
@@ -38,13 +41,20 @@ public class Message {
 	 * @param timestamp the time at which the message was sent
 	 * @param sender    the user that sent the message
 	 * @param isFile    whether the message represents a file
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
 	 */
-	public Message(String content, long timestamp, String sender, boolean isFile) {
+	public Message(String content, long timestamp, String sender, boolean isFile)
+			throws UnsupportedEncodingException, NoSuchAlgorithmException {
 		this.content = content;
 		this.timestamp = timestamp;
 		this.sender = sender;
 		this.isFile = isFile;
-		this.id = UUID.randomUUID().toString();
+		byte[] stringBytes = (content + timestamp + sender + isFile).getBytes("UTF-8");
+		MessageDigest md = MessageDigest.getInstance("MD5");
+		byte[] hashBytes = md.digest(stringBytes);
+		byte[] encodedBytes = Base64.getEncoder().encode(hashBytes);
+		id = new String(encodedBytes);
 	}
 
 	/**

@@ -2,15 +2,15 @@ package de.sinas.server;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileOwnerAttributeView;
-import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Base64;
 
 import de.sinas.Conversation;
 import de.sinas.Message;
@@ -160,24 +160,19 @@ public class AppServer extends Server {
 			}
 		}
 		boolean isFile = Boolean.parseBoolean(msgParts[2]);
-		String hString = msgParts[3] + ms;
-		String idString = "";
+		String content = msgParts[3];
+		Message message;
 		try {
-			byte[] stringBytes = hString.getBytes("UTF-8");
-			MessageDigest md = MessageDigest.getInstance("MD5");
-			byte[] hashBytes = md.digest(stringBytes);
-			byte[] encodedBytes = Base64.getEncoder().encode(hashBytes);
-			idString = new String(encodedBytes);
-		} catch (Exception ex) {
-			ex.printStackTrace();
+			message = new Message(content, ms, user.getUsername(), isFile);
+		} catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
+			e.printStackTrace();
 			sendToUser(user, PROTOCOL.SC.ERROR, PROTOCOL.ERRORCODES.UNKNOWN_ERROR);
 			return;
 		}
-		Message cMessage = new Message(idString, msgParts[3], ms, user.getUsername(), isFile);
-		conv.addMessages(cMessage);
+		conv.addMessages(message);
 		db.saveConversation(conv);
-		sendToConversation(conv, PROTOCOL.SC.MESSAGE, conv.getId(), cMessage.getId(), cMessage.isFile(),
-				cMessage.getTimestamp(), cMessage.getSender(), cMessage.getContent());
+		sendToConversation(conv, PROTOCOL.SC.MESSAGE, conv.getId(), message.getId(), message.isFile(),
+				message.getTimestamp(), message.getSender(), message.getContent());
 	}
 
 	private void handleCreateConversation(User user, String[] msgParts) {
