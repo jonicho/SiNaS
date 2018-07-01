@@ -68,6 +68,7 @@ public class AppServer extends Server {
 		case PROTOCOL.CS.CREATE_CONVERSATION:
 			handleCreateConversation(user, msgParts);
 			break;
+		
 		default:
 			sendError(user, PROTOCOL.ERRORCODES.UNKNOWN_MESSAGE_BASE);
 			break;
