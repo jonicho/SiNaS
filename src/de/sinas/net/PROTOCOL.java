@@ -38,7 +38,8 @@ public final class PROTOCOL {
 				INVALID_MESSAGE = 2,
 				USER_DOES_NOT_EXIST = 3,
 				REQUEST_NOT_ALLOWED = 4,
-				UNKNOWN_MESSAGE_BASE = 5;
+				UNKNOWN_MESSAGE_BASE = 5,
+				EMPTY_MESSAGE = 6;
 	}
 
 	/**
