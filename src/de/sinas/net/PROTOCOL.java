@@ -37,7 +37,8 @@ public final class PROTOCOL {
 				NOT_LOGGED_IN = 1,
 				INVALID_MESSAGE = 2,
 				USER_DOES_NOT_EXIST = 3,
-				REQUEST_NOT_ALLOWED = 4;
+				REQUEST_NOT_ALLOWED = 4,
+				UNKNOWN_MESSAGE_BASE = 5;
 	}
 
 	/**
