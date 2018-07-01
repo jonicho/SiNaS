@@ -238,6 +238,7 @@ public class AppServer extends Server {
 		Conversation conversation = getConvByID(msgParts[1]);
 		if(!conversation.contains(user.getUsername())) {
 			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
+			return;
 		}
 		conversation.addUser(msgParts[2]);
 		String usersString = conversation.getUsers().get(0);
@@ -251,6 +252,7 @@ public class AppServer extends Server {
 		Conversation conversation = getConvByID(msgParts[1]);
 		if(!conversation.contains(user.getUsername())) {
 			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
+			return;
 		}
 		conversation.removeUser(msgParts[2]);
 		String usersString = conversation.getUsers().get(0);
@@ -264,6 +266,7 @@ public class AppServer extends Server {
 		Conversation conversation = getConvByID(msgParts[1]);
 		if(!conversation.contains(user.getUsername())) {
 			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
+			return;
 		}
 		conversation.rename(msgParts[2]);
 		String usersString = conversation.getUsers().get(0);
