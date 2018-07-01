@@ -111,6 +111,7 @@ public class AppServer extends Server {
 	private void handleGetUser(User requestingUser, String[] msgParts) {
 		if (msgParts.length < 2) {
 			sendError(requestingUser, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
+			return;
 		}
 		User user = users.getUser(msgParts[1]);
 		if (user == null) {
@@ -133,6 +134,7 @@ public class AppServer extends Server {
 			lastNMessages = Integer.parseInt(msgParts[2]);
 		} catch (NumberFormatException e) {
 			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
+			return;
 		}
 		Conversation conversation = null;
 		for (Conversation c : conversations) {
@@ -164,6 +166,7 @@ public class AppServer extends Server {
 	private void handleMessage(User user, String[] msgParts) {
 		if (msgParts.length < 4) {
 			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
+			return;
 		}
 		long ms = System.currentTimeMillis();
 		Conversation conv = null;
@@ -192,6 +195,7 @@ public class AppServer extends Server {
 	private void handleCreateConversation(User user, String[] msgParts) {
 		if (msgParts.length < 3) {
 			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
+			return;
 		}
 		String name = msgParts[1];
 		String[] users = Arrays.copyOfRange(msgParts, 2, msgParts.length);
