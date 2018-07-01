@@ -68,13 +68,78 @@ public class AppServer extends Server {
 		case PROTOCOL.CS.CREATE_CONVERSATION:
 			handleCreateConversation(user, msgParts);
 			break;
-		
+		case PROTOCOL.CS.CONVERSATION_ADD:
+			handleConversationAddUser(user, msgParts);
+			break;
+		case PROTOCOL.CS.CONVERSATION_REM:
+			handleConversationRemoveUser(user, msgParts);
+			break;
+		case PROTOCOL.CS.CONVERSATION_RENAME:
+			handleConversationRename(user, msgParts);
+			break;
 		default:
 			sendError(user, PROTOCOL.ERRORCODES.UNKNOWN_MESSAGE_BASE);
 			break;
 		}
 	}
 
+	private void handleConversationAddUser(User user,String[] msgParts) {
+		Conversation c = getConvByID(msgParts[1]);
+		if(!c.contains(user.getUsername())) {
+			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
+		}
+		c.addUser(msgParts[2]);
+		String userList = "";
+		for (String u : c.getUsers()) {
+			userList += u + PROTOCOL.SPLIT;
+		}
+		for (String u : c.getUsers()) {
+			User cUser = users.getUser(u);
+			sendToUser(user, PROTOCOL.SC.CONVERSATION, c.getId(), c.getName(), userList);
+		}
+	}
+	
+	private void handleConversationRemoveUser(User user,String[] msgParts) {
+		Conversation c = getConvByID(msgParts[1]);
+		if(!c.contains(user.getUsername())) {
+			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
+		}
+		c.removeUser(msgParts[2]);
+		String userList = "";
+		for (String u : c.getUsers()) {
+			userList += u + PROTOCOL.SPLIT;
+		}
+		for (String u : c.getUsers()) {
+			User cUser = users.getUser(u);
+			sendToUser(user, PROTOCOL.SC.CONVERSATION, c.getId(), c.getName(), userList);
+		}
+	}
+	
+	private void handleConversationRename(User user,String[] msgParts) {
+		Conversation c = getConvByID(msgParts[1]);
+		if(!c.contains(user.getUsername())) {
+			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
+		}
+		c.rename(msgParts[2]);
+		String userList = "";
+		for (String u : c.getUsers()) {
+			userList += u + PROTOCOL.SPLIT;
+		}
+		for (String u : c.getUsers()) {
+			User cUser = users.getUser(u);
+			sendToUser(user, PROTOCOL.SC.CONVERSATION, c.getId(), c.getName(), userList);
+		}
+	}
+	
+	private Conversation getConvByID(String id) {
+		for (Conversation c : conversations) {
+			if(c.getId().equals(id)) {
+				return c;
+			}
+		}
+		return null;
+	}
+	
 	private void handleLogin(String clientIP, int clientPort) {
 		Path path = Paths.get(loginDirectory.getAbsolutePath() + "/" + clientIP);
 		FileOwnerAttributeView ownerAttributeView = Files.getFileAttributeView(path, FileOwnerAttributeView.class);

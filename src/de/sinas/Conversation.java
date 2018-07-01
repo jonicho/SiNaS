@@ -27,6 +27,10 @@ public class Conversation {
 		this.users.addAll(Arrays.asList(users));
 	}
 	
+	public void rename(String name) {
+		this.name = name;
+	}
+	
 	public void removeUser(String username) {
 		users.remove(username);
 	}

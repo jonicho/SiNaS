@@ -28,6 +28,7 @@ public final class PROTOCOL {
 				GET_MESSAGES = "getmsgs", // Base [split] conversation id [split] amount
 				CONVERSATION_ADD = "conadd", // Base [Split] id [Split] name
 				CONVERSATION_REM = "conrem", //Base [Split] id [Split] name
+				CONVERSATION_RENAME = "conren", //Base [Split] id [Split] new names
 				MESSAGE = "msg"; // Base [split] conversation id [split] is file [split] content
 	}
 
