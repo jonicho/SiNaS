@@ -104,6 +104,9 @@ public class AppServer extends Server {
 	}
 
 	private void handleGetUser(User requestingUser, String[] msgParts) {
+		if (msgParts.length < 2) {
+			sendError(requestingUser, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
+		}
 		User user = users.getUser(msgParts[1]);
 		if (user == null) {
 			user = db.getUserInfo(msgParts[1]);
@@ -116,6 +119,9 @@ public class AppServer extends Server {
 	}
 
 	private void handleGetMessages(User user, String[] msgParts) {
+		if (msgParts.length < 3) {
+			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
+		}
 		String conversationId = msgParts[1];
 		int lastNMessages = 0;
 		try {
@@ -151,6 +157,9 @@ public class AppServer extends Server {
 	}
 
 	private void handleMessage(User user, String[] msgParts) {
+		if (msgParts.length < 4) {
+			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
+		}
 		long ms = System.currentTimeMillis();
 		Conversation conv = null;
 		String convID = msgParts[1];
@@ -176,6 +185,9 @@ public class AppServer extends Server {
 	}
 
 	private void handleCreateConversation(User user, String[] msgParts) {
+		if (msgParts.length < 3) {
+			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
+		}
 		String name = msgParts[1];
 		String[] users = Arrays.copyOfRange(msgParts, 2, msgParts.length);
 		if (!Arrays.asList(users).contains(user.getUsername())) {
