@@ -29,6 +29,7 @@ public final class PROTOCOL {
 				CONVERSATION_ADD = "conadd", // Base [Split] id [Split] name
 				CONVERSATION_REM = "conrem", //Base [Split] id [Split] name
 				CONVERSATION_RENAME = "conren", //Base [Split] id [Split] new names
+				CHANGE_NICK = "cnick", //Base [Split] name
 				MESSAGE = "msg"; // Base [split] conversation id [split] is file [split] content
 	}
 

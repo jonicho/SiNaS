@@ -77,10 +77,18 @@ public class AppServer extends Server {
 		case PROTOCOL.CS.CONVERSATION_RENAME:
 			handleConversationRename(user, msgParts);
 			break;
+		case PROTOCOL.CS.CHANGE_NICK:
+			handleChangeNick(user, msgParts);
+			break;
 		default:
 			sendError(user, PROTOCOL.ERRORCODES.UNKNOWN_MESSAGE_BASE);
 			break;
 		}
+	}
+	
+	private void handleChangeNick(User user,String[] msgParts) {
+		user.setNickname(msgParts[1]);
+		sendToUser(user, PROTOCOL.SC.USER,user.getUsername(),user.getNickname());
 	}
 	
 	private void handleLogin(String clientIP, int clientPort) {

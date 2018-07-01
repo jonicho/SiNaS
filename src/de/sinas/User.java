@@ -16,6 +16,10 @@ public class User {
 	public void setUsername(String username) {
 		this.username = username;
 	}
+	
+	public void setNickname(String nickname) {
+		this.nickname = nickname;
+	}
 
 	public String getIp() {
 		return ip;
