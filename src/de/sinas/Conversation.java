@@ -26,6 +26,10 @@ public class Conversation {
 		this.name = name;
 		this.users.addAll(Arrays.asList(users));
 	}
+	
+	public void removeUser(String username) {
+		users.remove(username);
+	}
 
 	/**
 	 * Creates a new conversation with a new id and an arbitrary amount of users.

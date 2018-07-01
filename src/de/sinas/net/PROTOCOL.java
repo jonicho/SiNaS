@@ -26,6 +26,8 @@ public final class PROTOCOL {
 				GET_CONVERSATIONS = "getcons", // Base
 				GET_USER = "getuser", // Base [split] username
 				GET_MESSAGES = "getmsgs", // Base [split] conversation id [split] amount
+				CONVERSATION_ADD = "conadd", // Base [Split] name
+				CONVERSATION_REM = "conrem", //Base [Split] name
 				MESSAGE = "msg"; // Base [split] conversation id [split] is file [split] content
 	}
 
