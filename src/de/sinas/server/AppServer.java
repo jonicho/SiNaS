@@ -105,6 +105,7 @@ public class AppServer extends Server {
 			user = db.getUserInfo(msgParts[1]);
 			if (user == null) {
 				sendError(requestingUser, PROTOCOL.ERRORCODES.USER_DOES_NOT_EXIST);
+				return;
 			}
 		}
 		sendToUser(requestingUser, PROTOCOL.SC.USER, user.getUsername(), user.getNickname());
