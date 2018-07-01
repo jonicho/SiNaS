@@ -241,6 +241,7 @@ public class AppServer extends Server {
 			return;
 		}
 		conversation.addUser(msgParts[2]);
+		db.saveConversation(conversation);
 		String usersString = conversation.getUsers().get(0);
 		for (int i = 1; i < conversation.getUsers().size(); i++) {
 			usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
@@ -255,6 +256,7 @@ public class AppServer extends Server {
 			return;
 		}
 		conversation.removeUser(msgParts[2]);
+		db.saveConversation(conversation);
 		String usersString = conversation.getUsers().get(0);
 		for (int i = 1; i < conversation.getUsers().size(); i++) {
 			usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
@@ -269,6 +271,7 @@ public class AppServer extends Server {
 			return;
 		}
 		conversation.rename(msgParts[2]);
+		db.saveConversation(conversation);
 		String usersString = conversation.getUsers().get(0);
 		for (int i = 1; i < conversation.getUsers().size(); i++) {
 			usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
