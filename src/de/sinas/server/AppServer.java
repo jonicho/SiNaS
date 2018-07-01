@@ -82,63 +82,6 @@ public class AppServer extends Server {
 			break;
 		}
 	}
-
-	private void handleConversationAddUser(User user,String[] msgParts) {
-		Conversation c = getConvByID(msgParts[1]);
-		if(!c.contains(user.getUsername())) {
-			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
-		}
-		c.addUser(msgParts[2]);
-		String userList = "";
-		for (String u : c.getUsers()) {
-			userList += u + PROTOCOL.SPLIT;
-		}
-		for (String u : c.getUsers()) {
-			User cUser = users.getUser(u);
-			sendToUser(user, PROTOCOL.SC.CONVERSATION, c.getId(), c.getName(), userList);
-		}
-	}
-	
-	private void handleConversationRemoveUser(User user,String[] msgParts) {
-		Conversation c = getConvByID(msgParts[1]);
-		if(!c.contains(user.getUsername())) {
-			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
-		}
-		c.removeUser(msgParts[2]);
-		String userList = "";
-		for (String u : c.getUsers()) {
-			userList += u + PROTOCOL.SPLIT;
-		}
-		for (String u : c.getUsers()) {
-			User cUser = users.getUser(u);
-			sendToUser(user, PROTOCOL.SC.CONVERSATION, c.getId(), c.getName(), userList);
-		}
-	}
-	
-	private void handleConversationRename(User user,String[] msgParts) {
-		Conversation c = getConvByID(msgParts[1]);
-		if(!c.contains(user.getUsername())) {
-			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
-		}
-		c.rename(msgParts[2]);
-		String userList = "";
-		for (String u : c.getUsers()) {
-			userList += u + PROTOCOL.SPLIT;
-		}
-		for (String u : c.getUsers()) {
-			User cUser = users.getUser(u);
-			sendToUser(user, PROTOCOL.SC.CONVERSATION, c.getId(), c.getName(), userList);
-		}
-	}
-	
-	private Conversation getConvByID(String id) {
-		for (Conversation c : conversations) {
-			if(c.getId().equals(id)) {
-				return c;
-			}
-		}
-		return null;
-	}
 	
 	private void handleLogin(String clientIP, int clientPort) {
 		Path path = Paths.get(loginDirectory.getAbsolutePath() + "/" + clientIP);
@@ -291,6 +234,45 @@ public class AppServer extends Server {
 				newConversation.getName(), usersString);
 	}
 
+	private void handleConversationAddUser(User user,String[] msgParts) {
+		Conversation conversation = getConvByID(msgParts[1]);
+		if(!conversation.contains(user.getUsername())) {
+			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
+		}
+		conversation.addUser(msgParts[2]);
+		String usersString = conversation.getUsers().get(0);
+		for (int i = 1; i < conversation.getUsers().size(); i++) {
+			usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
+		}
+		sendToConversation(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(), usersString);
+	}
+	
+	private void handleConversationRemoveUser(User user,String[] msgParts) {
+		Conversation conversation = getConvByID(msgParts[1]);
+		if(!conversation.contains(user.getUsername())) {
+			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
+		}
+		conversation.removeUser(msgParts[2]);
+		String usersString = conversation.getUsers().get(0);
+		for (int i = 1; i < conversation.getUsers().size(); i++) {
+			usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
+		}
+		sendToConversation(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(), usersString);
+	}
+	
+	private void handleConversationRename(User user,String[] msgParts) {
+		Conversation conversation = getConvByID(msgParts[1]);
+		if(!conversation.contains(user.getUsername())) {
+			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
+		}
+		conversation.rename(msgParts[2]);
+		String usersString = conversation.getUsers().get(0);
+		for (int i = 1; i < conversation.getUsers().size(); i++) {
+			usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
+		}
+		sendToConversation(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(), usersString);
+	}
+
 	private void sendToUser(User user, Object... message) {
 		send(user.getIp(), user.getPort(), PROTOCOL.buildMessage(message));
 	}
@@ -306,6 +288,15 @@ public class AppServer extends Server {
 
 	private void sendError(User user, int errorCode) {
 		sendToUser(user, PROTOCOL.getErrorMessage(errorCode));
+	}
+	
+	private Conversation getConvByID(String id) {
+		for (Conversation c : conversations) {
+			if(c.getId().equals(id)) {
+				return c;
+			}
+		}
+		return null;
 	}
 
 	@Override
