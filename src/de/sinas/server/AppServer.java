@@ -177,7 +177,7 @@ public class AppServer extends Server {
 		conv.addMessages(cMessage);
 		db.saveConversation(conv);
 		sendToConversation(conv, PROTOCOL.SC.MESSAGE, conv.getId(), cMessage.getId(), cMessage.isFile(),
-				cMessage.getTimestamp(), cMessage.getContent());
+				cMessage.getTimestamp(), cMessage.getSender(), cMessage.getContent());
 	}
 
 	private void handleCreateConversation(User user, String[] msgParts) {
