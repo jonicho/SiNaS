@@ -127,6 +127,7 @@ public class AppServer extends Server {
 	private void handleGetMessages(User user, String[] msgParts) {
 		if (msgParts.length < 3) {
 			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
+			return;
 		}
 		String conversationId = msgParts[1];
 		int lastNMessages = 0;
