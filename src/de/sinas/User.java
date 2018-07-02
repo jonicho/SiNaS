@@ -1,11 +1,17 @@
 package de.sinas;
 
+/**
+ * A user with an ip, a port, a username and a nickname
+ */
 public class User {
 	private String ip;
 	private int port;
 	private String username;
 	private String nickname;
 
+	/**
+	 * Creates a new user with the given ip, port, username and nickname
+	 */
 	public User(String ip, int port, String username, String nickname) {
 		this.ip = ip;
 		this.port = port;

@@ -16,24 +16,20 @@ import de.sinas.User;
 
 /**
  * The database for SiNaS. Stores user and conversation data in the given
- * directory
- * 
- * user file structure (filename = username)
- * 
- * 		(1)		nickname 							//only nickname of
- * 
- * 
- * conversation structure (filename = conversation id)
- * 
- * 		(1)		user1:user2 						//both conversation participants
- * 		(2)		id:timestamp:sender:isFile:content	//format of a message's data (if isFile() then content = null)
- * 		(3)			... following messages
- * 
- * 
- * database folder structure
- * 		SiNaS 	/ conversations / (conversation files called <id>)
- * 				/ files / (files called <id>.*)
- * 				/ users / (userdata files called <username>)
+ * directory<br>
+ * <br>
+ * user file structure (filename = username)<br>
+ * (1) nickname<br>
+ * <br>
+ * conversation structure (filename = conversation id)<br>
+ * (1) convname[SPLIT]user1[SPLIT]user2<br>
+ * (2) id[SPLIT]timestamp[SPLIT]sender[SPLIT]isFile[SPLIT]content<br>
+ * (3) ... following messages<br>
+ * <br>
+ * database folder structure<br>
+ * SiNaS / conversations / (conversation files called <id>)<br>
+ * 		 / files / (files called <id>)<br>
+ * 		 / users / (userdata files called <username>)<br>
  */
 public class Database {
 	private static final String SPLIT = "_";
@@ -61,8 +57,8 @@ public class Database {
 	}
 
 	/**
-	 * Loads the user with the given name with ip and port.</br>
-	 * This method is to get a user that connected to the server.</br>
+	 * Loads the user with the given name with ip and port.<br>
+	 * This method is to get a user that connected to the server.<br>
 	 * If no user with the given name exists a new one is created.
 	 * 
 	 * @return The user with the given username
@@ -104,9 +100,9 @@ public class Database {
 	}
 
 	/**
-	 * Loads the user with the given name without ip and port.</br>
+	 * Loads the user with the given name with an empty ip and the port 0.<br>
 	 * This method is to get information about a user without having the user to
-	 * connect to the server.</br>
+	 * connect to the server.<br>
 	 * If no user with the given name exists {@code null} is returned.
 	 * 
 	 * @return The user with the given username. {@code null} if no user with the
@@ -179,8 +175,7 @@ public class Database {
 					boolean isFile = Boolean.parseBoolean(msgInfo[3]);
 					String content = "";
 					if (isFile) {
-						content = null;
-						// TODO file
+						// TODO handle file
 					} else {
 						content = msgInfo[4];
 						for (int k = 5; k < msgInfo.length; k++) {

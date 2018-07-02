@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 import de.sinas.User;
 
+/**
+ * A class managing users to ensure that there is no user twice.
+ */
 public class Users {
 	private ArrayList<User> users = new ArrayList<User>();
 
@@ -64,9 +67,9 @@ public class Users {
 	/**
 	 * Removes the given user
 	 * 
-	 * @return {@code true} if this list contained the specified element
+	 * @return {@code true} if the specified user existed
 	 */
 	public boolean removeUser(User user) {
 		return users.remove(user);
-	} 
+	}
 }

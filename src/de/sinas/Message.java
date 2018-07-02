@@ -35,7 +35,9 @@ public class Message {
 	}
 
 	/**
-	 * Creates a new message with a new id.
+	 * Creates a new message and generates an id by hashing the following
+	 * string:<br>
+	 * (content + timestamp + sender + isFile)
 	 * 
 	 * @param content   the message content
 	 * @param timestamp the time at which the message was sent

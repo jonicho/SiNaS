@@ -26,14 +26,6 @@ public class Conversation {
 		this.name = name;
 		this.users.addAll(Arrays.asList(users));
 	}
-	
-	public void rename(String name) {
-		this.name = name;
-	}
-	
-	public void removeUser(String username) {
-		users.remove(username);
-	}
 
 	/**
 	 * Creates a new conversation with a new id and an arbitrary amount of users.
@@ -44,6 +36,23 @@ public class Conversation {
 		this.id = UUID.randomUUID().toString();
 		this.name = name;
 		this.users.addAll(Arrays.asList(users));
+	}
+
+	/**
+	 * Renames this conversation
+	 */
+	public void rename(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * Removes the given user
+	 * 
+	 * @param username the username of the user to remove
+	 * @return {@code true} if this conversation contained the specified user
+	 */
+	public boolean removeUser(String username) {
+		return users.remove(username);
 	}
 
 	public void addUser(String user) {

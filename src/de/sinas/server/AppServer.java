@@ -86,6 +86,13 @@ public class AppServer extends Server {
 		}
 	}
 
+	/**
+	 * Handles a login request.<br>
+	 * Determines the username with the owner attribute of the file with the ip as
+	 * filename in the SiNaS login directory.
+	 * 
+	 * @see PROTOCOL.CS
+	 */
 	private void handleLogin(String clientIP, int clientPort) {
 		Path path = Paths.get(loginDirectory.getAbsolutePath() + "/" + clientIP);
 		FileOwnerAttributeView ownerAttributeView = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
@@ -108,6 +115,13 @@ public class AppServer extends Server {
 
 	}
 
+	/**
+	 * Handles a get conversations request.<br>
+	 * Sends the id, name and users of all conversations containing the requesting
+	 * user.
+	 * 
+	 * @see PROTOCOL.CS
+	 */
 	private void handleGetConversations(User user) {
 		for (Conversation conversation : conversations) {
 			if (conversation.contains(user.getUsername())) {
@@ -120,6 +134,13 @@ public class AppServer extends Server {
 		}
 	}
 
+	/**
+	 * Handles a get user request.<br>
+	 * If the requested user exists the username and the nickname are sent back. If
+	 * not an error is sent back.
+	 * 
+	 * @see PROTOCOL.CS
+	 */
 	private void handleGetUser(User requestingUser, String[] msgParts) {
 		if (msgParts.length < 2) {
 			sendError(requestingUser, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
@@ -136,6 +157,12 @@ public class AppServer extends Server {
 		sendToUser(requestingUser, PROTOCOL.SC.USER, user.getUsername(), user.getNickname());
 	}
 
+	/**
+	 * Handles a get messages request.<br>
+	 * Sends the last {@code amount} messages of the requested conversation.
+	 * 
+	 * @see PROTOCOL.CS
+	 */
 	private void handleGetMessages(User user, String[] msgParts) {
 		if (msgParts.length < 3) {
 			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
@@ -176,6 +203,13 @@ public class AppServer extends Server {
 		}
 	}
 
+	/**
+	 * Handles a message request.<br>
+	 * Sends the requested message to the requested conversation. Uses the reception
+	 * time as time stamp.
+	 * 
+	 * @see PROTOCOL.CS
+	 */
 	private void handleMessage(User user, String[] msgParts) {
 		if (msgParts.length < 4) {
 			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
@@ -209,6 +243,13 @@ public class AppServer extends Server {
 				message.getTimestamp(), message.getSender(), message.getContent());
 	}
 
+	/**
+	 * Handles a create conversation request.<br>
+	 * Creates a new conversation with the requested name and participants. Sends
+	 * the conversation info to all participants.
+	 * 
+	 * @see PROTOCOL.CS
+	 */
 	private void handleCreateConversation(User user, String[] msgParts) {
 		if (msgParts.length < 3) {
 			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
@@ -237,12 +278,19 @@ public class AppServer extends Server {
 				newConversation.getName(), usersString);
 	}
 
+	/**
+	 * Handles a conversation add user request.<br>
+	 * Adds the requested user to the requested conversation. Sends the conversation
+	 * info to all participants.
+	 * 
+	 * @see PROTOCOL.CS
+	 */
 	private void handleConversationAddUser(User user, String[] msgParts) {
 		if (msgParts.length < 3) {
 			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
 			return;
 		}
-		Conversation conversation = getConvByID(msgParts[1]);
+		Conversation conversation = getConversationById(msgParts[1]);
 		if (!conversation.contains(user.getUsername())) {
 			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
 			return;
@@ -257,12 +305,19 @@ public class AppServer extends Server {
 				usersString);
 	}
 
+	/**
+	 * Handles a conversation remove user request.<br>
+	 * Removes the requested user from the requested conversation. Sends the
+	 * conversation info to all participants.
+	 * 
+	 * @see PROTOCOL.CS
+	 */
 	private void handleConversationRemoveUser(User user, String[] msgParts) {
 		if (msgParts.length < 3) {
 			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
 			return;
 		}
-		Conversation conversation = getConvByID(msgParts[1]);
+		Conversation conversation = getConversationById(msgParts[1]);
 		if (!conversation.contains(user.getUsername())) {
 			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
 			return;
@@ -277,12 +332,19 @@ public class AppServer extends Server {
 				usersString);
 	}
 
+	/**
+	 * Handles a conversation rename request.<br>
+	 * Renames the requested conversation with the requested name. Sends the
+	 * conversation info to all participants.
+	 * 
+	 * @see PROTOCOL.CS
+	 */
 	private void handleConversationRename(User user, String[] msgParts) {
 		if (msgParts.length < 3) {
 			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
 			return;
 		}
-		Conversation conversation = getConvByID(msgParts[1]);
+		Conversation conversation = getConversationById(msgParts[1]);
 		if (!conversation.contains(user.getUsername())) {
 			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
 			return;
@@ -297,6 +359,12 @@ public class AppServer extends Server {
 				usersString);
 	}
 
+	/**
+	 * Handles a change nick request.<br>
+	 * Changes the nickname of the requesting user to the requested nickname.
+	 * 
+	 * @see PROTOCOL.CS
+	 */
 	private void handleChangeNick(User user, String[] msgParts) {
 		if (msgParts.length < 2) {
 			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
@@ -307,10 +375,17 @@ public class AppServer extends Server {
 		sendToUser(user, PROTOCOL.SC.USER, user.getUsername(), user.getNickname());
 	}
 
+	/**
+	 * Sends the given message to the given user.
+	 */
 	private void sendToUser(User user, Object... message) {
 		send(user.getIp(), user.getPort(), PROTOCOL.buildMessage(message));
 	}
 
+	/**
+	 * Sends the given message to all participants of the given conversation if they
+	 * are online.
+	 */
 	private void sendToConversation(Conversation conversation, Object... message) {
 		for (String username : conversation.getUsers()) {
 			User user = users.getUser(username);
@@ -320,11 +395,20 @@ public class AppServer extends Server {
 		}
 	}
 
+	/**
+	 * Sends the given error code to the given user.
+	 */
 	private void sendError(User user, int errorCode) {
 		sendToUser(user, PROTOCOL.getErrorMessage(errorCode));
 	}
 
-	private Conversation getConvByID(String id) {
+	/**
+	 * Returns the conversation with the given id.
+	 * 
+	 * @return the conversation with the given id. {@code null} if there is no such
+	 *         conversations.
+	 */
+	private Conversation getConversationById(String id) {
 		for (Conversation c : conversations) {
 			if (c.getId().equals(id)) {
 				return c;
