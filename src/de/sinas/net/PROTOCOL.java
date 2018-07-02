@@ -21,7 +21,7 @@ public final class PROTOCOL {
 	public final class CS {
 		private CS() {}
 
-		public static final String LOGIN = "lgn", // Base [split] name
+		public static final String LOGIN = "lgn", // Base
 				CREATE_CONVERSATION = "crtcon", // Base [split] name [split] users ...
 				GET_CONVERSATIONS = "getcons", // Base
 				GET_USER = "getuser", // Base [split] username
