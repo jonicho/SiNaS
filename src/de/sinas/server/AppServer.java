@@ -85,13 +85,7 @@ public class AppServer extends Server {
 			break;
 		}
 	}
-	
-	private void handleChangeNick(User user,String[] msgParts) {
-		user.setNickname(msgParts[1]);
-		db.saveUser(user);
-		sendToUser(user, PROTOCOL.SC.USER,user.getUsername(),user.getNickname());
-	}
-	
+
 	private void handleLogin(String clientIP, int clientPort) {
 		Path path = Paths.get(loginDirectory.getAbsolutePath() + "/" + clientIP);
 		FileOwnerAttributeView ownerAttributeView = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
@@ -243,9 +237,13 @@ public class AppServer extends Server {
 				newConversation.getName(), usersString);
 	}
 
-	private void handleConversationAddUser(User user,String[] msgParts) {
+	private void handleConversationAddUser(User user, String[] msgParts) {
+		if (msgParts.length < 3) {
+			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
+			return;
+		}
 		Conversation conversation = getConvByID(msgParts[1]);
-		if(!conversation.contains(user.getUsername())) {
+		if (!conversation.contains(user.getUsername())) {
 			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
 			return;
 		}
@@ -255,12 +253,17 @@ public class AppServer extends Server {
 		for (int i = 1; i < conversation.getUsers().size(); i++) {
 			usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
 		}
-		sendToConversation(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(), usersString);
+		sendToConversation(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(),
+				usersString);
 	}
-	
-	private void handleConversationRemoveUser(User user,String[] msgParts) {
+
+	private void handleConversationRemoveUser(User user, String[] msgParts) {
+		if (msgParts.length < 3) {
+			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
+			return;
+		}
 		Conversation conversation = getConvByID(msgParts[1]);
-		if(!conversation.contains(user.getUsername())) {
+		if (!conversation.contains(user.getUsername())) {
 			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
 			return;
 		}
@@ -270,12 +273,17 @@ public class AppServer extends Server {
 		for (int i = 1; i < conversation.getUsers().size(); i++) {
 			usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
 		}
-		sendToConversation(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(), usersString);
+		sendToConversation(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(),
+				usersString);
 	}
-	
-	private void handleConversationRename(User user,String[] msgParts) {
+
+	private void handleConversationRename(User user, String[] msgParts) {
+		if (msgParts.length < 3) {
+			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
+			return;
+		}
 		Conversation conversation = getConvByID(msgParts[1]);
-		if(!conversation.contains(user.getUsername())) {
+		if (!conversation.contains(user.getUsername())) {
 			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
 			return;
 		}
@@ -285,7 +293,18 @@ public class AppServer extends Server {
 		for (int i = 1; i < conversation.getUsers().size(); i++) {
 			usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
 		}
-		sendToConversation(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(), usersString);
+		sendToConversation(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(),
+				usersString);
+	}
+
+	private void handleChangeNick(User user, String[] msgParts) {
+		if (msgParts.length < 2) {
+			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
+			return;
+		}
+		user.setNickname(msgParts[1]);
+		db.saveUser(user);
+		sendToUser(user, PROTOCOL.SC.USER, user.getUsername(), user.getNickname());
 	}
 
 	private void sendToUser(User user, Object... message) {
@@ -304,10 +323,10 @@ public class AppServer extends Server {
 	private void sendError(User user, int errorCode) {
 		sendToUser(user, PROTOCOL.getErrorMessage(errorCode));
 	}
-	
+
 	private Conversation getConvByID(String id) {
 		for (Conversation c : conversations) {
-			if(c.getId().equals(id)) {
+			if (c.getId().equals(id)) {
 				return c;
 			}
 		}
