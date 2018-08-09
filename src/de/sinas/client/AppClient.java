@@ -139,7 +139,7 @@ public class AppClient extends Client {
 		if (conversation == null) {
 			return;
 		}
-		conversation.addMessages(new Message(msgParts[1], msgParts[6], Long.parseLong(msgParts[4]), msgParts[5],
+		conversation.addMessages(new Message(msgParts[2], msgParts[6], Long.parseLong(msgParts[4]), msgParts[5],
 				Boolean.parseBoolean(msgParts[3])));
 	}
 
