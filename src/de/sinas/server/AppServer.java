@@ -33,6 +33,7 @@ public class AppServer extends Server {
 	@Override
 	public void processNewConnection(String clientIP, int clientPort) {
 		System.out.println("New connection: " + clientIP + ":" + clientPort);
+		send(clientIP, clientPort, PROTOCOL.buildMessage(PROTOCOL.SC.IP, clientIP, clientPort));
 	}
 
 	@Override
@@ -94,7 +95,7 @@ public class AppServer extends Server {
 	 * @see PROTOCOL.CS
 	 */
 	private void handleLogin(String clientIP, int clientPort) {
-		Path path = Paths.get(loginDirectory.getAbsolutePath() + "/" + clientIP);
+		Path path = Paths.get(loginDirectory.getAbsolutePath() + "/" + clientIP + " " + clientPort);
 		FileOwnerAttributeView ownerAttributeView = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
 		try {
 			String[] ownerName = ownerAttributeView.getOwner().getName().split("\\\\");

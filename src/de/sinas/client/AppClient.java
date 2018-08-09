@@ -23,6 +23,8 @@ public class AppClient extends Client {
 	private File authFile;
 	private ObservableList<Conversation> conversations = FXCollections.observableArrayList();
 	private Users users;
+	private String ownIP;
+	private int ownPort;
 
 	public AppClient(String pServerIP, int pServerPort, Gui gui) {
 		super(pServerIP, pServerPort);
@@ -34,6 +36,11 @@ public class AppClient extends Client {
 		System.out.println("New message: " + message);
 		String[] msgParts = message.split(PROTOCOL.SPLIT);
 		switch (msgParts[0]) {
+		case PROTOCOL.SC.IP:
+			ownIP = msgParts[1];
+			ownPort = Integer.parseInt(msgParts[2]);
+			login();
+			break;
 		case PROTOCOL.SC.LOGIN_OK:
 			handleLoginOk(msgParts[1], msgParts[2]);
 			break;
@@ -136,9 +143,9 @@ public class AppClient extends Client {
 				Boolean.parseBoolean(msgParts[3])));
 	}
 
-	public void login() {
+	private void login() {
 		try {
-			File f = new File(loginDirectory.getAbsolutePath() + "\\" + InetAddress.getLocalHost().getHostAddress());
+			File f = new File(loginDirectory, ownIP + " " + ownPort);
 			if (f.exists()) {
 				Files.delete(f.toPath());
 			}

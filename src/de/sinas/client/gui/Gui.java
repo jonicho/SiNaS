@@ -44,7 +44,6 @@ public class Gui extends Application {
 			primaryStage.show();
 		});
 		primaryStage.show();
-		appClient.login();
 	}
 
 	@FXML

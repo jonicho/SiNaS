@@ -11,6 +11,7 @@ public final class PROTOCOL {
 		private SC() {}
 
 		public static final String ERROR = "err", // Base [split] errorcode
+				IP = "ip", // Base [split] ip [split] port
 				OK = "ok", // Base
 				LOGIN_OK = "lgnok", // Base [split] username [split] nickname
 				CONVERSATION = "con", // Base [split] conversaion name [split] conversation id [split] users ...
