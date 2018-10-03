@@ -2,33 +2,28 @@ package de.sinas.client;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import de.sinas.Conversation;
 import de.sinas.Message;
 import de.sinas.User;
-import de.sinas.client.gui.Gui;
 import de.sinas.net.Client;
 import de.sinas.net.PROTOCOL;
 import de.sinas.server.Users;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 public class AppClient extends Client {
-	private final Gui gui;
 	private final File loginDirectory = new File("/home/jonas");
 	private User thisUser;
 	private File authFile;
-	private ObservableList<Conversation> conversations = FXCollections.observableArrayList();
+	private ArrayList<Conversation> conversations = new ArrayList<Conversation>();
 	private Users users;
 	private String ownIP;
 	private int ownPort;
 
-	public AppClient(String pServerIP, int pServerPort, Gui gui) {
+	public AppClient(String pServerIP, int pServerPort, String username, String password) {
 		super(pServerIP, pServerPort);
-		this.gui = gui;
 	}
 
 	@Override
@@ -165,7 +160,7 @@ public class AppClient extends Client {
 		return thisUser != null;
 	}
 
-	public ObservableList<Conversation> getConversations() {
+	public ArrayList<Conversation> getConversations() {
 		return conversations;
 	}
 
