@@ -9,14 +9,17 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import java.security.SecureRandom;
 
 public class AESHandler {
     private Cipher cipher;
     private final int KEY_SIZE = 4096;
+    private SecureRandom prng;
 
     public AESHandler() { 
         try {
             cipher = Cipher.getInstance("AES");
+            prng = SecureRandom.getInstance("SHA1PRNG");
         } catch (NoSuchAlgorithmException | NoSuchPaddingException ex) {
             ex.printStackTrace();
         }
@@ -24,8 +27,7 @@ public class AESHandler {
 
     public SecretKeySpec generateKey() {
         byte[] keyBytes = new byte[KEY_SIZE];
-        Random rand = new Random();
-        rand.nextBytes(keyBytes);
+        prng.nextBytes(keyBytes);
         return new SecretKeySpec(keyBytes, "AES");
     }
 
