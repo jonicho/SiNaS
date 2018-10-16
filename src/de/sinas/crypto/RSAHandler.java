@@ -1,4 +1,4 @@
-package de.sinas;
+package de.sinas.crypto;
 
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
