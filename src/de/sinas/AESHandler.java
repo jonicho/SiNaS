@@ -14,6 +14,7 @@ import java.security.SecureRandom;
 public class AESHandler {
     private Cipher cipher;
     private final int KEY_SIZE = 4096;
+    private final int SEED_SIZE = 2048;
     private SecureRandom prng;
 
     public AESHandler() { 
@@ -23,6 +24,11 @@ public class AESHandler {
         } catch (NoSuchAlgorithmException | NoSuchPaddingException ex) {
             ex.printStackTrace();
         }
+    }
+
+    public void randomizePRNG() throws NoSuchAlgorithmException {
+        SecureRandom seedRNG = SecureRandom.getInstance("SHA1PRNG");
+        prng.setSeed(seedRNG.generateSeed(SEED_SIZE));
     }
 
     public SecretKeySpec generateKey() {

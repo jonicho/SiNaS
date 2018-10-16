@@ -13,6 +13,7 @@ public class HashHandler {
     private MessageDigest sha;
     private SecureRandom prng;
     private SecretKeyFactory hgen;
+    private int SEED_SIZE = 2048;
 
     public HashHandler() {
         try {
@@ -22,6 +23,11 @@ public class HashHandler {
         } catch (NoSuchAlgorithmException ex) {
             ex.printStackTrace();
         }
+    }
+
+    public void randomizePRNG() throws NoSuchAlgorithmException {
+        SecureRandom seedRNG = SecureRandom.getInstance("SHA1PRNG");
+        prng.setSeed(seedRNG.generateSeed(SEED_SIZE));
     }
 
     public byte[] getCheckSum(byte[] pInput) {
