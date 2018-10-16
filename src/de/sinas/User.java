@@ -7,20 +7,14 @@ public class User {
 	private String ip;
 	private int port;
 	private String username;
-	private String nickname;
 
 	/**
 	 * Creates a new user with the given ip, port, username and nickname
 	 */
-	public User(String ip, int port, String username, String nickname) {
+	public User(String ip, int port, String username) {
 		this.ip = ip;
 		this.port = port;
 		this.username = username;
-		this.nickname = nickname;
-	}
-	
-	public void setNickname(String nickname) {
-		this.nickname = nickname;
 	}
 
 	public String getIp() {
@@ -35,15 +29,10 @@ public class User {
 		return username;
 	}
 
-	public String getNickname() {
-		return nickname;
-	}
-
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof User && ((User) obj).getUsername().equals(getUsername())
-				&& ((User) obj).getNickname().equals(getNickname()) && ((User) obj).getIp().equals(getIp())
-				&& ((User) obj).getPort() == getPort();
+				&& ((User) obj).getIp().equals(getIp()) && ((User) obj).getPort() == getPort();
 	}
 
 	@Override

@@ -11,18 +11,17 @@ public final class PROTOCOL {
 		private SC() {}
 
 		public static final String ERROR = "err", // Base [split] errorcode
-				IP = "ip", // Base [split] ip [split] port
 				OK = "ok", // Base
-				LOGIN_OK = "lgnok", // Base [split] username [split] nickname
+				LOGIN_OK = "lgnok", // Base
 				CONVERSATION = "con", // Base [split] conversaion name [split] conversation id [split] users ...
-				USER = "user", // Base [split] username [split] nickname
+				USER = "user", // Base [split] username
 				MESSAGE = "msg"; // Base [split] conversation id [split] message id [split] is file [split] timestamp [split] sender [split] content
 	}
 
 	public final class CS {
 		private CS() {}
 
-		public static final String LOGIN = "lgn", // Base
+		public static final String LOGIN = "lgn", // Base [split] name [split] password
 				CREATE_CONVERSATION = "crtcon", // Base [split] name [split] users ...
 				GET_CONVERSATIONS = "getcons", // Base
 				GET_USER = "getuser", // Base [split] username
@@ -30,7 +29,6 @@ public final class PROTOCOL {
 				CONVERSATION_ADD = "conadd", // Base [Split] id [Split] name
 				CONVERSATION_REM = "conrem", //Base [Split] id [Split] name
 				CONVERSATION_RENAME = "conren", //Base [Split] id [Split] new names
-				CHANGE_NICK = "cnick", //Base [Split] name
 				MESSAGE = "msg"; // Base [split] conversation id [split] is file [split] content
 	}
 

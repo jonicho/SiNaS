@@ -1,11 +1,5 @@
 package de.sinas.client;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import de.sinas.Conversation;
 import de.sinas.Message;
 import de.sinas.User;
@@ -13,17 +7,21 @@ import de.sinas.net.Client;
 import de.sinas.net.PROTOCOL;
 import de.sinas.server.Users;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class AppClient extends Client {
-	private final File loginDirectory = new File("/home/jonas");
 	private User thisUser;
-	private File authFile;
-	private ArrayList<Conversation> conversations = new ArrayList<Conversation>();
+	private ArrayList<Conversation> conversations = new ArrayList<>();
 	private Users users;
 	private String ownIP;
 	private int ownPort;
 
 	public AppClient(String pServerIP, int pServerPort, String username, String password) {
 		super(pServerIP, pServerPort);
+		login(username, password);
 	}
 
 	@Override
@@ -31,28 +29,23 @@ public class AppClient extends Client {
 		System.out.println("New message: " + message);
 		String[] msgParts = message.split(PROTOCOL.SPLIT);
 		switch (msgParts[0]) {
-		case PROTOCOL.SC.IP:
-			ownIP = msgParts[1];
-			ownPort = Integer.parseInt(msgParts[2]);
-			login();
-			break;
-		case PROTOCOL.SC.LOGIN_OK:
-			handleLoginOk(msgParts[1], msgParts[2]);
-			break;
-		case PROTOCOL.SC.ERROR:
-			handleError(msgParts[1]);
-			break;
-		case PROTOCOL.SC.CONVERSATION:
-			handleConversation(msgParts);
-			break;
-		case PROTOCOL.SC.USER:
-			handleUser(msgParts);
-			break;
-		case PROTOCOL.SC.MESSAGE:
-			handleMessage(msgParts);
-			break;
-		default:
-			break;
+			case PROTOCOL.SC.LOGIN_OK:
+				handleLoginOk();
+				break;
+			case PROTOCOL.SC.ERROR:
+				handleError(msgParts[1]);
+				break;
+			case PROTOCOL.SC.CONVERSATION:
+				handleConversation(msgParts);
+				break;
+			case PROTOCOL.SC.USER:
+				handleUser(msgParts);
+				break;
+			case PROTOCOL.SC.MESSAGE:
+				handleMessage(msgParts);
+				break;
+			default:
+				break;
 		}
 
 	}
@@ -62,14 +55,7 @@ public class AppClient extends Client {
 
 	}
 
-	private void handleLoginOk(String username, String nickname) {
-		if (authFile != null) {
-			try {
-				Files.delete(authFile.toPath());
-			} catch (IOException e) {
-			}
-			thisUser = new User(null, 0, username, username);
-		}
+	private void handleLoginOk() {
 		send(PROTOCOL.buildMessage(PROTOCOL.CS.GET_CONVERSATIONS));
 	}
 
@@ -82,17 +68,11 @@ public class AppClient extends Client {
 			return;
 		}
 		switch (errorCode) {
-		case PROTOCOL.ERRORCODES.LOGIN_FAILED:
-			try {
-				Files.delete(authFile.toPath());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			thisUser = null;
-			break;
+			case PROTOCOL.ERRORCODES.LOGIN_FAILED:
+				break;
 
-		default:
-			break;
+			default:
+				break;
 		}
 	}
 
@@ -120,7 +100,7 @@ public class AppClient extends Client {
 		if (users.doesUserExist(msgParts[1])) {
 			users.removeUser(users.getUser(msgParts[1]));
 		}
-		users.addUser(new User("", 0, msgParts[1], msgParts[2]));
+		users.addUser(new User("", 0, msgParts[1]));
 	}
 
 	private void handleMessage(String[] msgParts) {
@@ -138,18 +118,8 @@ public class AppClient extends Client {
 				Boolean.parseBoolean(msgParts[3])));
 	}
 
-	private void login() {
-		try {
-			File f = new File(loginDirectory, ownIP + " " + ownPort);
-			if (f.exists()) {
-				Files.delete(f.toPath());
-			}
-			f.createNewFile();
-			authFile = f;
-			send(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	private void login(String username, String password) {
+		send(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN, username, password));
 	}
 
 	public User getThisUser() {
