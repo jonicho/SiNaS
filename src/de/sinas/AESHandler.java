@@ -1,8 +1,7 @@
 package de.sinas;
 
 import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -12,23 +11,21 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-public class RSAHandler {
+public class AESHandler {
     private Cipher cipher;
     private KeyPairGenerator kpg;
     private final int KEY_SIZE = 4096;
 
-    public RSAHandler() { 
+    public AESHandler() { 
         try {
-            cipher = Cipher.getInstance("RSA");
-            kpg = KeyPairGenerator.getInstance("RSA");
-            kpg.initialize(KEY_SIZE);
+            cipher = Cipher.getInstance("AES");
         } catch (NoSuchAlgorithmException | NoSuchPaddingException ex) {
             ex.printStackTrace();
         }
     }
 
-    public KeyPair generateKeyPair() {
-        return kpg.generateKeyPair();
+    public KeyPair generateKey() {
+        return null;
     }
 
     public byte[] encrypt(byte[] input, PublicKey pKey) {
