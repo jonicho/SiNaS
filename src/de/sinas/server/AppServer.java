@@ -18,9 +18,9 @@ public class AppServer extends Server {
 	private final Users users = new Users();
 	private final ArrayList<Conversation> conversations = new ArrayList<>();
 
-	public AppServer(int pPort, File databaseDirectory) {
+	public AppServer(int pPort, String dbPath) {
 		super(pPort);
-		db = new Database(databaseDirectory);
+		db = new Database(dbPath);
 	}
 
 	@Override
