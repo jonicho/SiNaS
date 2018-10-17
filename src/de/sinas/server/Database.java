@@ -84,6 +84,43 @@ public class Database {
 	}
 
 	/**
+	 * Loads the conversation with the given conversation id
+	 *
+	 * @param conversationId
+	 * @return
+	 */
+	public Conversation getConversation(String conversationId) {
+		try {
+			String id;
+			String name;
+			ArrayList<String> users = new ArrayList<>();
+			{
+				PreparedStatement statement = connection.prepareStatement("SELECT * FROM conversations WHERE conversation_id=?");
+				statement.setString(1, conversationId);
+				ResultSet rs = statement.executeQuery();
+				if (rs.next()) {
+					id = rs.getString("conversation_id");
+					name = rs.getString("name");
+				} else {
+					return null;
+				}
+			}
+			{
+				PreparedStatement statement = connection.prepareStatement("SELECT * FROM conversations_users WHERE conversation_id=?");
+				statement.setString(1, conversationId);
+				ResultSet rs = statement.executeQuery();
+				while (rs.next()) {
+					users.add(rs.getString("username"));
+				}
+			}
+			return new Conversation(id, name, users.toArray(new String[0]));
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/**
 	 * Creates the given user in the database
 	 *
 	 * @param user
