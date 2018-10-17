@@ -140,7 +140,7 @@ public class AppServer extends Server {
 			}
 		}
 		users.addUser(user);
-		sendToUser(user, PROTOCOL.SC.LOGIN_OK, user.getUsername());
+		sendAES(user, PROTOCOL.SC.LOGIN_OK, user.getUsername());
 		}
 		else {
 			sendError(user, PROTOCOL.ERRORCODES.LOGIN_FAILED);
@@ -162,7 +162,7 @@ public class AppServer extends Server {
 				for (int i = 1; i < conversation.getUsers().size(); i++) {
 					usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
 				}
-				sendToUser(user, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(), usersString);
+				sendAES(user, PROTOCOL.SC.CONVERSATION,conversation.getName(), conversation.getId(), conversation.getConvKey(), usersString);
 			}
 		}
 	}
@@ -187,7 +187,7 @@ public class AppServer extends Server {
 				return;
 			}
 		}
-		sendToUser(requestingUser, PROTOCOL.SC.USER, user.getUsername());
+		sendAES(requestingUser, PROTOCOL.SC.USER, user.getUsername());
 	}
 
 	/**
@@ -231,7 +231,7 @@ public class AppServer extends Server {
 				break;
 			}
 			Message msg = messages.get(index);
-			sendToUser(user, PROTOCOL.SC.MESSAGE, conversationId, msg.getId(), msg.isFile(), msg.getTimestamp(),
+			sendAES(user, PROTOCOL.SC.MESSAGE, conversationId, msg.getId(), msg.isFile(), msg.getTimestamp(),
 					msg.getSender(), msg.getContent());
 		}
 	}
@@ -409,6 +409,19 @@ public class AppServer extends Server {
 		String enc = Encoder.b64Encode(cryp);
 		send(user.getIp(),user.getPort(),enc);
 	}
+
+	/*
+	* Sends the given message to the given user.
+	* The message is encrypted using the given key and the AES Algorithm
+	*/
+	private void sendAES(User user, Object... message) {
+		String msg = PROTOCOL.buildMessage(message);
+		byte[] cryp = super.gethAES().encrypt(msg.getBytes(), cryptoManager.getSessionByUser(user).getMainAESKey());
+		String enc = Encoder.b64Encode(cryp);
+		send(user.getIp(),user.getPort(),enc);
+	}
+
+
 
 	/*
 	* Sends the given message to the given user.
