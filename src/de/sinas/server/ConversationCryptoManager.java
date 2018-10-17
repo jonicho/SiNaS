@@ -20,7 +20,7 @@ public class ConversationCryptoManager {
 
     public boolean hasSession(User u, Conversation conv) {
         for (ConversationCryptoSession ccs : sessions) {
-            if(ccs.getOwner() = u && ccs.getConv() = conv) {
+            if(ccs.getOwner() = u && ccs.getConv() == conv) {
                 return true;
             }
         }
@@ -29,7 +29,7 @@ public class ConversationCryptoManager {
 
     public ConversationCryptoSession getSession(User u, Conversation conv) {
         for (ConversationCryptoSession ccs : sessions) {
-            if(ccs.getOwner() = u && ccs.getConv() = conv) {
+            if(ccs.getOwner() = u && ccs.getConv() == conv) {
                 return ccs;
             }
         }
