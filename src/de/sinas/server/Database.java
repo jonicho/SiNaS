@@ -24,10 +24,10 @@ public class Database {
 	private void initEmptyDatabase() {
 		try {
 			Statement statement = connection.createStatement();
-			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `users` ( `username` TEXT UNIQUE, `password` TEXT, PRIMARY KEY(`username`) )");
-			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `conversations` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, `name` TEXT )");
-			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `messages` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, `content` TEXT, `timestamp` INTEGER, `sender` TEXT, `is_file` INTEGER, `conversation_id` INTEGER, FOREIGN KEY(`sender`) REFERENCES `users`(`username`), FOREIGN KEY(`conversation_id`) REFERENCES `conversations`(`id`) )");
-			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `conversations_users` ( `conversation_id` INTEGER UNIQUE, `username` TEXT UNIQUE, FOREIGN KEY(`username`) REFERENCES `users`(`username`), FOREIGN KEY(`conversation_id`) REFERENCES `conversations`(`id`), PRIMARY KEY(`conversation_id`,`username`) )");
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `users` ( `username` TEXT NOT NULL UNIQUE, `password` TEXT NOT NULL, PRIMARY KEY(`username`) )");
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `conversations` ( `conversation_id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `name` TEXT NOT NULL )");
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `messages` ( `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `content` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `sender` TEXT NOT NULL, `is_file` REAL NOT NULL, `conversation_id` INTEGER NOT NULL, FOREIGN KEY(`sender`) REFERENCES `users`(`username`), FOREIGN KEY(`conversation_id`) REFERENCES `conversations`(`conversation_id`) )");
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `conversations_users` ( `conversation_id` INTEGER NOT NULL, `username` TEXT NOT NULL, FOREIGN KEY(`conversation_id`) REFERENCES `conversations`(`conversation_id`), FOREIGN KEY(`username`) REFERENCES `users`(`username`), PRIMARY KEY(`conversation_id`,`username`) )");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
