@@ -25,13 +25,12 @@ public class Database {
 	}
 
 	private void initEmptyDatabase() {
-		// TODO: do nothing when database is not empty
 		try {
 			Statement statement = connection.createStatement();
-			statement.executeUpdate("CREATE TABLE `users` ( `username` TEXT UNIQUE, `password` TEXT, PRIMARY KEY(`username`) )");
-			statement.executeUpdate("CREATE TABLE `conversations` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, `name` TEXT )");
-			statement.executeUpdate("CREATE TABLE `messages` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, `content` TEXT, `timestamp` INTEGER, `sender` TEXT, `is_file` INTEGER, `conversation_id` INTEGER, FOREIGN KEY(`sender`) REFERENCES `users`(`username`), FOREIGN KEY(`conversation_id`) REFERENCES `conversations`(`id`) )");
-			statement.executeUpdate("CREATE TABLE `conversations_users` ( `conversation_id` INTEGER UNIQUE, `username` TEXT UNIQUE, FOREIGN KEY(`username`) REFERENCES `users`(`username`), FOREIGN KEY(`conversation_id`) REFERENCES `conversations`(`id`), PRIMARY KEY(`conversation_id`,`username`) )");
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `users` ( `username` TEXT UNIQUE, `password` TEXT, PRIMARY KEY(`username`) )");
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `conversations` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, `name` TEXT )");
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `messages` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, `content` TEXT, `timestamp` INTEGER, `sender` TEXT, `is_file` INTEGER, `conversation_id` INTEGER, FOREIGN KEY(`sender`) REFERENCES `users`(`username`), FOREIGN KEY(`conversation_id`) REFERENCES `conversations`(`id`) )");
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `conversations_users` ( `conversation_id` INTEGER UNIQUE, `username` TEXT UNIQUE, FOREIGN KEY(`username`) REFERENCES `users`(`username`), FOREIGN KEY(`conversation_id`) REFERENCES `conversations`(`id`), PRIMARY KEY(`conversation_id`,`username`) )");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
