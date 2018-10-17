@@ -158,9 +158,21 @@ public class Database {
 	 * Updates the given user in the database
 	 *
 	 * @param user
-	 * @return true if the user exists, false otherwise
+	 * @return true if the user exists and the user could successfully be updated, false otherwise
 	 */
 	public boolean updateUser(User user) {
+		if (getUserInfo(user.getUsername()) != null) {
+			return false;
+		}
+		try {
+			PreparedStatement statement = connection.prepareStatement("UPDATE `users` SET `password`=? WHERE `username`=?;");
+			statement.setString(1, user.getPassword());
+			statement.setString(2, user.getUsername());
+			statement.executeUpdate();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return false;
 	}
 
