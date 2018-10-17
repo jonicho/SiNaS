@@ -7,14 +7,16 @@ public class User {
 	private String ip;
 	private int port;
 	private String username;
+	private String password;
 
 	/**
-	 * Creates a new user with the given ip, port, username and nickname
+	 * Creates a new user with the given ip, port, username and password
 	 */
-	public User(String ip, int port, String username) {
+	public User(String ip, int port, String username, String password) {
 		this.ip = ip;
 		this.port = port;
 		this.username = username;
+		this.password = password;
 	}
 
 	public String getIp() {
@@ -29,10 +31,17 @@ public class User {
 		return username;
 	}
 
+	public String getPassword() {
+		return password;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof User && ((User) obj).getUsername().equals(getUsername())
-				&& ((User) obj).getIp().equals(getIp()) && ((User) obj).getPort() == getPort();
+		return obj instanceof User
+				&& ((User) obj).getUsername().equals(getUsername())
+				&& ((User) obj).getIp().equals(getIp())
+				&& ((User) obj).getPort() == getPort()
+				&& ((User) obj).getPassword().equals(getPassword());
 	}
 
 	@Override
