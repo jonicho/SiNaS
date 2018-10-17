@@ -41,6 +41,9 @@ public class Database {
 	 * This method is to get a user that connected to the server.<br>
 	 * If no user with the given name exists a new one is created.
 	 *
+	 * @param ip
+	 * @param port
+	 * @param username
 	 * @return The user with the given username
 	 */
 	public User getConnectedUser(String username, String ip, int port) {
@@ -53,6 +56,7 @@ public class Database {
 	 * connect to the server.<br>
 	 * If no user with the given name exists {@code null} is returned.
 	 *
+	 * @param username
 	 * @return The user with the given username. {@code null} if no user with the
 	 * given name exists.
 	 */
@@ -63,6 +67,7 @@ public class Database {
 	/**
 	 * Loads all conversations of the given user
 	 *
+	 * @param user
 	 * @return all conversations of the given user
 	 */
 	public ArrayList<Conversation> getConversations(User user) {
@@ -70,14 +75,66 @@ public class Database {
 	}
 
 	/**
-	 * Saves the given user
+	 * Creates the given user in the database
+	 *
+	 * @param user
+	 * @return true if the user did not already exist, false otherwise
 	 */
-	public void saveUser(User user) {
+	public boolean createUser(User user) {
+		return false;
 	}
 
 	/**
-	 * Saves the given conversation
+	 * Updates the given user in the database
+	 *
+	 * @param user
+	 * @return true if the user exists, false otherwise
 	 */
-	public void saveConversation(Conversation conversation) {
+	public boolean updateUser(User user) {
+		return false;
+	}
+
+	/**
+	 * Creates the given conversation in the database<br>
+	 * (NOTE: this method only creates the conversation, not the conversation's messages;<br>
+	 *       to create messages use {@link #createMessage(Message)})
+	 *
+	 * @param conversation
+	 * @return true if the conversation did not already exist, false otherwise
+	 */
+	public boolean createConversation(Conversation conversation) {
+		return false;
+	}
+
+	/**
+	 * Updates the given conversation in the database<br>
+	 * (NOTE: this method only updates the conversation, not the conversation's messages;<br>
+	 *       to update messages use {@link #updateMessage(Message)})
+	 *
+	 * @param conversation
+	 * @return true if the conversation exists, false otherwise
+	 */
+	public boolean updateConversation(Conversation conversation) {
+		return false;
+	}
+
+	/**
+	 * Creates the given message in the database
+	 *
+	 * @param message
+	 * @return true if the message did not already exist, false otherwise
+	 */
+	public boolean createMessage(Message message) {
+		return false;
+	}
+
+	/**
+	 * Updates the given message in the database
+	 *
+	 * @param message
+	 * @return true if the message exists, false otherwise
+	 */
+	public boolean updateMessage(Message message) {
+		return false;
 	}
 }
