@@ -39,7 +39,18 @@ public class AppServer extends Server {
 		String[] msgParts = message.split(PROTOCOL.SPLIT);
 		User user = users.getUser(clientIP, clientPort);
 		if(user != null && cryptoManager.getSessionByUser(user) != null) {
-			
+			if(msgParts.length == 1) {
+				byte[] decStr = Encoder.b64Decode(msgParts[0]);
+				CryptoSession cs = cryptoManager.getSessionByUser(user);
+				String plainText = new String(super.gethAES().decrypt(decStr, cs.getMainAESKey()));
+				msgParts = plainText.split(PROTOCOL.SPLIT);
+			}
+			else {
+				Conversation con = getConversationById(msgParts[0]);
+				byte[] decStr = Encoder.b64Decode(msgParts[1]);
+				String plainText = new String(super.gethAES().decrypt(decStr, con.getConvKey()));
+				msgParts = plainText.split(PROTOCOL.SPLIT);
+			}
 		}
 		if (user == null) {
 			if (!msgParts[0].equals(PROTOCOL.CS.LOGIN)) {

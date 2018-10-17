@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import javax.crypto.spec.SecretKeySpec;
+
 /**
  * A conversation containing an arbitrary amount of users
  */
@@ -14,6 +16,7 @@ public class Conversation {
 	private String name;
 	private ArrayList<Message> messages = new ArrayList<>();
 	private ArrayList<String> users = new ArrayList<>();
+	private SecretKeySpec convKey;
 
 	/**
 	 * Creates a new conversation with an arbitrary amount of users.
@@ -101,6 +104,13 @@ public class Conversation {
 	 */
 	public List<Message> getMessages() {
 		return Collections.unmodifiableList(messages);
+	}
+
+	/**
+	 * @return the convKey
+	 */
+	public SecretKeySpec getConvKey() {
+		return convKey;
 	}
 
 	/**
