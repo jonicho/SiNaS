@@ -5,10 +5,7 @@ import de.sinas.Message;
 import de.sinas.User;
 
 import java.io.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -47,6 +44,18 @@ public class Database {
 	 * @return The user with the given username
 	 */
 	public User getConnectedUser(String username, String ip, int port) {
+		try {
+			PreparedStatement statement = connection.prepareStatement("SELECT * FROM `users` WHERE `username`=?");
+			statement.setString(1, username);
+			ResultSet rs = statement.executeQuery();
+			if (rs.next()) {
+				return new User(ip, port, rs.getString("username"), rs.getString("password"));
+			} else {
+				return null;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
