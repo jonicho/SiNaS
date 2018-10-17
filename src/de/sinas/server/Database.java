@@ -136,9 +136,21 @@ public class Database {
 	 * Creates the given user in the database
 	 *
 	 * @param user
-	 * @return true if the user did not already exist, false otherwise
+	 * @return true if the user did not already exist and the user could successfully be created, false otherwise
 	 */
 	public boolean createUser(User user) {
+		if (getUserInfo(user.getUsername()) == null) {
+			return false;
+		}
+		try {
+			PreparedStatement statement = connection.prepareStatement("INSERT INTO `users`(`username`,`password`) VALUES (?,?);");
+			statement.setString(1, user.getUsername());
+			statement.setString(2, user.getPassword());
+			statement.executeUpdate();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return false;
 	}
 
