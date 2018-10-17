@@ -3,6 +3,7 @@ package de.sinas.crypto;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Random;
 import javax.crypto.BadPaddingException;
@@ -31,13 +32,14 @@ public class AESHandler {
         prng.setSeed(seedRNG.generateSeed(SEED_SIZE));
     }
 
-    public SecretKeySpec generateKey() {
+    public SecretKey generateKey() {
         byte[] keyBytes = new byte[KEY_SIZE];
         prng.nextBytes(keyBytes);
-        return new SecretKeySpec(keyBytes, "AES");
+        SecretKey sKey = new SecretKeySpec(keyBytes, "AES");
+        return sKey;
     }
 
-    public byte[] encrypt(byte[] input, SecretKeySpec pKey) {
+    public byte[] encrypt(byte[] input, SecretKey pKey) {
         try {
             cipher.init(Cipher.ENCRYPT_MODE, pKey);  
             return cipher.doFinal(input);   
@@ -47,7 +49,7 @@ public class AESHandler {
         return null;
     }
 
-    public byte[] decrypt(byte[] input, SecretKeySpec pKey) {
+    public byte[] decrypt(byte[] input, SecretKey pKey) {
         try {
             cipher.init(Cipher.DECRYPT_MODE, pKey);  
             return cipher.doFinal(input);   

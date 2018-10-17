@@ -11,6 +11,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 
 public class RSAHandler {
     private Cipher cipher;
@@ -31,7 +32,7 @@ public class RSAHandler {
         return kpg.generateKeyPair();
     }
 
-    public byte[] encrypt(byte[] input, PublicKey pKey) {
+    public byte[] encrypt(byte[] input, SecretKey pKey) {
         try {
             cipher.init(Cipher.ENCRYPT_MODE, pKey);  
             return cipher.doFinal(input);   
@@ -41,7 +42,7 @@ public class RSAHandler {
         return null;
     }
 
-    public byte[] decrypt(byte[] input, PrivateKey pKey) {
+    public byte[] decrypt(byte[] input, SecretKey pKey) {
         try {
             cipher.init(Cipher.DECRYPT_MODE, pKey);  
             return cipher.doFinal(input);   

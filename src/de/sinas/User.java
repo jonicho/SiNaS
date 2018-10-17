@@ -35,6 +35,13 @@ public class User {
 		return password;
 	}
 
+	/**
+	 * @param password the password to set
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof User

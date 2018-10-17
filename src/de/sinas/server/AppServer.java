@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 public class AppServer extends Server {
@@ -22,6 +23,7 @@ public class AppServer extends Server {
 	private final Users users = new Users();
 	private final ArrayList<Conversation> conversations = new ArrayList<>();
 	private final CryptoSessionManager cryptoManager = new CryptoSessionManager();
+	private final ArrayList<TempUser> tempUsers = new ArrayList<TempUser>();
 
 	public AppServer(int pPort, String dbPath) {
 		super(pPort);
@@ -53,10 +55,28 @@ public class AppServer extends Server {
 			}
 		}
 		if (user == null) {
-			if (!msgParts[0].equals(PROTOCOL.CS.LOGIN)) {
-				send(clientIP, clientPort, PROTOCOL.getErrorMessage(PROTOCOL.ERRORCODES.NOT_LOGGED_IN));
-			} else {
-				handleLogin(clientIP, clientPort, msgParts[1], msgParts[2]);
+			if(msgParts[0].equals(PROTOCOL.CS.CREATE_SEC_CONNECTION)) {
+				TempUser tUser = new TempUser(clientIP, clientPort);
+				SecretKey sKey = new SecretKeySpec(msgParts[1].getBytes(), 0, msgParts[1].length(), "RSA");
+				tUser.setRsaKey(sKey);
+				tUser.setAesKey(super.gethAES().generateKey());
+				tempUsers.add(tUser);
+				sendRSA(new User(clientIP,clientPort,"",""), tUser.getRsaKey(), PROTOCOL.buildMessage(PROTOCOL.SC.SEC_CONNECTION_ACCEPTED,tUser.getAesKey()));
+			}
+			 else {
+				for (TempUser tu : tempUsers) {
+					if(tu.getIp().equals(clientIP) && tu.getPort() == clientPort) {
+						if(msgParts.length > 1) {
+							sendError(new User(clientIP,clientPort,"",""),PROTOCOL.ERRORCODES.INVALID_MESSAGE);
+						}
+						else {
+							byte[] decStr = Encoder.b64Decode(msgParts[0]);
+							String plainText = new String(super.gethAES().decrypt(decStr, tu.getAesKey()));
+							msgParts = plainText.split(PROTOCOL.SPLIT);
+							handleLogin(tu,msgParts[1], msgParts[2]);
+						}
+					}
+				}
 			}
 			return;
 		}
@@ -102,9 +122,16 @@ public class AppServer extends Server {
 	 *
 	 * @see PROTOCOL.CS
 	 */
-	private void handleLogin(String clientIP, int clientPort, String username, String password) {
+	private void handleLogin(TempUser tUser, String username, String password) {
 		// TODO: handle login
-		User user = db.getConnectedUser(username, clientIP, clientPort);
+		User user = db.getConnectedUser(username, tUser.getIp(), tUser.getPort());
+		if(user.getPassword().equals(password)) {
+			tempUsers.remove(tUser);
+		CryptoSession cs = new CryptoSession(user);
+		cs.setMainAESKey(tUser.getAesKey());
+		cs.setUserPublicKey(tUser.getRsaKey());
+		cryptoManager.addSession(cs);
+		
 		// load all conversations of this user and add them if they are not in the
 		// conversation list yet
 		for (Conversation conversation : db.getConversations(user)) {
@@ -114,6 +141,10 @@ public class AppServer extends Server {
 		}
 		users.addUser(user);
 		sendToUser(user, PROTOCOL.SC.LOGIN_OK, user.getUsername());
+		}
+		else {
+			sendError(user, PROTOCOL.ERRORCODES.LOGIN_FAILED);
+		}
 
 	}
 
@@ -372,7 +403,7 @@ public class AppServer extends Server {
 	* Sends the given message to the given user.
 	* The message is encrypted using the given key and the AES Algorithm
 	*/
-	private void sendAES(User user, SecretKeySpec key, Object... message) {
+	private void sendAES(User user, SecretKey key, Object... message) {
 		String msg = PROTOCOL.buildMessage(message);
 		byte[] cryp = super.gethAES().encrypt(msg.getBytes(), key);
 		String enc = Encoder.b64Encode(cryp);
@@ -383,7 +414,7 @@ public class AppServer extends Server {
 	* Sends the given message to the given user.
 	* The message is encrypted using the given key and the RSA Algorithm
 	*/
-	private void sendRSA(User user, PublicKey key, Object... message) {
+	private void sendRSA(User user, SecretKey key, Object... message) {
 		String msg = PROTOCOL.buildMessage(message);
 		byte[] cryp = super.gethRSA().encrypt(msg.getBytes(), key);
 		String enc = Encoder.b64Encode(cryp);
