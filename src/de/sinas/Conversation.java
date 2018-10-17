@@ -16,7 +16,6 @@ public class Conversation {
 	private String name;
 	private ArrayList<Message> messages = new ArrayList<>();
 	private ArrayList<String> users = new ArrayList<>();
-	private SecretKey convKey;
 
 	/**
 	 * Creates a new conversation with an arbitrary amount of users.

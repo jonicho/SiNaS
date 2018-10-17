@@ -24,6 +24,7 @@ public class AppServer extends Server {
 	private final ArrayList<Conversation> conversations = new ArrayList<>();
 	private final CryptoSessionManager cryptoManager = new CryptoSessionManager();
 	private final ArrayList<TempUser> tempUsers = new ArrayList<TempUser>();
+	private final ConversationCryptoManager convCryptoManager = new ConversationCryptoManager();
 
 	public AppServer(int pPort, String dbPath) {
 		super(pPort);
@@ -49,8 +50,9 @@ public class AppServer extends Server {
 			}
 			else {
 				Conversation con = getConversationById(msgParts[0]);
+				ConversationCryptoSession ccs = convCryptoManager.getSession(user, con);
 				byte[] decStr = Encoder.b64Decode(msgParts[1]);
-				String plainText = new String(super.gethAES().decrypt(decStr, con.getConvKey()));
+				String plainText = new String(super.gethAES().decrypt(decStr,ccs.getAesKey()));
 				msgParts = plainText.split(PROTOCOL.SPLIT);
 			}
 		}
@@ -162,7 +164,12 @@ public class AppServer extends Server {
 				for (int i = 1; i < conversation.getUsers().size(); i++) {
 					usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
 				}
-				sendAES(user, PROTOCOL.SC.CONVERSATION,conversation.getName(), conversation.getId(), conversation.getConvKey(), usersString);
+				if(!convCryptoManager.hasSession(user, conversation)) {
+					ConversationCryptoSession ccs = new ConversationCryptoSession(conversation,user);
+					ccs.setAesKey(super.gethAES().generateKey());
+					convCryptoManager.addSession(ccs);
+				}
+				sendAES(user, PROTOCOL.SC.CONVERSATION,conversation.getName(), conversation.getId(),convCryptoManager.getSession(user, conversation).getAesKey() , usersString);
 			}
 		}
 	}
@@ -445,6 +452,24 @@ public class AppServer extends Server {
 				sendToUser(user, message);
 			}
 		}
+	}
+
+	private void sendToConversationAES(Conversation con, Object... message) {
+		ArrayList<User> destUsers = new ArrayList<User>();
+		for (String username : con.getUsers()) {
+			User user = users.getUser(username);
+			if (user != null && convCryptoManager.hasSession(user, con)) {
+				destUsers.add(user);
+			}
+		}
+		for(User u : destUsers) {
+			ConversationCryptoSession ccs = convCryptoManager.getSession(u, con);
+			String msg = PROTOCOL.buildMessage(message);
+			byte[] cryp = super.gethAES().encrypt(msg.getBytes(), ccs.getAesKey());
+			String enc = Encoder.b64Encode(cryp);
+			send(u.getIp(),u.getPort(),ccs.getConv().getId()+PROTOCOL.SPLIT+enc);
+		}
+
 	}
 
 	/**
