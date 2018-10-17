@@ -73,7 +73,7 @@ public class AppServer extends Server {
 							byte[] decStr = Encoder.b64Decode(msgParts[0]);
 							String plainText = new String(super.gethAES().decrypt(decStr, tu.getAesKey()));
 							msgParts = plainText.split(PROTOCOL.SPLIT);
-							handleLogin(clientIP, clientPort, msgParts[1], msgParts[2]);
+							handleLogin(tu,msgParts[1], msgParts[2]);
 						}
 					}
 				}
@@ -122,9 +122,16 @@ public class AppServer extends Server {
 	 *
 	 * @see PROTOCOL.CS
 	 */
-	private void handleLogin(String clientIP, int clientPort, String username, String password) {
+	private void handleLogin(TempUser tUser, String username, String password) {
 		// TODO: handle login
-		User user = db.getConnectedUser(username, clientIP, clientPort);
+		User user = db.getConnectedUser(username, tUser.getIp(), tUser.getPort());
+		if(user.getPassword().equals(password)) {
+			tempUsers.remove(tUser);
+		CryptoSession cs = new CryptoSession(user);
+		cs.setMainAESKey(tUser.getAesKey());
+		cs.setUserPublicKey(tUser.getRsaKey());
+		cryptoManager.addSession(cs);
+		
 		// load all conversations of this user and add them if they are not in the
 		// conversation list yet
 		for (Conversation conversation : db.getConversations(user)) {
@@ -134,6 +141,10 @@ public class AppServer extends Server {
 		}
 		users.addUser(user);
 		sendToUser(user, PROTOCOL.SC.LOGIN_OK, user.getUsername());
+		}
+		else {
+			sendError(user, PROTOCOL.ERRORCODES.LOGIN_FAILED);
+		}
 
 	}
 
