@@ -14,8 +14,8 @@ import java.security.SecureRandom;
 
 public class AESHandler {
     private Cipher cipher;
-    private final int KEY_SIZE = 4096;
-    private final int SEED_SIZE = 2048;
+    private final int KEY_SIZE = 256;
+    private final int SEED_SIZE = 1024;
     private SecureRandom prng;
 
     public AESHandler() { 
