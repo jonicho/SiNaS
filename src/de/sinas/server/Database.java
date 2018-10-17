@@ -70,7 +70,7 @@ public class Database {
 	 * given name exists.
 	 */
 	public User getUserInfo(String username) {
-		return null;
+		return getConnectedUser(username, "", 0);
 	}
 
 	/**
