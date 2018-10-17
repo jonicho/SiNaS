@@ -16,6 +16,7 @@ public class Message {
 	private long timestamp;
 	private String sender;
 	private boolean isFile;
+	private String conversationId;
 
 	/**
 	 * Creates a new message
@@ -26,12 +27,13 @@ public class Message {
 	 * @param sender    the user that sent the message
 	 * @param isFile    whether the message represents a file
 	 */
-	public Message(String id, String content, long timestamp, String sender, boolean isFile) {
+	public Message(String id, String content, long timestamp, String sender, boolean isFile, String conversationId) {
 		this.content = content;
 		this.timestamp = timestamp;
 		this.sender = sender;
 		this.isFile = isFile;
 		this.id = id;
+		this.conversationId = conversationId;
 	}
 
 	/**
@@ -88,6 +90,10 @@ public class Message {
 
 	public String getId() {
 		return id;
+	}
+
+	public String getConversationId() {
+		return conversationId;
 	}
 
 	@Override
