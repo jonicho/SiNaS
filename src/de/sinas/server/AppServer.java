@@ -3,15 +3,19 @@ package de.sinas.server;
 import de.sinas.Conversation;
 import de.sinas.Message;
 import de.sinas.User;
+import de.sinas.crypto.Encoder;
 import de.sinas.net.PROTOCOL;
 import de.sinas.net.Server;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.crypto.spec.SecretKeySpec;
 
 public class AppServer extends Server {
 	private final Database db;
@@ -347,6 +351,28 @@ public class AppServer extends Server {
 	 */
 	private void sendToUser(User user, Object... message) {
 		send(user.getIp(), user.getPort(), PROTOCOL.buildMessage(message));
+	}
+
+	/*
+	* Sends the given message to the given user.
+	* The message is encrypted using the given key and the AES Algorithm
+	*/
+	private void sendAES(User user, SecretKeySpec key, Object... message) {
+		String msg = PROTOCOL.buildMessage(message);
+		byte[] cryp = super.gethAES().encrypt(msg.getBytes(), key);
+		String enc = Encoder.b64Encode(cryp);
+		send(user.getIp(),user.getPort(),enc);
+	}
+
+	/*
+	* Sends the given message to the given user.
+	* The message is encrypted using the given key and the RSA Algorithm
+	*/
+	private void sendRSA(User user, PublicKey key, Object... message) {
+		String msg = PROTOCOL.buildMessage(message);
+		byte[] cryp = super.gethRSA().encrypt(msg.getBytes(), key);
+		String enc = Encoder.b64Encode(cryp);
+		send(user.getIp(),user.getPort(),enc);
 	}
 
 	/**
