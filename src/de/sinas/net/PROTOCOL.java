@@ -10,26 +10,28 @@ public final class PROTOCOL {
 	public final class SC {
 		private SC() {}
 
-		public static final String ERROR = "err", // Base [split] errorcode
-				OK = "ok", // Base
-				LOGIN_OK = "lgnok", // Base
-				CONVERSATION = "con", // Base [split] conversaion name [split] conversation id [split] users ...
-				USER = "user", // Base [split] username
-				MESSAGE = "msg"; // Base [split] conversation id [split] message id [split] is file [split] timestamp [split] sender [split] content
+		public static final String ERROR = "err", //{ENRYPTED:MAINAES} Base [split] errorcode
+				OK = "ok", //{ENRYPTED:MAINAES} Base
+				LOGIN_OK = "lgnok", //{ENRYPTED:MAINAES} Base
+				CONVERSATION = "con", //{ENRYPTED:MAINAES} Base [split] conversaion name [split] conversation id [split] conversation AES KEY [split] users ...
+				SEC_CONNECTION_ACCEPTED = "secacc", //{ENCRYPTED:RSA} Base [split] Main AES Key
+				USER = "user", //{ENRYPTED:MAINAES} Base [split] username
+				MESSAGE = "msg"; //{ENCRYPTED:CONVAES} Base [split] conversation id [split] message id [split] is file [split] timestamp [split] sender [split] content
 	}
 
 	public final class CS {
 		private CS() {}
 
-		public static final String LOGIN = "lgn", // Base [split] name [split] password
-				CREATE_CONVERSATION = "crtcon", // Base [split] name [split] users ...
-				GET_CONVERSATIONS = "getcons", // Base
-				GET_USER = "getuser", // Base [split] username
-				GET_MESSAGES = "getmsgs", // Base [split] conversation id [split] amount
-				CONVERSATION_ADD = "conadd", // Base [Split] id [Split] name
-				CONVERSATION_REM = "conrem", //Base [Split] id [Split] name
-				CONVERSATION_RENAME = "conren", //Base [Split] id [Split] new names
-				MESSAGE = "msg"; // Base [split] conversation id [split] is file [split] content
+		public static final String LOGIN = "lgn", //{ENRYPTED:MAINAES} Base [split] name [split] password
+				CREATE_SEC_CONNECTION = "crypcon", // Base [split] RSA Public Key
+				CREATE_CONVERSATION = "crtcon", //{ENRYPTED:MAINAES} Base [split] name [split] users ...
+				GET_CONVERSATIONS = "getcons", //{ENRYPTED:MAINAES} Base
+				GET_USER = "getuser", //{ENRYPTED:MAINAES} Base [split] username
+				GET_MESSAGES = "getmsgs", //{ENRYPTED:MAINAES} Base [split] conversation id [split] amount
+				CONVERSATION_ADD = "conadd", //{ENRYPTED:MAINAES} Base [Split] id [Split] name
+				CONVERSATION_REM = "conrem", //{ENRYPTED:MAINAES} Base [Split] id [Split] name
+				CONVERSATION_RENAME = "conren", //{ENRYPTED:MAINAES} Base [Split] id [Split] new names
+				MESSAGE = "msg"; //{ENCRYPTED:CONVAES} Base [split] conversation id [split] is file [split] content
 	}
 
 	public final class ERRORCODES {
