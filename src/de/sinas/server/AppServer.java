@@ -21,6 +21,7 @@ public class AppServer extends Server {
 	private final Database db;
 	private final Users users = new Users();
 	private final ArrayList<Conversation> conversations = new ArrayList<>();
+	private final CryptoSessionManager cryptoManager = new CryptoSessionManager();
 
 	public AppServer(int pPort, String dbPath) {
 		super(pPort);
@@ -37,6 +38,9 @@ public class AppServer extends Server {
 		System.out.println("New message: " + clientIP + ":" + clientPort + ", " + message);
 		String[] msgParts = message.split(PROTOCOL.SPLIT);
 		User user = users.getUser(clientIP, clientPort);
+		if(user != null && cryptoManager.getSessionByUser(user) != null) {
+			
+		}
 		if (user == null) {
 			if (!msgParts[0].equals(PROTOCOL.CS.LOGIN)) {
 				send(clientIP, clientPort, PROTOCOL.getErrorMessage(PROTOCOL.ERRORCODES.NOT_LOGGED_IN));
