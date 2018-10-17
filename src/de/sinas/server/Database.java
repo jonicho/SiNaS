@@ -80,6 +80,18 @@ public class Database {
 	 * @return all conversations of the given user
 	 */
 	public ArrayList<Conversation> getConversations(User user) {
+		try {
+			ArrayList<Conversation> conversations = new ArrayList<>();
+			PreparedStatement statement = connection.prepareStatement("SELECT * FROM conversations_users WHERE username=?");
+			statement.setString(1, user.getUsername());
+			ResultSet rs = statement.executeQuery();
+			while (rs.next()) {
+				conversations.add(getConversation(rs.getString("conversation_id")));
+			}
+			return conversations;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
