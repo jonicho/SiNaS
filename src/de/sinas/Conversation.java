@@ -6,8 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import javax.crypto.SecretKey;
-
 /**
  * A conversation containing an arbitrary amount of users
  */
@@ -103,13 +101,6 @@ public class Conversation {
 	 */
 	public List<Message> getMessages() {
 		return Collections.unmodifiableList(messages);
-	}
-
-	/**
-	 * @return the convKey
-	 */
-	public SecretKey getConvKey() {
-		return convKey;
 	}
 
 	/**
