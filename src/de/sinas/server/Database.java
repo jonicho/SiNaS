@@ -224,8 +224,7 @@ public class Database {
 
 	/**
 	 * Updates the given conversation in the database<br>
-	 * (NOTE: this method only updates the conversation, not the conversation's messages;<br>
-	 * to update messages use {@link #updateMessage(Message)})
+	 * (NOTE: this method only updates the conversation, not the conversation's messages)
 	 *
 	 * @param conversation
 	 * @return true if the conversation exists, false otherwise
@@ -241,16 +240,6 @@ public class Database {
 	 * @return true if the message did not already exist, false otherwise
 	 */
 	public boolean createMessage(Message message) {
-		return false;
-	}
-
-	/**
-	 * Updates the given message in the database
-	 *
-	 * @param message
-	 * @return true if the message exists, false otherwise
-	 */
-	public boolean updateMessage(Message message) {
 		return false;
 	}
 }
