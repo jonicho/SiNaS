@@ -75,7 +75,13 @@ public class AppServer extends Server {
 							byte[] decStr = Encoder.b64Decode(msgParts[0]);
 							String plainText = new String(super.gethAES().decrypt(decStr, tu.getAesKey()));
 							msgParts = plainText.split(PROTOCOL.SPLIT);
-							handleLogin(tu,msgParts[1], msgParts[2]);
+							if(msgParts[0].equals(PROTOCOL.CS.LOGIN)) {
+								handleLogin(tu,msgParts[1], msgParts[2]);
+							}
+							else if(msgParts[0].equals(PROTOCOL.CS.REGISTER)) {
+								handleRegister(tu, msgParts[1], msgParts[2]);
+							}
+							
 						}
 					}
 				}
@@ -114,6 +120,17 @@ public class AppServer extends Server {
 			default:
 				sendError(user, PROTOCOL.ERRORCODES.UNKNOWN_MESSAGE_BASE);
 				break;
+		}
+	}
+
+
+	private void handleRegister(TempUser tUser, String username, String password) {
+		if(db.getConnectedUser(username, tUser.getIp(), tUser.getPort()) == null) {
+			db.createUser(new User(tUser.getIp(),tUser.getPort(),username,password));
+			handleLogin(tUser, username, password); //TODO
+		} else {
+			send(tUser.getIp(), tUser.getPort(), PROTOCOL.buildMessage(PROTOCOL.SC.ERROR,PROTOCOL.ERRORCODES.ALREADY_REGISTERED));
+			handleLogin(tUser, username, password); //TODO
 		}
 	}
 

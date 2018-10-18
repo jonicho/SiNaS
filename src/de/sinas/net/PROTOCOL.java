@@ -22,8 +22,9 @@ public final class PROTOCOL {
 	public final class CS {
 		private CS() {}
 
-		public static final String LOGIN = "lgn", //{ENRYPTED:MAINAES} Base [split] name [split] password
+		public static final String LOGIN = "lgn", //{ENRYPTED:MAINAES} Base [split] name [split] PBBKDF2 Hash of the password
 				CREATE_SEC_CONNECTION = "crypcon", // Base [split] RSA Public Key
+				REGISTER = "reg", //{ENRYPTED:MAINAES} Base [split] name [split] PBBKDF2 Hash of the password
 				CREATE_CONVERSATION = "crtcon", //{ENRYPTED:MAINAES} Base [split] name [split] users ...
 				GET_CONVERSATIONS = "getcons", //{ENRYPTED:MAINAES} Base
 				GET_USER = "getuser", //{ENRYPTED:MAINAES} Base [split] username
@@ -31,7 +32,7 @@ public final class PROTOCOL {
 				CONVERSATION_ADD = "conadd", //{ENRYPTED:MAINAES} Base [Split] id [Split] name
 				CONVERSATION_REM = "conrem", //{ENRYPTED:MAINAES} Base [Split] id [Split] name
 				CONVERSATION_RENAME = "conren", //{ENRYPTED:MAINAES} Base [Split] id [Split] new names
-				MESSAGE = "msg"; //{ENCRYPTED:CONVAES} Base [split] conversation id [split] is file [split] content
+				MESSAGE = "msg"; //conversation id[split]{ENCRYPTED:CONVAES} Base [split] is file [split] content
 	}
 
 	public final class ERRORCODES {
@@ -44,7 +45,9 @@ public final class PROTOCOL {
 				USER_DOES_NOT_EXIST = 3,
 				REQUEST_NOT_ALLOWED = 4,
 				UNKNOWN_MESSAGE_BASE = 5,
-				EMPTY_MESSAGE = 6;
+				EMPTY_MESSAGE = 6,
+				ALREADY_REGISTERED = 7;
+
 	}
 
 	/**
