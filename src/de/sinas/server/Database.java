@@ -4,10 +4,8 @@ import de.sinas.Conversation;
 import de.sinas.Message;
 import de.sinas.User;
 
-import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Database {
 	private Connection connection;
@@ -43,7 +41,7 @@ public class Database {
 	 * @param username
 	 * @return The user with the given username
 	 */
-	public User getConnectedUser(String username, String ip, int port) {
+	public User loadConnectedUser(String username, String ip, int port) {
 		try {
 			PreparedStatement statement = connection.prepareStatement("SELECT * FROM `users` WHERE `username`=?");
 			statement.setString(1, username);
@@ -69,8 +67,8 @@ public class Database {
 	 * @return The user with the given username. {@code null} if no user with the
 	 * given name exists.
 	 */
-	public User getUserInfo(String username) {
-		return getConnectedUser(username, "", 0);
+	public User loadUserInfo(String username) {
+		return loadConnectedUser(username, "", 0);
 	}
 
 	/**
@@ -79,14 +77,14 @@ public class Database {
 	 * @param user
 	 * @return all conversations of the given user
 	 */
-	public ArrayList<Conversation> getConversations(User user) {
+	public ArrayList<Conversation> loadConversations(User user) {
 		try {
 			ArrayList<Conversation> conversations = new ArrayList<>();
 			PreparedStatement statement = connection.prepareStatement("SELECT * FROM conversations_users WHERE username=?");
 			statement.setString(1, user.getUsername());
 			ResultSet rs = statement.executeQuery();
 			while (rs.next()) {
-				conversations.add(getConversation(rs.getString("conversation_id")));
+				conversations.add(loadConversation(rs.getString("conversation_id")));
 			}
 			return conversations;
 		} catch (SQLException e) {
@@ -101,7 +99,7 @@ public class Database {
 	 * @param conversationId
 	 * @return
 	 */
-	public Conversation getConversation(String conversationId) {
+	public Conversation loadConversation(String conversationId) {
 		try {
 			String id;
 			String name;
@@ -139,7 +137,7 @@ public class Database {
 	 * @return true if the user did not already exist and the user could successfully be created, false otherwise
 	 */
 	public boolean createUser(User user) {
-		if (getUserInfo(user.getUsername()) == null) {
+		if (loadUserInfo(user.getUsername()) == null) {
 			return false;
 		}
 		try {
@@ -161,7 +159,7 @@ public class Database {
 	 * @return true if the user exists and the user could successfully be updated, false otherwise
 	 */
 	public boolean updateUser(User user) {
-		if (getUserInfo(user.getUsername()) != null) {
+		if (loadUserInfo(user.getUsername()) != null) {
 			return false;
 		}
 		try {
@@ -179,7 +177,7 @@ public class Database {
 	/**
 	 * Creates the given conversation in the database<br>
 	 * (NOTE: this method only creates the conversation, not the conversation's messages;<br>
-	 *       to create messages use {@link #createMessage(Message)})
+	 * to create messages use {@link #createMessage(Message)})
 	 *
 	 * @param conversation
 	 * @return true if the conversation did not already exist, false otherwise
@@ -191,7 +189,7 @@ public class Database {
 	/**
 	 * Updates the given conversation in the database<br>
 	 * (NOTE: this method only updates the conversation, not the conversation's messages;<br>
-	 *       to update messages use {@link #updateMessage(Message)})
+	 * to update messages use {@link #updateMessage(Message)})
 	 *
 	 * @param conversation
 	 * @return true if the conversation exists, false otherwise

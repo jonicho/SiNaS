@@ -118,7 +118,7 @@ public class AppServer extends Server {
 
 
 	private void handleRegister(TempUser tUser, String username, String password) {
-		if (db.getConnectedUser(username, tUser.getIp(), tUser.getPort()) == null) {
+		if (db.loadConnectedUser(username, tUser.getIp(), tUser.getPort()) == null) {
 			db.createUser(new User(tUser.getIp(), tUser.getPort(), username, password));
 			handleLogin(tUser, username, password); //TODO
 		} else {
@@ -136,7 +136,7 @@ public class AppServer extends Server {
 	 */
 	private void handleLogin(TempUser tUser, String username, String password) {
 		// TODO: handle login
-		User user = db.getConnectedUser(username, tUser.getIp(), tUser.getPort());
+		User user = db.loadConnectedUser(username, tUser.getIp(), tUser.getPort());
 		if (user.getPassword().equals(password)) {
 			tempUsers.remove(tUser);
 			CryptoSession cs = new CryptoSession(user);
@@ -146,7 +146,7 @@ public class AppServer extends Server {
 
 			// load all conversations of this user and add them if they are not in the
 			// conversation list yet
-			for (Conversation conversation : db.getConversations(user)) {
+			for (Conversation conversation : db.loadConversations(user)) {
 				if (!conversations.contains(conversation)) {
 					conversations.add(conversation);
 				}
@@ -197,7 +197,7 @@ public class AppServer extends Server {
 		}
 		User user = users.getUser(msgParts[1]);
 		if (user == null) {
-			user = db.getUserInfo(msgParts[1]);
+			user = db.loadUserInfo(msgParts[1]);
 			if (user == null) {
 				sendError(requestingUser, PROTOCOL.ERRORCODES.USER_DOES_NOT_EXIST);
 				return;
@@ -311,7 +311,7 @@ public class AppServer extends Server {
 			return;
 		}
 		for (String u : users) {
-			if (db.getUserInfo(u) == null) {
+			if (db.loadUserInfo(u) == null) {
 				sendError(user, PROTOCOL.ERRORCODES.USER_DOES_NOT_EXIST);
 				return;
 			}
