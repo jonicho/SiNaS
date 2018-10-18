@@ -7,16 +7,13 @@ import de.sinas.crypto.Encoder;
 import de.sinas.net.PROTOCOL;
 import de.sinas.net.Server;
 
-import java.io.File;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 
 public class AppServer extends Server {
 	private final Database db;
@@ -41,47 +38,43 @@ public class AppServer extends Server {
 		System.out.println("New message: " + clientIP + ":" + clientPort + ", " + message);
 		String[] msgParts = message.split(PROTOCOL.SPLIT);
 		User user = users.getUser(clientIP, clientPort);
-		if(user != null && cryptoManager.getSessionByUser(user) != null) {
-			if(msgParts.length == 1) {
+		if (user != null && cryptoManager.getSessionByUser(user) != null) {
+			if (msgParts.length == 1) {
 				byte[] decStr = Encoder.b64Decode(msgParts[0]);
 				CryptoSession cs = cryptoManager.getSessionByUser(user);
 				String plainText = new String(super.gethAES().decrypt(decStr, cs.getMainAESKey()));
 				msgParts = plainText.split(PROTOCOL.SPLIT);
-			}
-			else {
+			} else {
 				Conversation con = getConversationById(msgParts[0]);
 				ConversationCryptoSession ccs = convCryptoManager.getSession(user, con);
 				byte[] decStr = Encoder.b64Decode(msgParts[1]);
-				String plainText = new String(super.gethAES().decrypt(decStr,ccs.getAesKey()));
+				String plainText = new String(super.gethAES().decrypt(decStr, ccs.getAesKey()));
 				msgParts = plainText.split(PROTOCOL.SPLIT);
 			}
 		}
 		if (user == null) {
-			if(msgParts[0].equals(PROTOCOL.CS.CREATE_SEC_CONNECTION)) {
+			if (msgParts[0].equals(PROTOCOL.CS.CREATE_SEC_CONNECTION)) {
 				TempUser tUser = new TempUser(clientIP, clientPort);
 				SecretKey sKey = new SecretKeySpec(msgParts[1].getBytes(), 0, msgParts[1].length(), "RSA");
 				tUser.setRsaKey(sKey);
 				tUser.setAesKey(super.gethAES().generateKey());
 				tempUsers.add(tUser);
-				sendRSA(new User(clientIP,clientPort,"",""), tUser.getRsaKey(), PROTOCOL.buildMessage(PROTOCOL.SC.SEC_CONNECTION_ACCEPTED,tUser.getAesKey()));
-			}
-			 else {
+				sendRSA(new User(clientIP, clientPort, "", ""), tUser.getRsaKey(), PROTOCOL.buildMessage(PROTOCOL.SC.SEC_CONNECTION_ACCEPTED, tUser.getAesKey()));
+			} else {
 				for (TempUser tu : tempUsers) {
-					if(tu.getIp().equals(clientIP) && tu.getPort() == clientPort) {
-						if(msgParts.length > 1) {
-							sendError(new User(clientIP,clientPort,"",""),PROTOCOL.ERRORCODES.INVALID_MESSAGE);
-						}
-						else {
+					if (tu.getIp().equals(clientIP) && tu.getPort() == clientPort) {
+						if (msgParts.length > 1) {
+							sendError(new User(clientIP, clientPort, "", ""), PROTOCOL.ERRORCODES.INVALID_MESSAGE);
+						} else {
 							byte[] decStr = Encoder.b64Decode(msgParts[0]);
 							String plainText = new String(super.gethAES().decrypt(decStr, tu.getAesKey()));
 							msgParts = plainText.split(PROTOCOL.SPLIT);
-							if(msgParts[0].equals(PROTOCOL.CS.LOGIN)) {
-								handleLogin(tu,msgParts[1], msgParts[2]);
-							}
-							else if(msgParts[0].equals(PROTOCOL.CS.REGISTER)) {
+							if (msgParts[0].equals(PROTOCOL.CS.LOGIN)) {
+								handleLogin(tu, msgParts[1], msgParts[2]);
+							} else if (msgParts[0].equals(PROTOCOL.CS.REGISTER)) {
 								handleRegister(tu, msgParts[1], msgParts[2]);
 							}
-							
+
 						}
 					}
 				}
@@ -125,11 +118,11 @@ public class AppServer extends Server {
 
 
 	private void handleRegister(TempUser tUser, String username, String password) {
-		if(db.getConnectedUser(username, tUser.getIp(), tUser.getPort()) == null) {
-			db.createUser(new User(tUser.getIp(),tUser.getPort(),username,password));
+		if (db.getConnectedUser(username, tUser.getIp(), tUser.getPort()) == null) {
+			db.createUser(new User(tUser.getIp(), tUser.getPort(), username, password));
 			handleLogin(tUser, username, password); //TODO
 		} else {
-			send(tUser.getIp(), tUser.getPort(), PROTOCOL.buildMessage(PROTOCOL.SC.ERROR,PROTOCOL.ERRORCODES.ALREADY_REGISTERED));
+			send(tUser.getIp(), tUser.getPort(), PROTOCOL.buildMessage(PROTOCOL.SC.ERROR, PROTOCOL.ERRORCODES.ALREADY_REGISTERED));
 			handleLogin(tUser, username, password); //TODO
 		}
 	}
@@ -144,24 +137,23 @@ public class AppServer extends Server {
 	private void handleLogin(TempUser tUser, String username, String password) {
 		// TODO: handle login
 		User user = db.getConnectedUser(username, tUser.getIp(), tUser.getPort());
-		if(user.getPassword().equals(password)) {
+		if (user.getPassword().equals(password)) {
 			tempUsers.remove(tUser);
-		CryptoSession cs = new CryptoSession(user);
-		cs.setMainAESKey(tUser.getAesKey());
-		cs.setUserPublicKey(tUser.getRsaKey());
-		cryptoManager.addSession(cs);
-		
-		// load all conversations of this user and add them if they are not in the
-		// conversation list yet
-		for (Conversation conversation : db.getConversations(user)) {
-			if (!conversations.contains(conversation)) {
-				conversations.add(conversation);
+			CryptoSession cs = new CryptoSession(user);
+			cs.setMainAESKey(tUser.getAesKey());
+			cs.setUserPublicKey(tUser.getRsaKey());
+			cryptoManager.addSession(cs);
+
+			// load all conversations of this user and add them if they are not in the
+			// conversation list yet
+			for (Conversation conversation : db.getConversations(user)) {
+				if (!conversations.contains(conversation)) {
+					conversations.add(conversation);
+				}
 			}
-		}
-		users.addUser(user);
-		sendAES(user, PROTOCOL.SC.LOGIN_OK, user.getUsername());
-		}
-		else {
+			users.addUser(user);
+			sendAES(user, PROTOCOL.SC.LOGIN_OK, user.getUsername());
+		} else {
 			sendError(user, PROTOCOL.ERRORCODES.LOGIN_FAILED);
 		}
 
@@ -181,12 +173,12 @@ public class AppServer extends Server {
 				for (int i = 1; i < conversation.getUsers().size(); i++) {
 					usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
 				}
-				if(!convCryptoManager.hasSession(user, conversation)) {
-					ConversationCryptoSession ccs = new ConversationCryptoSession(conversation,user);
+				if (!convCryptoManager.hasSession(user, conversation)) {
+					ConversationCryptoSession ccs = new ConversationCryptoSession(conversation, user);
 					ccs.setAesKey(super.gethAES().generateKey());
 					convCryptoManager.addSession(ccs);
 				}
-				sendAES(user, PROTOCOL.SC.CONVERSATION,conversation.getName(), conversation.getId(),convCryptoManager.getSession(user, conversation).getAesKey() , usersString);
+				sendAES(user, PROTOCOL.SC.CONVERSATION, conversation.getName(), conversation.getId(), convCryptoManager.getSession(user, conversation).getAesKey(), usersString);
 			}
 		}
 	}
@@ -424,38 +416,37 @@ public class AppServer extends Server {
 	}
 
 	/*
-	* Sends the given message to the given user.
-	* The message is encrypted using the given key and the AES Algorithm
-	*/
+	 * Sends the given message to the given user.
+	 * The message is encrypted using the given key and the AES Algorithm
+	 */
 	private void sendAES(User user, SecretKey key, Object... message) {
 		String msg = PROTOCOL.buildMessage(message);
 		byte[] cryp = super.gethAES().encrypt(msg.getBytes(), key);
 		String enc = Encoder.b64Encode(cryp);
-		send(user.getIp(),user.getPort(),enc);
+		send(user.getIp(), user.getPort(), enc);
 	}
 
 	/*
-	* Sends the given message to the given user.
-	* The message is encrypted using the given key and the AES Algorithm
-	*/
+	 * Sends the given message to the given user.
+	 * The message is encrypted using the given key and the AES Algorithm
+	 */
 	private void sendAES(User user, Object... message) {
 		String msg = PROTOCOL.buildMessage(message);
 		byte[] cryp = super.gethAES().encrypt(msg.getBytes(), cryptoManager.getSessionByUser(user).getMainAESKey());
 		String enc = Encoder.b64Encode(cryp);
-		send(user.getIp(),user.getPort(),enc);
+		send(user.getIp(), user.getPort(), enc);
 	}
 
 
-
 	/*
-	* Sends the given message to the given user.
-	* The message is encrypted using the given key and the RSA Algorithm
-	*/
+	 * Sends the given message to the given user.
+	 * The message is encrypted using the given key and the RSA Algorithm
+	 */
 	private void sendRSA(User user, SecretKey key, Object... message) {
 		String msg = PROTOCOL.buildMessage(message);
 		byte[] cryp = super.gethRSA().encrypt(msg.getBytes(), key);
 		String enc = Encoder.b64Encode(cryp);
-		send(user.getIp(),user.getPort(),enc);
+		send(user.getIp(), user.getPort(), enc);
 	}
 
 	/**
@@ -479,12 +470,12 @@ public class AppServer extends Server {
 				destUsers.add(user);
 			}
 		}
-		for(User u : destUsers) {
+		for (User u : destUsers) {
 			ConversationCryptoSession ccs = convCryptoManager.getSession(u, con);
 			String msg = PROTOCOL.buildMessage(message);
 			byte[] cryp = super.gethAES().encrypt(msg.getBytes(), ccs.getAesKey());
 			String enc = Encoder.b64Encode(cryp);
-			send(u.getIp(),u.getPort(),ccs.getConv().getId()+PROTOCOL.SPLIT+enc);
+			send(u.getIp(), u.getPort(), ccs.getConv().getId() + PROTOCOL.SPLIT + enc);
 		}
 
 	}
