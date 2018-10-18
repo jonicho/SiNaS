@@ -274,6 +274,27 @@ public class Database {
 	 * @return true if the message did not already exist, false otherwise
 	 */
 	public boolean createMessage(Message message) {
+		try {
+			{
+				PreparedStatement statement = connection.prepareStatement("SELECT * FROM messages WHERE id=?");
+				statement.setString(1, message.getId());
+				ResultSet rs = statement.executeQuery();
+				if (rs.next()) {
+					return false;
+				}
+			}
+			PreparedStatement statement = connection.prepareStatement("INSERT INTO `messages`(`id`, `content`, `timestamp`, `sender`, `is_file`, `conversation_id`) VALUES (?,?,?,?,?,?);");
+			statement.setString(1, message.getId());
+			statement.setString(2, message.getContent());
+			statement.setLong(3, message.getTimestamp());
+			statement.setString(4, message.getSender());
+			statement.setBoolean(5, message.isFile());
+			statement.setString(6, message.getConversationId());
+			statement.executeUpdate();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return false;
 	}
 }
