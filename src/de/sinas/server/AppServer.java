@@ -415,7 +415,7 @@ public class AppServer extends Server {
 		send(user.getIp(), user.getPort(), PROTOCOL.buildMessage(message));
 	}
 
-	/*
+	/**
 	 * Sends the given message to the given user.
 	 * The message is encrypted using the given key and the AES Algorithm
 	 */
@@ -426,7 +426,7 @@ public class AppServer extends Server {
 		send(user.getIp(), user.getPort(), enc);
 	}
 
-	/*
+	/**
 	 * Sends the given message to the given user.
 	 * The message is encrypted using the given key and the AES Algorithm
 	 */
@@ -438,7 +438,7 @@ public class AppServer extends Server {
 	}
 
 
-	/*
+	/**
 	 * Sends the given message to the given user.
 	 * The message is encrypted using the given key and the RSA Algorithm
 	 */
