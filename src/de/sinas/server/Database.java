@@ -247,6 +247,23 @@ public class Database {
 	 * @return true if the conversation exists, false otherwise
 	 */
 	public boolean updateConversation(Conversation conversation) {
+		try {
+			{
+				PreparedStatement statement = connection.prepareStatement("SELECT * FROM conversations WHERE conversation_id=?");
+				statement.setString(1, conversation.getId());
+				ResultSet rs = statement.executeQuery();
+				if (!rs.next()) {
+					return false;
+				}
+			}
+			PreparedStatement statement = connection.prepareStatement("UPDATE `conversations` SET `name`=? WHERE conversation_id=?;");
+			statement.setString(1, conversation.getName());
+			statement.setString(2, conversation.getId());
+			statement.executeUpdate();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return false;
 	}
 
