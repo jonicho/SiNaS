@@ -219,6 +219,23 @@ public class Database {
 	 * @return true if the conversation did not already exist, false otherwise
 	 */
 	public boolean createConversation(Conversation conversation) {
+		try {
+			{
+				PreparedStatement statement = connection.prepareStatement("SELECT * FROM conversations WHERE conversation_id=?");
+				statement.setString(1, conversation.getId());
+				ResultSet rs = statement.executeQuery();
+				if (!rs.next()) {
+					return false;
+				}
+			}
+			PreparedStatement statement = connection.prepareStatement("INSERT INTO `conversations`(`conversation_id`,`name`) VALUES (?,?);");
+			statement.setString(1, conversation.getId());
+			statement.setString(2, conversation.getName());
+			statement.executeUpdate();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return false;
 	}
 
