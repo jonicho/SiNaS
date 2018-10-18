@@ -224,7 +224,7 @@ public class Database {
 				PreparedStatement statement = connection.prepareStatement("SELECT * FROM conversations WHERE conversation_id=?");
 				statement.setString(1, conversation.getId());
 				ResultSet rs = statement.executeQuery();
-				if (!rs.next()) {
+				if (rs.next()) {
 					return false;
 				}
 			}
