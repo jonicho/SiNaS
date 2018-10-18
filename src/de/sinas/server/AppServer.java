@@ -287,7 +287,7 @@ public class AppServer extends Server {
 			return;
 		}
 		conv.addMessages(message);
-		db.saveConversation(conv);
+		db.createMessage(message);
 		sendToConversation(conv, PROTOCOL.SC.MESSAGE, conv.getId(), message.getId(), message.isFile(),
 				message.getTimestamp(), message.getSender(), message.getContent());
 	}
@@ -318,7 +318,7 @@ public class AppServer extends Server {
 		}
 		Conversation newConversation = new Conversation(name, users);
 		conversations.add(newConversation);
-		db.saveConversation(newConversation);
+		db.createConversation(newConversation);
 		String usersString = newConversation.getUsers().get(0);
 		for (int i = 1; i < newConversation.getUsers().size(); i++) {
 			usersString += PROTOCOL.SPLIT + newConversation.getUsers().get(i);
@@ -345,7 +345,7 @@ public class AppServer extends Server {
 			return;
 		}
 		conversation.addUser(msgParts[2]);
-		db.saveConversation(conversation);
+		db.addUserToConversation(conversation, msgParts[2]);
 		String usersString = conversation.getUsers().get(0);
 		for (int i = 1; i < conversation.getUsers().size(); i++) {
 			usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
@@ -372,7 +372,7 @@ public class AppServer extends Server {
 			return;
 		}
 		conversation.removeUser(msgParts[2]);
-		db.saveConversation(conversation);
+		db.removeUserFromConversation(conversation, msgParts[2]);
 		String usersString = conversation.getUsers().get(0);
 		for (int i = 1; i < conversation.getUsers().size(); i++) {
 			usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
@@ -399,7 +399,7 @@ public class AppServer extends Server {
 			return;
 		}
 		conversation.rename(msgParts[2]);
-		db.saveConversation(conversation);
+		db.updateConversation(conversation);
 		String usersString = conversation.getUsers().get(0);
 		for (int i = 1; i < conversation.getUsers().size(); i++) {
 			usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
