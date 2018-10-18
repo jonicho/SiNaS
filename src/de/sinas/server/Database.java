@@ -297,4 +297,26 @@ public class Database {
 		}
 		return false;
 	}
+
+	/**
+	 * Adds the given user to the given conversation
+	 *
+	 * @param conversation
+	 * @param user
+	 * @return true if both the conversation and the user exist and the user is not already in the conversation, false otherwise
+	 */
+	public boolean addUserToConversation(Conversation conversation, String user) {
+		return false;
+	}
+
+	/**
+	 * Removes the given user from the given conversation
+	 *
+	 * @param conversation
+	 * @param user
+	 * @return true if both the conversation and the user exist and the user was in the conversation, false otherwise
+	 */
+	public boolean removeUserFromConversation(Conversation conversation, String user) {
+		return false;
+	}
 }
