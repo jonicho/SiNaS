@@ -23,8 +23,8 @@ public class Database {
 		try {
 			Statement statement = connection.createStatement();
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `users` ( `username` TEXT NOT NULL UNIQUE, `password` TEXT NOT NULL, PRIMARY KEY(`username`) )");
-			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `conversations` ( `conversation_id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `name` TEXT NOT NULL )");
-			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `messages` ( `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `content` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `sender` TEXT NOT NULL, `is_file` REAL NOT NULL, `conversation_id` INTEGER NOT NULL, FOREIGN KEY(`sender`) REFERENCES `users`(`username`), FOREIGN KEY(`conversation_id`) REFERENCES `conversations`(`conversation_id`) )");
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `conversations` ( `conversation_id` TEXT NOT NULL PRIMARY KEY UNIQUE, `name` TEXT NOT NULL )");
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `messages` ( `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `content` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `sender` TEXT NOT NULL, `is_file` REAL NOT NULL, `conversation_id` TEXT NOT NULL, FOREIGN KEY(`sender`) REFERENCES `users`(`username`), FOREIGN KEY(`conversation_id`) REFERENCES `conversations`(`conversation_id`) )");
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `conversations_users` ( `conversation_id` INTEGER NOT NULL, `username` TEXT NOT NULL, FOREIGN KEY(`conversation_id`) REFERENCES `conversations`(`conversation_id`), FOREIGN KEY(`username`) REFERENCES `users`(`username`), PRIMARY KEY(`conversation_id`,`username`) )");
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -72,7 +72,9 @@ public class Database {
 	}
 
 	/**
-	 * Loads all conversations of the given user
+	 * Loads all conversations of the given user<br>
+	 * (NOTE: this method only loads the conversations, not the conversation's messages;<br>
+	 * to load messages use {@link #loadMessages(Conversation)})
 	 *
 	 * @param user
 	 * @return all conversations of the given user
@@ -94,7 +96,9 @@ public class Database {
 	}
 
 	/**
-	 * Loads the conversation with the given conversation id
+	 * Loads the conversation with the given conversation id<br>
+	 * (NOTE: this method only loads the conversation, not the conversation's messages;<br>
+	 * to load messages use {@link #loadMessages(Conversation)})
 	 *
 	 * @param conversationId
 	 * @return
@@ -128,6 +132,38 @@ public class Database {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	/**
+	 * Loads the messages from the given conversation
+	 *
+	 * @param conversation
+	 * @return true if the conversation exists and the message could be loaded successfully, false otherwise
+	 */
+	public boolean loadMessages(Conversation conversation) {
+		try {
+			{
+				PreparedStatement statement = connection.prepareStatement("SELECT * FROM conversations WHERE conversation_id=?");
+				statement.setString(1, conversation.getId());
+				ResultSet rs = statement.executeQuery();
+				if (!rs.next()) {
+					return false;
+				}
+			}
+			{
+				PreparedStatement statement = connection.prepareStatement("SELECT * FROM messages WHERE conversation_id=?");
+				statement.setString(1, conversation.getId());
+				ResultSet rs = statement.executeQuery();
+				while (rs.next()) {
+					Message message = new Message(rs.getString("id"), rs.getString("content"), rs.getLong("timestamp"), rs.getString("sender"), rs.getBoolean("is_file"), rs.getString("conversation_id"));
+					conversation.addMessages(message);
+				}
+			}
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	/**
