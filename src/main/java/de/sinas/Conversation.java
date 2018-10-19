@@ -1,10 +1,6 @@
 package de.sinas;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * A conversation containing an arbitrary amount of users
@@ -17,7 +13,7 @@ public class Conversation {
 
 	/**
 	 * Creates a new conversation with an arbitrary amount of users.
-	 * 
+	 *
 	 * @param id    the conversation id
 	 * @param users an arbitrary amount of users
 	 */
@@ -29,7 +25,7 @@ public class Conversation {
 
 	/**
 	 * Creates a new conversation with a new id and an arbitrary amount of users.
-	 * 
+	 *
 	 * @param users an arbitrary amount of users
 	 */
 	public Conversation(String name, String... users) {
@@ -47,7 +43,7 @@ public class Conversation {
 
 	/**
 	 * Removes the given user
-	 * 
+	 *
 	 * @param username the username of the user to remove
 	 * @return {@code true} if this conversation contained the specified user
 	 */
@@ -62,10 +58,17 @@ public class Conversation {
 	/**
 	 * Adds one or more messages to the conversation. The messages in this
 	 * conversation will be sorted by time stamp.
-	 * 
+	 *
 	 * @param messages The message(s) to add
+	 * @throws IllegalArgumentException if the conversation ids of the messages do not match the id of this conversation<br>
+	 *                                  if this exception was thrown, none of the given messages were added
 	 */
-	public void addMessages(Message... msgs) {
+	public void addMessages(Message... msgs) throws IllegalArgumentException {
+		for (Message msg : msgs) {
+			if (!msg.getConversationId().equals(id)) {
+				throw new IllegalArgumentException("the conversation ids of the messages must match the id of this conversation");
+			}
+		}
 		for (int i = 0; i < msgs.length; i++) {
 			if (!messages.contains(msgs[i])) {
 				messages.add(msgs[i]);
@@ -96,7 +99,7 @@ public class Conversation {
 
 	/**
 	 * Returns an unmodifiable list containing all messages in this conversation.
-	 * 
+	 *
 	 * @return the messages
 	 */
 	public List<Message> getMessages() {
@@ -105,7 +108,7 @@ public class Conversation {
 
 	/**
 	 * Returns an unmodifiable list containing all users in this conversation.
-	 * 
+	 *
 	 * @return the users
 	 */
 	public List<String> getUsers() {
