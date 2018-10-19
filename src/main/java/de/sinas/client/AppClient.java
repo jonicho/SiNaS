@@ -7,21 +7,19 @@ import de.sinas.net.Client;
 import de.sinas.net.PROTOCOL;
 import de.sinas.server.Users;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class AppClient extends Client {
+	private final ArrayList<Conversation> conversations = new ArrayList<>();
+	private final Users users = new Users();
 	private User thisUser;
-	private ArrayList<Conversation> conversations = new ArrayList<>();
-	private Users users;
-	private String ownIP;
-	private int ownPort;
+	private boolean isLoggedIn;
 
 	public AppClient(String pServerIP, int pServerPort, String username, String password) {
 		super(pServerIP, pServerPort);
-		login(username, password);
+		thisUser = new User("", 0, username, password);
+		login();
 	}
 
 	@Override
@@ -56,6 +54,7 @@ public class AppClient extends Client {
 	}
 
 	private void handleLoginOk() {
+		isLoggedIn = true;
 		send(PROTOCOL.buildMessage(PROTOCOL.CS.GET_CONVERSATIONS));
 	}
 
@@ -118,8 +117,8 @@ public class AppClient extends Client {
 				Boolean.parseBoolean(msgParts[3]), ""));
 	}
 
-	private void login(String username, String password) {
-		send(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN, username, password));
+	private void login() {
+		send(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN, thisUser.getUsername(), thisUser.getPassword()));
 	}
 
 	public User getThisUser() {
@@ -127,7 +126,7 @@ public class AppClient extends Client {
 	}
 
 	public boolean isLoggedIn() {
-		return thisUser != null;
+		return isLoggedIn;
 	}
 
 	public ArrayList<Conversation> getConversations() {
