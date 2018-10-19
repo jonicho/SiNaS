@@ -9,7 +9,6 @@ import de.sinas.net.Server;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -169,16 +168,16 @@ public class AppServer extends Server {
 	private void handleGetConversations(User user) {
 		for (Conversation conversation : conversations) {
 			if (conversation.contains(user.getUsername())) {
-				String usersString = conversation.getUsers().get(0);
+				StringBuilder usersString = new StringBuilder(conversation.getUsers().get(0));
 				for (int i = 1; i < conversation.getUsers().size(); i++) {
-					usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
+					usersString.append(PROTOCOL.SPLIT).append(conversation.getUsers().get(i));
 				}
 				if (!convCryptoManager.hasSession(user, conversation)) {
 					ConversationCryptoSession ccs = new ConversationCryptoSession(conversation, user);
 					ccs.setAesKey(super.gethAES().generateKey());
 					convCryptoManager.addSession(ccs);
 				}
-				sendAES(user, PROTOCOL.SC.CONVERSATION, conversation.getName(), conversation.getId(), convCryptoManager.getSession(user, conversation).getAesKey(), usersString);
+				sendAES(user, PROTOCOL.SC.CONVERSATION, conversation.getName(), conversation.getId(), convCryptoManager.getSession(user, conversation).getAesKey(), usersString.toString());
 			}
 		}
 	}
@@ -319,12 +318,12 @@ public class AppServer extends Server {
 		Conversation newConversation = new Conversation(name, users);
 		conversations.add(newConversation);
 		db.createConversation(newConversation);
-		String usersString = newConversation.getUsers().get(0);
+		StringBuilder usersString = new StringBuilder(newConversation.getUsers().get(0));
 		for (int i = 1; i < newConversation.getUsers().size(); i++) {
-			usersString += PROTOCOL.SPLIT + newConversation.getUsers().get(i);
+			usersString.append(PROTOCOL.SPLIT).append(newConversation.getUsers().get(i));
 		}
 		sendToConversation(newConversation, PROTOCOL.SC.CONVERSATION, newConversation.getId(),
-				newConversation.getName(), usersString);
+				newConversation.getName(), usersString.toString());
 	}
 
 	/**
@@ -346,12 +345,12 @@ public class AppServer extends Server {
 		}
 		conversation.addUser(msgParts[2]);
 		db.addUserToConversation(conversation, msgParts[2]);
-		String usersString = conversation.getUsers().get(0);
+		StringBuilder usersString = new StringBuilder(conversation.getUsers().get(0));
 		for (int i = 1; i < conversation.getUsers().size(); i++) {
-			usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
+			usersString.append(PROTOCOL.SPLIT).append(conversation.getUsers().get(i));
 		}
 		sendToConversation(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(),
-				usersString);
+				usersString.toString());
 	}
 
 	/**
@@ -400,12 +399,12 @@ public class AppServer extends Server {
 		}
 		conversation.rename(msgParts[2]);
 		db.updateConversation(conversation);
-		String usersString = conversation.getUsers().get(0);
+		StringBuilder usersString = new StringBuilder(conversation.getUsers().get(0));
 		for (int i = 1; i < conversation.getUsers().size(); i++) {
-			usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
+			usersString.append(PROTOCOL.SPLIT).append(conversation.getUsers().get(i));
 		}
 		sendToConversation(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(),
-				usersString);
+				usersString.toString());
 	}
 
 	/**
