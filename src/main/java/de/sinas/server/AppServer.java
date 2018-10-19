@@ -280,8 +280,8 @@ public class AppServer extends Server {
 		}
 		Message message;
 		try {
-			message = new Message(content, ms, user.getUsername(), isFile);
-		} catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
+			message = new Message(content, ms, user.getUsername(), isFile, conv.getId());
+		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 			sendToUser(user, PROTOCOL.SC.ERROR, PROTOCOL.ERRORCODES.UNKNOWN_ERROR);
 			return;
