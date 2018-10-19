@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+    compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.25.2'
+}
+
+repositories {
+    jcenter()
+}
+
+task runServer(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'de.sinas.server.ServerLauncher'
+}
+
+task runClient(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'de.sinas.client.ClientLauncher'
+}

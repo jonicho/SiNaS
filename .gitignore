@@ -1,4 +1,11 @@
 /bin/
-.settings/org.eclipse.jdt.core.prefs
+.settings/
 .vscode/
-.idea/workspace.xml
+.idea/**
+/out/
+.gradle/
+/build/
+!gradle-wrapper.jar
+**/build/
+.classpath
+.project

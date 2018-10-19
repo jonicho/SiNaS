@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/SiNaS.iml" filepath="$PROJECT_DIR$/SiNaS.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/SiNaS.iml" filepath="$PROJECT_DIR$/.idea/SiNaS.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/SiNaS_main.iml" filepath="$PROJECT_DIR$/.idea/modules/SiNaS_main.iml" group="SiNaS" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/SiNaS_test.iml" filepath="$PROJECT_DIR$/.idea/modules/SiNaS_test.iml" group="SiNaS" />
     </modules>
   </component>
 </project>
