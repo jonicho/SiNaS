@@ -41,6 +41,7 @@ public class AppClient extends Client {
 			String dec = new String(Encoder.b64Decode(msgParts[0]));
 			String plainText = new String(this.gethRSA().decrypt(dec.getBytes(), rsaPrivKey));
 			msgParts = plainText.split(PROTOCOL.SPLIT);
+			isRSA = false;
 		} else {
 			if(msgParts.length == 1) {
 				String dec = new String(Encoder.b64Decode(msgParts[0]));
@@ -65,6 +66,9 @@ public class AppClient extends Client {
 			case PROTOCOL.SC.ERROR:
 				handleError(msgParts[1]);
 				break;
+				case PROTOCOL.SC.SEC_CONNECTION_ACCEPTED:
+				handleSecConAccept(msgParts);
+				break;
 			case PROTOCOL.SC.CONVERSATION:
 				handleConversation(msgParts);
 				break;
@@ -84,6 +88,10 @@ public class AppClient extends Client {
 	public void connectionLost() {
 
 	}
+
+	private void handleSecConAccept(String[] msgParts) {
+		mainAESKey = new SecretKeySpec(msgParts[1].getBytes(),"AES");
+	} 
 
 	private void handleLoginOk() {
 		isLoggedIn = true;
