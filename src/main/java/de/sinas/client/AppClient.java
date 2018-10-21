@@ -173,7 +173,22 @@ public class AppClient extends Client {
 	}
 
 	private void sendMessage(String convID, String content) {
-		
+		Conversation cCon = null;
+		for(Conversation con : conversations) {
+			if(con.getId().equals(convID)) {
+				cCon = con;
+			}
+		}
+		ClientCryptoConversation ccc = null;
+		for(ClientCryptoConversation pccc : cryptoSessions) {
+			if(pccc.getConversationID().equals(convID)) {
+				ccc = pccc;
+			}
+		}
+		content = false + PROTOCOL.SPLIT + content;
+		byte[] cryp = super.gethAES().encrypt(content.getBytes(), ccc.getAesKey());
+		String enc = Encoder.b64Encode(cryp);
+		send(convID+PROTOCOL.SPLIT+enc);
 	}
 
 	public User getThisUser() {
@@ -186,17 +201,6 @@ public class AppClient extends Client {
 
 	public ArrayList<Conversation> getConversations() {
 		return conversations;
-	}
-
-	/**
-	 * Sends the given message to the given user.
-	 * The message is encrypted using the given key and the AES Algorithm
-	 */
-	private void sendAES(SecretKey key, Object... message) {
-		String msg = PROTOCOL.buildMessage(message);
-		byte[] cryp = super.gethAES().encrypt(msg.getBytes(), key);
-		String enc = Encoder.b64Encode(cryp);
-		send(enc);
 	}
 
 	/**
