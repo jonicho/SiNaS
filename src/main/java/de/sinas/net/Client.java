@@ -122,6 +122,28 @@ public abstract class Client {
 		}
 	}
 
+	/**
+	 * @return the hAES
+	 */
+	public AESHandler gethAES() {
+		return hAES;
+	}
+
+	/**
+	 * @return the hasher
+	 */
+	public HashHandler getHasher() {
+		return hasher;
+	}
+
+	/**
+	 * @return the hRSA
+	 */
+	public RSAHandler gethRSA() {
+		return hRSA;
+	}
+	
+
 	public Client(String pServerIP, int pServerPort) {
 		messageHandler = new MessageHandler(pServerIP, pServerPort);
 	}

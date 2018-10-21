@@ -3,18 +3,29 @@ package de.sinas.client;
 import de.sinas.Conversation;
 import de.sinas.Message;
 import de.sinas.User;
+import de.sinas.crypto.Encoder;
 import de.sinas.net.Client;
 import de.sinas.net.PROTOCOL;
+import de.sinas.server.CryptoSessionManager;
 import de.sinas.server.Users;
 
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
 
 public class AppClient extends Client {
 	private final ArrayList<Conversation> conversations = new ArrayList<>();
 	private final Users users = new Users();
 	private User thisUser;
 	private boolean isLoggedIn;
+	private boolean isRSA;
+	private SecretKey rsaPrivKey;
+	private SecretKey rsaPubKey;
+	private SecretKey mainAESKey;
+	private ArrayList<ClientCryptoConversation> cryptoSessions = new ArrayList<ClientCryptoConversation>();
 
 	public AppClient(String pServerIP, int pServerPort, String username, String password) {
 		super(pServerIP, pServerPort);
@@ -26,6 +37,27 @@ public class AppClient extends Client {
 	public void processMessage(String message) {
 		System.out.println("New message: " + message);
 		String[] msgParts = message.split(PROTOCOL.SPLIT);
+		if(isRSA) {
+			String dec = new String(Encoder.b64Decode(msgParts[0]));
+			String plainText = new String(this.gethRSA().decrypt(dec.getBytes(), rsaPrivKey));
+			msgParts = plainText.split(PROTOCOL.SPLIT);
+		} else {
+			if(msgParts.length == 1) {
+				String dec = new String(Encoder.b64Decode(msgParts[0]));
+				String plainText = new String(this.gethAES().decrypt(dec.getBytes(), mainAESKey));
+				msgParts = plainText.split(PROTOCOL.SPLIT);
+			} else {
+				String dec = new String(Encoder.b64Decode(msgParts[0]));
+				SecretKey cKey = null;
+				for(ClientCryptoConversation ccc : cryptoSessions) {
+					if(ccc.getConversationID().equals(msgParts[0])) {
+						cKey = ccc.getAesKey();
+					}
+				}
+				String plainText = new String(this.gethAES().decrypt(dec.getBytes(), cKey));
+				msgParts = plainText.split(PROTOCOL.SPLIT);
+			}
+		}
 		switch (msgParts[0]) {
 			case PROTOCOL.SC.LOGIN_OK:
 				handleLoginOk();
@@ -115,6 +147,14 @@ public class AppClient extends Client {
 		}
 		conversation.addMessages(new Message(msgParts[2], msgParts[6], Long.parseLong(msgParts[4]), msgParts[5],
 				Boolean.parseBoolean(msgParts[3]), ""));
+	}
+
+	private void makeConnection() {
+		KeyPair kp = this.gethRSA().generateKeyPair();
+		rsaPrivKey = new SecretKeySpec(kp.getPrivate().getEncoded(),"RSA");
+		rsaPubKey = new SecretKeySpec(kp.getPublic().getEncoded(),"RSA");
+		isRSA = true;
+		send(PROTOCOL.buildMessage(PROTOCOL.CS.CREATE_SEC_CONNECTION,rsaPubKey.getEncoded()));
 	}
 
 	private void login() {
