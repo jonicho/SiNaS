@@ -16,7 +16,7 @@ public final class PROTOCOL {
 				CONVERSATION = "con", //{ENRYPTED:MAINAES} Base [split] conversaion name [split] conversation id [split] conversation AES KEY [split] users ...
 				SEC_CONNECTION_ACCEPTED = "secacc", //{ENCRYPTED:RSA} Base [split] Main AES Key
 				USER = "user", //{ENRYPTED:MAINAES} Base [split] username
-				MESSAGE = "msg"; //{ENCRYPTED:CONVAES} Base [split] conversation id [split] message id [split] is file [split] timestamp [split] sender [split] content
+				MESSAGE = "msg"; //conversation id[split]{ENCRYPTED:CONVAES} Base [split] conversation id [split] message id [split] is file [split] timestamp [split] sender [split] content
 	}
 
 	public final class CS {

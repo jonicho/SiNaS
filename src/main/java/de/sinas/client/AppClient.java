@@ -95,7 +95,7 @@ public class AppClient extends Client {
 
 	private void handleLoginOk() {
 		isLoggedIn = true;
-		send(PROTOCOL.buildMessage(PROTOCOL.CS.GET_CONVERSATIONS));
+		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.GET_CONVERSATIONS));
 	}
 
 	private void handleError(String error) {
@@ -116,8 +116,11 @@ public class AppClient extends Client {
 	}
 
 	private void handleConversation(String[] msgParts) {
-		String conversationId = msgParts[1];
-		String conversationName = msgParts[2];
+		String conversationName = msgParts[1];
+		String conversationId = msgParts[2];
+		String convesationKey = msgParts[3];
+		SecretKey conKey = new SecretKeySpec(msgParts[3].getBytes(),"AES");
+		cryptoSessions.add(new ClientCryptoConversation(conKey,conversationId));
 		String[] usernames = Arrays.copyOfRange(msgParts, 3, msgParts.length);
 		boolean updated = false;
 		for (int i = 0; i < conversations.size(); i++) {
@@ -166,7 +169,11 @@ public class AppClient extends Client {
 	}
 
 	private void login() {
-		send(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN, thisUser.getUsername(), thisUser.getPassword()));
+		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN, thisUser.getUsername(), thisUser.getPassword()));
+	}
+
+	private void sendMessage(String convID, String content) {
+		
 	}
 
 	public User getThisUser() {
@@ -181,4 +188,36 @@ public class AppClient extends Client {
 		return conversations;
 	}
 
+	/**
+	 * Sends the given message to the given user.
+	 * The message is encrypted using the given key and the AES Algorithm
+	 */
+	private void sendAES(SecretKey key, Object... message) {
+		String msg = PROTOCOL.buildMessage(message);
+		byte[] cryp = super.gethAES().encrypt(msg.getBytes(), key);
+		String enc = Encoder.b64Encode(cryp);
+		send(enc);
+	}
+
+	/**
+	 * Sends the given message to the given user.
+	 * The message is encrypted using the given key and the AES Algorithm
+	 */
+	private void sendAES(Object... message) {
+		String msg = PROTOCOL.buildMessage(message);
+		byte[] cryp = super.gethAES().encrypt(msg.getBytes(), mainAESKey);
+		String enc = Encoder.b64Encode(cryp);
+		send(enc);
+	}
+
+	/**
+	 * Sends the given message to the given user.
+	 * The message is encrypted using the given key and the RSA Algorithm
+	 */
+	private void sendRSA(SecretKey key, Object... message) {
+		String msg = PROTOCOL.buildMessage(message);
+		byte[] cryp = super.gethRSA().encrypt(msg.getBytes(), key);
+		String enc = Encoder.b64Encode(cryp);
+		send(enc);
+	}
 }
