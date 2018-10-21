@@ -287,7 +287,7 @@ public class AppServer extends Server {
 		}
 		conv.addMessages(message);
 		db.createMessage(message);
-		sendToConversation(conv, PROTOCOL.SC.MESSAGE, conv.getId(), message.getId(), message.isFile(),
+		sendToConversationAES(conv, PROTOCOL.SC.MESSAGE, conv.getId(), message.getId(), message.isFile(),
 				message.getTimestamp(), message.getSender(), message.getContent());
 	}
 
@@ -322,7 +322,7 @@ public class AppServer extends Server {
 		for (int i = 1; i < newConversation.getUsers().size(); i++) {
 			usersString.append(PROTOCOL.SPLIT).append(newConversation.getUsers().get(i));
 		}
-		sendToConversation(newConversation, PROTOCOL.SC.CONVERSATION, newConversation.getId(),
+		sendToConversationAES(newConversation, PROTOCOL.SC.CONVERSATION, newConversation.getId(),
 				newConversation.getName(), usersString.toString());
 	}
 
@@ -349,7 +349,7 @@ public class AppServer extends Server {
 		for (int i = 1; i < conversation.getUsers().size(); i++) {
 			usersString.append(PROTOCOL.SPLIT).append(conversation.getUsers().get(i));
 		}
-		sendToConversation(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(),
+		sendToConversationAES(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(),
 				usersString.toString());
 	}
 
@@ -376,7 +376,7 @@ public class AppServer extends Server {
 		for (int i = 1; i < conversation.getUsers().size(); i++) {
 			usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
 		}
-		sendToConversation(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(),
+		sendToConversationAES(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(),
 				usersString);
 	}
 
@@ -403,7 +403,7 @@ public class AppServer extends Server {
 		for (int i = 1; i < conversation.getUsers().size(); i++) {
 			usersString.append(PROTOCOL.SPLIT).append(conversation.getUsers().get(i));
 		}
-		sendToConversation(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(),
+		sendToConversationAES(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(),
 				usersString.toString());
 	}
 
