@@ -6,7 +6,6 @@ import de.sinas.User;
 import de.sinas.crypto.Encoder;
 import de.sinas.net.Client;
 import de.sinas.net.PROTOCOL;
-import de.sinas.server.CryptoSessionManager;
 import de.sinas.server.Users;
 
 import java.security.KeyPair;
@@ -27,9 +26,9 @@ public class AppClient extends Client {
 	private SecretKey mainAESKey;
 	private ArrayList<ClientCryptoConversation> cryptoSessions = new ArrayList<ClientCryptoConversation>();
 
-	public AppClient(String pServerIP, int pServerPort, String username, String password) {
+	public AppClient(String pServerIP, int pServerPort, String username, String passwordHash) {
 		super(pServerIP, pServerPort);
-		thisUser = new User("", 0, username, password);
+		thisUser = new User("", 0, username, passwordHash);
 		login();
 	}
 
@@ -169,7 +168,7 @@ public class AppClient extends Client {
 	}
 
 	private void login() {
-		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN, thisUser.getUsername(), thisUser.getPassword()));
+		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN, thisUser.getUsername(), thisUser.getPasswordHash()));
 	}
 
 	private void sendMessage(String convID, String content) {

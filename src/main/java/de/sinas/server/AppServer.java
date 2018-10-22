@@ -136,7 +136,7 @@ public class AppServer extends Server {
 	private void handleLogin(TempUser tUser, String username, String password) {
 		// TODO: handle login
 		User user = db.loadConnectedUser(username, tUser.getIp(), tUser.getPort());
-		if (user.getPassword().equals(password)) {
+		if (user.getPasswordHash().equals(password)) {
 			tempUsers.remove(tUser);
 			CryptoSession cs = new CryptoSession(user);
 			cs.setMainAESKey(tUser.getAesKey());
@@ -462,19 +462,15 @@ public class AppServer extends Server {
 	}
 
 	private void sendToConversationAES(Conversation con, Object... message) {
-		ArrayList<User> destUsers = new ArrayList<User>();
 		for (String username : con.getUsers()) {
 			User user = users.getUser(username);
 			if (user != null && convCryptoManager.hasSession(user, con)) {
-				destUsers.add(user);
+				ConversationCryptoSession ccs = convCryptoManager.getSession(user, con);
+				String msg = PROTOCOL.buildMessage(message);
+				byte[] cryp = super.gethAES().encrypt(msg.getBytes(), ccs.getAesKey());
+				String enc = Encoder.b64Encode(cryp);
+				send(user.getIp(), user.getPort(), ccs.getConv().getId() + PROTOCOL.SPLIT + enc);
 			}
-		}
-		for (User u : destUsers) {
-			ConversationCryptoSession ccs = convCryptoManager.getSession(u, con);
-			String msg = PROTOCOL.buildMessage(message);
-			byte[] cryp = super.gethAES().encrypt(msg.getBytes(), ccs.getAesKey());
-			String enc = Encoder.b64Encode(cryp);
-			send(u.getIp(), u.getPort(), ccs.getConv().getId() + PROTOCOL.SPLIT + enc);
 		}
 
 	}

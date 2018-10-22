@@ -22,7 +22,7 @@ public class Database {
 	private void initEmptyDatabase() {
 		try {
 			Statement statement = connection.createStatement();
-			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `users` ( `username` TEXT NOT NULL UNIQUE, `password` TEXT NOT NULL, PRIMARY KEY(`username`) )");
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `users` ( `username` TEXT NOT NULL UNIQUE, `password_hash` TEXT NOT NULL, PRIMARY KEY(`username`) )");
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `conversations` ( `conversation_id` TEXT NOT NULL PRIMARY KEY UNIQUE, `name` TEXT NOT NULL )");
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `messages` ( `id` TEXT NOT NULL PRIMARY KEY UNIQUE, `content` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `sender` TEXT NOT NULL, `is_file` REAL NOT NULL, `conversation_id` TEXT NOT NULL, FOREIGN KEY(`sender`) REFERENCES `users`(`username`), FOREIGN KEY(`conversation_id`) REFERENCES `conversations`(`conversation_id`) )");
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `conversations_users` ( `conversation_id` TEXT NOT NULL, `username` TEXT NOT NULL, FOREIGN KEY(`conversation_id`) REFERENCES `conversations`(`conversation_id`), FOREIGN KEY(`username`) REFERENCES `users`(`username`), PRIMARY KEY(`conversation_id`,`username`) )");
@@ -47,7 +47,7 @@ public class Database {
 			statement.setString(1, username);
 			ResultSet rs = statement.executeQuery();
 			if (rs.next()) {
-				return new User(ip, port, rs.getString("username"), rs.getString("password"));
+				return new User(ip, port, rs.getString("username"), rs.getString("password_hash"));
 			} else {
 				return null;
 			}
@@ -177,9 +177,9 @@ public class Database {
 			return false;
 		}
 		try {
-			PreparedStatement statement = connection.prepareStatement("INSERT INTO `users`(`username`,`password`) VALUES (?,?);");
+			PreparedStatement statement = connection.prepareStatement("INSERT INTO `users`(`username`,`password_hash`) VALUES (?,?);");
 			statement.setString(1, user.getUsername());
-			statement.setString(2, user.getPassword());
+			statement.setString(2, user.getPasswordHash());
 			statement.executeUpdate();
 			return true;
 		} catch (SQLException e) {
@@ -199,8 +199,8 @@ public class Database {
 			return false;
 		}
 		try {
-			PreparedStatement statement = connection.prepareStatement("UPDATE `users` SET `password`=? WHERE `username`=?;");
-			statement.setString(1, user.getPassword());
+			PreparedStatement statement = connection.prepareStatement("UPDATE `users` SET `password_hash`=? WHERE `username`=?;");
+			statement.setString(1, user.getPasswordHash());
 			statement.setString(2, user.getUsername());
 			statement.executeUpdate();
 			return true;
