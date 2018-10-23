@@ -170,6 +170,11 @@ public class AppClient extends Client {
 		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN, thisUser.getUsername(), thisUser.getPasswordHash()));
 	}
 
+	public void register(String username, String passwordHash) {
+		thisUser = new User("", 0, username, passwordHash);
+		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.REGISTER, thisUser.getUsername(), thisUser.getPasswordHash()));
+	}
+
 	private void sendMessage(String convID, String content) {
 		Conversation cCon = null;
 		for(Conversation con : conversations) {
