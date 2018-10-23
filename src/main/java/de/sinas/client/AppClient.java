@@ -18,7 +18,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class AppClient extends Client {
 	private final ArrayList<Conversation> conversations = new ArrayList<>();
 	private final Users users = new Users();
-	private User thisUser;
+	private User thisUser = new User("", 0, "", "");
 	private boolean isLoggedIn;
 	private boolean isRSA;
 	private SecretKey rsaPrivKey;
@@ -26,10 +26,8 @@ public class AppClient extends Client {
 	private SecretKey mainAESKey;
 	private ArrayList<ClientCryptoConversation> cryptoSessions = new ArrayList<ClientCryptoConversation>();
 
-	public AppClient(String pServerIP, int pServerPort, String username, String passwordHash) {
+	public AppClient(String pServerIP, int pServerPort) {
 		super(pServerIP, pServerPort);
-		thisUser = new User("", 0, username, passwordHash);
-		login();
 	}
 
 	@Override
@@ -167,7 +165,8 @@ public class AppClient extends Client {
 		send(PROTOCOL.buildMessage(PROTOCOL.CS.CREATE_SEC_CONNECTION,rsaPubKey.getEncoded()));
 	}
 
-	private void login() {
+	public void login(String username, String passwordHash) {
+		thisUser = new User("", 0, username, passwordHash);
 		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN, thisUser.getUsername(), thisUser.getPasswordHash()));
 	}
 
