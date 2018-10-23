@@ -351,6 +351,40 @@ public class Database {
 	 * @return true if both the conversation and the user exist and the user was in the conversation, false otherwise
 	 */
 	public boolean removeUserFromConversation(Conversation conversation, String user) {
+		try {
+			{
+				PreparedStatement statement = connection.prepareStatement("SELECT * FROM conversations WHERE conversation_id=?");
+				statement.setString(1, conversation.getId());
+				ResultSet rs = statement.executeQuery();
+				if (!rs.next()) {
+					return false;
+				}
+			}
+			{
+				PreparedStatement statement = connection.prepareStatement("SELECT * FROM users WHERE username=?");
+				statement.setString(1, user);
+				ResultSet rs = statement.executeQuery();
+				if (!rs.next()) {
+					return false;
+				}
+			}
+			{
+				PreparedStatement statement = connection.prepareStatement("SELECT * FROM conversations_users WHERE conversation_id=? AND username=?");
+				statement.setString(1, conversation.getId());
+				statement.setString(2, user);
+				ResultSet rs = statement.executeQuery();
+				if (!rs.next()) {
+					return false;
+				}
+			}
+			PreparedStatement statement = connection.prepareStatement("DELETE FROM `conversations_users` WHERE `conversation_id`=? AND `username`=?;");
+			statement.setString(1, conversation.getId());
+			statement.setString(2, user);
+			statement.executeUpdate();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return false;
 	}
 }
