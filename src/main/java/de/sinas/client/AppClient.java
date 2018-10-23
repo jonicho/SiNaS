@@ -163,7 +163,7 @@ public class AppClient extends Client {
 		rsaPrivKey = new SecretKeySpec(kp.getPrivate().getEncoded(),"RSA");
 		rsaPubKey = new SecretKeySpec(kp.getPublic().getEncoded(),"RSA");
 		isRSA = true;
-		send(PROTOCOL.buildMessage(PROTOCOL.CS.CREATE_SEC_CONNECTION,rsaPubKey.getEncoded()));
+		send(PROTOCOL.buildMessage(PROTOCOL.CS.CREATE_SEC_CONNECTION, new String(rsaPubKey.getEncoded())));
 	}
 
 	public void login(String username, String passwordHash) {
