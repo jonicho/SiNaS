@@ -28,6 +28,7 @@ public class AppClient extends Client {
 
 	public AppClient(String pServerIP, int pServerPort) {
 		super(pServerIP, pServerPort);
+		makeConnection();
 	}
 
 	@Override
