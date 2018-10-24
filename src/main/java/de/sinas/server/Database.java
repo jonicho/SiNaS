@@ -173,7 +173,7 @@ public class Database {
 	 * @return true if the user did not already exist and the user could successfully be created, false otherwise
 	 */
 	public boolean createUser(User user) {
-		if (loadUserInfo(user.getUsername()) == null) {
+		if (loadUserInfo(user.getUsername()) != null) {
 			return false;
 		}
 		try {
