@@ -164,6 +164,7 @@ public class AppClient extends Client {
 		KeyPair kp = this.gethRSA().generateKeyPair();
 		rsaPrivKey = new SecretKeySpec(kp.getPrivate().getEncoded(),"RSA");
 		rsaPubKey = new SecretKeySpec(kp.getPublic().getEncoded(),"RSA");
+		System.out.println(rsaPubKey);
 		isRSA = true;
 		send(PROTOCOL.buildMessage(PROTOCOL.CS.CREATE_SEC_CONNECTION,rsaPubKey.getEncoded()));
 	}
