@@ -123,7 +123,6 @@ public class AppServer extends Server {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		System.out.println("Len is:"+Encoder.b64Encode(tUser.getAesKey().getEncoded()).getBytes().length);
 		sendRSA(new User(tUser.getIp(), tUser.getPort(), "", ""), tUser.getRsaKey(), PROTOCOL.buildMessage(PROTOCOL.SC.SEC_CONNECTION_ACCEPTED, Encoder.b64Encode(tUser.getAesKey().getEncoded())));
 	}
 

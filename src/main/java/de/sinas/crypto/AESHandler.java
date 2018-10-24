@@ -34,7 +34,6 @@ public class AESHandler {
     public SecretKey generateKey() {
         byte[] keyBytes = new byte[KEY_SIZE];
         prng.nextBytes(keyBytes);
-        System.out.println(Arrays.toString(keyBytes));
         SecretKey sKey = new SecretKeySpec(keyBytes, "AES");
         return sKey;
     }
