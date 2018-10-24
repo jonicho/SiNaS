@@ -80,10 +80,6 @@ public class AppServer extends Server {
 			}
 			return;
 		}
-		if (msgParts.length < 1) {
-			sendError(user, PROTOCOL.ERRORCODES.EMPTY_MESSAGE);
-			return;
-		}
 		switch (msgParts[0]) {
 			case PROTOCOL.CS.MESSAGE:
 				handleMessage(user, msgParts);
