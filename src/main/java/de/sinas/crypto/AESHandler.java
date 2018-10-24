@@ -9,6 +9,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.security.SecureRandom;
+import java.util.Arrays;
 
 public class AESHandler {
     private Cipher cipher;
@@ -33,6 +34,7 @@ public class AESHandler {
     public SecretKey generateKey() {
         byte[] keyBytes = new byte[KEY_SIZE];
         prng.nextBytes(keyBytes);
+        System.out.println(Arrays.toString(keyBytes));
         SecretKey sKey = new SecretKeySpec(keyBytes, "AES");
         return sKey;
     }

@@ -89,7 +89,8 @@ public class AppClient extends Client {
 	}
 
 	private void handleSecConAccept(String[] msgParts) {
-		mainAESKey = new SecretKeySpec(msgParts[1].getBytes(),"AES");
+		mainAESKey = new SecretKeySpec(Encoder.b64Decode(msgParts[1]),"AES");
+		sendAES(PROTOCOL.CS.REGISTER,"testname","testhash");
 	} 
 
 	private void handleLoginOk() {
