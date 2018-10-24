@@ -16,7 +16,7 @@ import javax.crypto.SecretKey;
 public class RSAHandler {
     private Cipher cipher;
     private KeyPairGenerator kpg;
-    private final int KEY_SIZE = 2048;
+    private final int KEY_SIZE = 3072;
 
     public RSAHandler() { 
         try {
