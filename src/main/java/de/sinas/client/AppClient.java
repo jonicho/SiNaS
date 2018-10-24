@@ -37,7 +37,7 @@ public class AppClient extends Client {
 
 	@Override
 	public void processMessage(String message) {
-		System.out.println("New message: " + message);
+		System.out.println("(CLIENT)New message: " + message);
 		String[] msgParts = message.split(PROTOCOL.SPLIT);
 		if(isRSA) {
 			String dec = new String(Encoder.b64Decode(msgParts[0]));

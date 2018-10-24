@@ -38,7 +38,7 @@ public class AppServer extends Server {
 
 	@Override
 	public void processMessage(String clientIP, int clientPort, String message) {
-		System.out.println("New message: " + clientIP + ":" + clientPort + ", " + message);
+		System.out.println("(SERVER)New message: " + clientIP + ":" + clientPort + ", " + message);
 		String[] msgParts = message.split(PROTOCOL.SPLIT);
 		User user = users.getUser(clientIP, clientPort);
 		if (user != null && cryptoManager.getSessionByUser(user) != null) {
