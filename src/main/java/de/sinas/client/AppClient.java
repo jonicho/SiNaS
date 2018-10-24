@@ -117,23 +117,24 @@ public class AppClient extends Client {
 		String conversationName = msgParts[1];
 		String conversationId = msgParts[2];
 		String convesationKey = msgParts[3];
-		SecretKey conKey = new SecretKeySpec(msgParts[3].getBytes(),"AES");
-		cryptoSessions.add(new ClientCryptoConversation(conKey,conversationId));
 		String[] usernames = Arrays.copyOfRange(msgParts, 3, msgParts.length);
-		boolean updated = false;
+		SecretKey conKey = new SecretKeySpec(convesationKey.getBytes(),"AES");
+		cryptoSessions.add(new ClientCryptoConversation(conKey,conversationId));
+		int conversationIndex = -1;
 		for (int i = 0; i < conversations.size(); i++) {
 			Conversation c = conversations.get(i);
 			if (c.getId().equals(conversationId)) {
-				Conversation newConversation = new Conversation(conversationId, conversationName, usernames);
-				newConversation.addMessages(c.getMessages().toArray(new Message[0]));
-				conversations.set(i, newConversation);
-				updated = true;
+				conversationIndex = i;
 				break;
 			}
 		}
-		if (!updated) {
+		if (conversationIndex == -1) {
 			conversations.add(new Conversation(conversationId, conversationName, usernames));
+			return;
 		}
+		Conversation newConversation = new Conversation(conversationId, conversationName, usernames);
+		newConversation.addMessages(conversations.get(conversationIndex).getMessages().toArray(new Message[0]));
+		conversations.set(conversationIndex, newConversation);
 	}
 
 	private void handleUser(String[] msgParts) {
