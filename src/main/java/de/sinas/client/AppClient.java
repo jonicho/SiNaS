@@ -47,7 +47,8 @@ public class AppClient extends Client {
 			if(msgParts.length == 1) {
 				String plainText = new String(this.gethAES().decrypt(Encoder.b64Decode(msgParts[0]), mainAESKey));
 				msgParts = plainText.split(PROTOCOL.SPLIT);
-			} else {
+			} 
+			else if (msgParts.length != 2){
 				SecretKey cKey = null;
 				for(ClientCryptoConversation ccc : cryptoSessions) {
 					if(ccc.getConversationID().equals(msgParts[0])) {
