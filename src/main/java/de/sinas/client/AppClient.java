@@ -40,24 +40,21 @@ public class AppClient extends Client {
 		System.out.println("New message: " + message);
 		String[] msgParts = message.split(PROTOCOL.SPLIT);
 		if(isRSA) {
-			String dec = new String(Encoder.b64Decode(msgParts[0]));
-			String plainText = new String(this.gethRSA().decrypt(dec.getBytes(), rsaPrivKey));
+			String plainText = new String(this.gethRSA().decrypt(Encoder.b64Decode(msgParts[0]), rsaPrivKey));
 			msgParts = plainText.split(PROTOCOL.SPLIT);
 			isRSA = false;
 		} else {
 			if(msgParts.length == 1) {
-				String dec = new String(Encoder.b64Decode(msgParts[0]));
-				String plainText = new String(this.gethAES().decrypt(dec.getBytes(), mainAESKey));
+				String plainText = new String(this.gethAES().decrypt(Encoder.b64Decode(msgParts[0]), mainAESKey));
 				msgParts = plainText.split(PROTOCOL.SPLIT);
 			} else {
-				String dec = new String(Encoder.b64Decode(msgParts[0]));
 				SecretKey cKey = null;
 				for(ClientCryptoConversation ccc : cryptoSessions) {
 					if(ccc.getConversationID().equals(msgParts[0])) {
 						cKey = ccc.getAesKey();
 					}
 				}
-				String plainText = new String(this.gethAES().decrypt(dec.getBytes(), cKey));
+				String plainText = new String(this.gethAES().decrypt(Encoder.b64Decode(msgParts[0]), cKey));
 				msgParts = plainText.split(PROTOCOL.SPLIT);
 			}
 		}
