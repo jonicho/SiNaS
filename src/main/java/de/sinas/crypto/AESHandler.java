@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 public class AESHandler {
     private Cipher cipher;
-    private final int KEY_SIZE = 256;
+    private final int KEY_SIZE = 32;
     private final int SEED_SIZE = 1024;
     private SecureRandom prng;
 
