@@ -51,4 +51,11 @@ public class TempUser extends User {
 	public String getPasswordHash() {
 		throw new IllegalStateException("a temporary user has no password hash!");
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof TempUser
+				&& ((User) obj).getIp().equals(getIp())
+				&& ((User) obj).getPort() == getPort();
+	}
 }
