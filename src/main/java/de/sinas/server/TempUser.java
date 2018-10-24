@@ -2,11 +2,13 @@ package de.sinas.server;
 
 import de.sinas.User;
 
+import java.security.PublicKey;
+
 import javax.crypto.SecretKey;
 
 public class TempUser extends User {
 	private SecretKey aesKey;
-	private SecretKey rsaKey;
+	private PublicKey rsaKey;
 
 	public TempUser(String pClientIP, int pClientPort) {
 		super(pClientIP, pClientPort, null, null);
@@ -29,14 +31,14 @@ public class TempUser extends User {
 	/**
 	 * @return the rsaKey
 	 */
-	public SecretKey getRsaKey() {
+	public PublicKey getRsaKey() {
 		return rsaKey;
 	}
 
 	/**
 	 * @param rsaKey the rsaKey to set
 	 */
-	public void setRsaKey(SecretKey rsaKey) {
+	public void setRsaKey(PublicKey rsaKey) {
 		this.rsaKey = rsaKey;
 	}
 

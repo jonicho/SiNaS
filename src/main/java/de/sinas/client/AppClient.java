@@ -8,7 +8,11 @@ import de.sinas.net.Client;
 import de.sinas.net.PROTOCOL;
 import de.sinas.server.Users;
 
+import java.security.Key;
 import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -21,8 +25,8 @@ public class AppClient extends Client {
 	private User thisUser = new User("", 0, "", "");
 	private boolean isLoggedIn;
 	private boolean isRSA;
-	private SecretKey rsaPrivKey;
-	private SecretKey rsaPubKey;
+	private PrivateKey rsaPrivKey;
+	private PublicKey rsaPubKey;
 	private SecretKey mainAESKey;
 	private ArrayList<ClientCryptoConversation> cryptoSessions = new ArrayList<ClientCryptoConversation>();
 
@@ -172,11 +176,10 @@ public class AppClient extends Client {
 
 	private void makeConnection() {
 		KeyPair kp = this.gethRSA().generateKeyPair();
-		rsaPrivKey = new SecretKeySpec(kp.getPrivate().getEncoded(),"RSA");
-		rsaPubKey = new SecretKeySpec(kp.getPublic().getEncoded(),"RSA");
-		System.out.println(rsaPubKey);
+		rsaPrivKey = kp.getPrivate();
+		rsaPubKey = kp.getPublic();
 		isRSA = true;
-		send(PROTOCOL.buildMessage(PROTOCOL.CS.CREATE_SEC_CONNECTION, new String(rsaPubKey.getEncoded())));
+		send(PROTOCOL.buildMessage(PROTOCOL.CS.CREATE_SEC_CONNECTION, Encoder.b64Encode(rsaPubKey.getEncoded())));
 	}
 
 	public void login(String username, String passwordHash) {
@@ -235,7 +238,7 @@ public class AppClient extends Client {
 	 * Sends the given message to the given user.
 	 * The message is encrypted using the given key and the RSA Algorithm
 	 */
-	private void sendRSA(SecretKey key, Object... message) {
+	private void sendRSA(PublicKey key, Object... message) {
 		String msg = PROTOCOL.buildMessage(message);
 		byte[] cryp = super.gethRSA().encrypt(msg.getBytes(), key);
 		String enc = Encoder.b64Encode(cryp);

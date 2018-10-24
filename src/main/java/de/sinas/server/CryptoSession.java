@@ -2,14 +2,16 @@ package de.sinas.server;
 
 import de.sinas.User;
 
+import java.security.PublicKey;
+
 import javax.crypto.SecretKey;
 
 public class CryptoSession {
-	private SecretKey userPublicKey;
+	private PublicKey userPublicKey;
 	private SecretKey mainAESKey;
 	private User owner;
 
-	public CryptoSession(User u, SecretKey userPublicKey, SecretKey mainAESKey) {
+	public CryptoSession(User u, PublicKey userPublicKey, SecretKey mainAESKey) {
 		owner = u;
 		this.userPublicKey = userPublicKey;
 		this.mainAESKey = mainAESKey;
@@ -32,7 +34,7 @@ public class CryptoSession {
 	/**
 	 * @return the userPublicKey
 	 */
-	public SecretKey getUserPublicKey() {
+	public PublicKey getUserPublicKey() {
 		return userPublicKey;
 	}
 

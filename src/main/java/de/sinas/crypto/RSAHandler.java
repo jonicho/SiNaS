@@ -4,6 +4,8 @@ import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -30,7 +32,7 @@ public class RSAHandler {
         return kpg.generateKeyPair();
     }
 
-    public byte[] encrypt(byte[] input, SecretKey pKey) {
+    public byte[] encrypt(byte[] input, PublicKey pKey) {
         try {
             cipher.init(Cipher.ENCRYPT_MODE, pKey);  
             return cipher.doFinal(input);   
@@ -40,7 +42,7 @@ public class RSAHandler {
         return null;
     }
 
-    public byte[] decrypt(byte[] input, SecretKey pKey) {
+    public byte[] decrypt(byte[] input, PrivateKey pKey) {
         try {
             cipher.init(Cipher.DECRYPT_MODE, pKey);  
             return cipher.doFinal(input);   

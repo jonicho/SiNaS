@@ -9,7 +9,11 @@ import de.sinas.net.Server;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -109,10 +113,16 @@ public class AppServer extends Server {
 	}
 
 	private void handleCreateSecConnection(TempUser tUser, String[] msgParts) {
-		SecretKey sKey = new SecretKeySpec(msgParts[1].getBytes(), 0, msgParts[1].length(), "RSA");
-		tUser.setRsaKey(sKey);
-		tUser.setAesKey(gethAES().generateKey());
-		tempUsers.add(tUser);
+		X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Encoder.b64Decode(msgParts[1]));
+		try {
+			KeyFactory keyFact = KeyFactory.getInstance("RSA");
+			PublicKey pubKey = keyFact.generatePublic(keySpec);
+			tUser.setRsaKey(pubKey);
+			tUser.setAesKey(gethAES().generateKey());
+			tempUsers.add(tUser);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 		sendRSA(new User(tUser.getIp(), tUser.getPort(), "", ""), tUser.getRsaKey(), PROTOCOL.buildMessage(PROTOCOL.SC.SEC_CONNECTION_ACCEPTED, tUser.getAesKey()));
 	}
 
@@ -439,7 +449,7 @@ public class AppServer extends Server {
 	 * Sends the given message to the given user.
 	 * The message is encrypted using the given key and the RSA Algorithm
 	 */
-	private void sendRSA(User user, SecretKey key, Object... message) {
+	private void sendRSA(User user, PublicKey key, Object... message) {
 		String msg = PROTOCOL.buildMessage(message);
 		byte[] cryp = super.gethRSA().encrypt(msg.getBytes(), key);
 		String enc = Encoder.b64Encode(cryp);
