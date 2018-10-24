@@ -145,9 +145,10 @@ public class AppClient extends Client {
 	}
 
 	private void handleMessage(String[] msgParts) {
+		String conversationId = msgParts[1];
 		Conversation conversation = null;
 		for (Conversation con : conversations) {
-			if (con.getId().equals(msgParts[1])) {
+			if (con.getId().equals(conversationId)) {
 				conversation = con;
 				break;
 			}
@@ -155,8 +156,18 @@ public class AppClient extends Client {
 		if (conversation == null) {
 			return;
 		}
-		conversation.addMessages(new Message(msgParts[2], msgParts[6], Long.parseLong(msgParts[4]), msgParts[5],
-				Boolean.parseBoolean(msgParts[3]), ""));
+		String messageId = msgParts[2];
+		boolean isFile = Boolean.parseBoolean(msgParts[3]);
+		long timestamp;
+		try {
+			timestamp = Long.parseLong(msgParts[4]);
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+			return;
+		}
+		String sender = msgParts[5];
+		String content = msgParts[6];
+		conversation.addMessages(new Message(messageId, content, timestamp, sender, isFile, conversationId));
 	}
 
 	private void makeConnection() {
