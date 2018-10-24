@@ -91,7 +91,11 @@ public class AppClient extends Client {
 
 	private void handleSecConAccept(String[] msgParts) {
 		mainAESKey = new SecretKeySpec(Encoder.b64Decode(msgParts[1]),"AES");
-		sendAES(PROTOCOL.CS.REGISTER,"testname","testhash");
+		try {
+			sendAES(PROTOCOL.CS.REGISTER,"testuser",Encoder.b64Encode(super.getHasher().getSecureHash("testhash",super.getHasher().getCheckSum("testname".getBytes()), 1000, 128)));
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 	} 
 
 	private void handleLoginOk() {
