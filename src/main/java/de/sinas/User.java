@@ -42,6 +42,10 @@ public class User {
 		this.passwordHash = passwordHash;
 	}
 
+	public boolean isTempUser() {
+		return false;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof User
