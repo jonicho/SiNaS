@@ -41,11 +41,6 @@ public class TempUser extends User {
 	}
 
 	@Override
-	public boolean isTempUser() {
-		return true;
-	}
-
-	@Override
 	public String getUsername() {
 		throw new IllegalStateException("a temporary user has no username!");
 	}

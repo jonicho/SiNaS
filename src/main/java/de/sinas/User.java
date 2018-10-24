@@ -1,5 +1,7 @@
 package de.sinas;
 
+import de.sinas.server.TempUser;
+
 /**
  * A user with an ip, a port, a username and a nickname
  */
@@ -43,7 +45,7 @@ public class User {
 	}
 
 	public boolean isTempUser() {
-		return false;
+		return this instanceof TempUser;
 	}
 
 	@Override
