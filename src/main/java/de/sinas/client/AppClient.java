@@ -6,7 +6,6 @@ import de.sinas.User;
 import de.sinas.crypto.Encoder;
 import de.sinas.net.Client;
 import de.sinas.net.PROTOCOL;
-import de.sinas.server.CryptoSessionManager;
 import de.sinas.server.Users;
 
 import java.security.KeyPair;
@@ -19,7 +18,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class AppClient extends Client {
 	private final ArrayList<Conversation> conversations = new ArrayList<>();
 	private final Users users = new Users();
-	private User thisUser;
+	private User thisUser = new User("", 0, "", "");
 	private boolean isLoggedIn;
 	private boolean isRSA;
 	private SecretKey rsaPrivKey;
@@ -27,10 +26,9 @@ public class AppClient extends Client {
 	private SecretKey mainAESKey;
 	private ArrayList<ClientCryptoConversation> cryptoSessions = new ArrayList<ClientCryptoConversation>();
 
-	public AppClient(String pServerIP, int pServerPort, String username, String password) {
+	public AppClient(String pServerIP, int pServerPort) {
 		super(pServerIP, pServerPort);
-		thisUser = new User("", 0, username, password);
-		login();
+		makeConnection();
 	}
 
 	@Override
@@ -119,23 +117,24 @@ public class AppClient extends Client {
 		String conversationName = msgParts[1];
 		String conversationId = msgParts[2];
 		String convesationKey = msgParts[3];
-		SecretKey conKey = new SecretKeySpec(msgParts[3].getBytes(),"AES");
-		cryptoSessions.add(new ClientCryptoConversation(conKey,conversationId));
 		String[] usernames = Arrays.copyOfRange(msgParts, 3, msgParts.length);
-		boolean updated = false;
+		SecretKey conKey = new SecretKeySpec(convesationKey.getBytes(),"AES");
+		cryptoSessions.add(new ClientCryptoConversation(conKey,conversationId));
+		int conversationIndex = -1;
 		for (int i = 0; i < conversations.size(); i++) {
 			Conversation c = conversations.get(i);
 			if (c.getId().equals(conversationId)) {
-				Conversation newConversation = new Conversation(conversationId, conversationName, usernames);
-				newConversation.addMessages(c.getMessages().toArray(new Message[0]));
-				conversations.set(i, newConversation);
-				updated = true;
+				conversationIndex = i;
 				break;
 			}
 		}
-		if (!updated) {
+		if (conversationIndex == -1) {
 			conversations.add(new Conversation(conversationId, conversationName, usernames));
+			return;
 		}
+		Conversation newConversation = new Conversation(conversationId, conversationName, usernames);
+		newConversation.addMessages(conversations.get(conversationIndex).getMessages().toArray(new Message[0]));
+		conversations.set(conversationIndex, newConversation);
 	}
 
 	private void handleUser(String[] msgParts) {
@@ -146,9 +145,10 @@ public class AppClient extends Client {
 	}
 
 	private void handleMessage(String[] msgParts) {
+		String conversationId = msgParts[1];
 		Conversation conversation = null;
 		for (Conversation con : conversations) {
-			if (con.getId().equals(msgParts[1])) {
+			if (con.getId().equals(conversationId)) {
 				conversation = con;
 				break;
 			}
@@ -156,8 +156,18 @@ public class AppClient extends Client {
 		if (conversation == null) {
 			return;
 		}
-		conversation.addMessages(new Message(msgParts[2], msgParts[6], Long.parseLong(msgParts[4]), msgParts[5],
-				Boolean.parseBoolean(msgParts[3]), ""));
+		String messageId = msgParts[2];
+		boolean isFile = Boolean.parseBoolean(msgParts[3]);
+		long timestamp;
+		try {
+			timestamp = Long.parseLong(msgParts[4]);
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+			return;
+		}
+		String sender = msgParts[5];
+		String content = msgParts[6];
+		conversation.addMessages(new Message(messageId, content, timestamp, sender, isFile, conversationId));
 	}
 
 	private void makeConnection() {
@@ -166,11 +176,17 @@ public class AppClient extends Client {
 		rsaPubKey = new SecretKeySpec(kp.getPublic().getEncoded(),"RSA");
 		System.out.println(rsaPubKey);
 		isRSA = true;
-		send(PROTOCOL.buildMessage(PROTOCOL.CS.CREATE_SEC_CONNECTION,rsaPubKey.getEncoded()));
+		send(PROTOCOL.buildMessage(PROTOCOL.CS.CREATE_SEC_CONNECTION, new String(rsaPubKey.getEncoded())));
 	}
 
-	private void login() {
-		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN, thisUser.getUsername(), thisUser.getPassword()));
+	public void login(String username, String passwordHash) {
+		thisUser = new User("", 0, username, passwordHash);
+		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN, thisUser.getUsername(), thisUser.getPasswordHash()));
+	}
+
+	public void register(String username, String passwordHash) {
+		thisUser = new User("", 0, username, passwordHash);
+		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.REGISTER, thisUser.getUsername(), thisUser.getPasswordHash()));
 	}
 
 	private void sendMessage(String convID, String content) {

@@ -38,50 +38,43 @@ public class AppServer extends Server {
 		String[] msgParts = message.split(PROTOCOL.SPLIT);
 		User user = users.getUser(clientIP, clientPort);
 		if (user != null && cryptoManager.getSessionByUser(user) != null) {
+			SecretKey key;
+			String encodedMessage;
 			if (msgParts.length == 1) {
-				byte[] decStr = Encoder.b64Decode(msgParts[0]);
-				CryptoSession cs = cryptoManager.getSessionByUser(user);
-				String plainText = new String(super.gethAES().decrypt(decStr, cs.getMainAESKey()));
-				msgParts = plainText.split(PROTOCOL.SPLIT);
+				key = cryptoManager.getSessionByUser(user).getMainAESKey();
+				encodedMessage = msgParts[0];
 			} else {
-				Conversation con = getConversationById(msgParts[0]);
-				ConversationCryptoSession ccs = convCryptoManager.getSession(user, con);
-				byte[] decStr = Encoder.b64Decode(msgParts[1]);
-				String plainText = new String(super.gethAES().decrypt(decStr, ccs.getAesKey()));
-				msgParts = plainText.split(PROTOCOL.SPLIT);
+				key = convCryptoManager.getSession(user, getConversationById(msgParts[0])).getAesKey();
+				encodedMessage = msgParts[1];
 			}
+			msgParts = new String(gethAES().decrypt(Encoder.b64Decode(encodedMessage), key)).split(PROTOCOL.SPLIT);
 		}
 		if (user == null) {
 			if (msgParts[0].equals(PROTOCOL.CS.CREATE_SEC_CONNECTION)) {
-				TempUser tUser = new TempUser(clientIP, clientPort);
-				SecretKey sKey = new SecretKeySpec(msgParts[1].getBytes(), 0, msgParts[1].length(), "RSA");
-				tUser.setRsaKey(sKey);
-				tUser.setAesKey(super.gethAES().generateKey());
-				tempUsers.add(tUser);
-				sendRSA(new User(clientIP, clientPort, "", ""), tUser.getRsaKey(), PROTOCOL.buildMessage(PROTOCOL.SC.SEC_CONNECTION_ACCEPTED, tUser.getAesKey()));
+				handleCreateSecConnection(new TempUser(clientIP, clientPort), msgParts);
 			} else {
+				if (msgParts.length > 1) {
+					sendError(new TempUser(clientIP, clientPort), PROTOCOL.ERRORCODES.INVALID_MESSAGE);
+					return;
+				}
+				TempUser tempUser = null;
 				for (TempUser tu : tempUsers) {
 					if (tu.getIp().equals(clientIP) && tu.getPort() == clientPort) {
-						if (msgParts.length > 1) {
-							sendError(new User(clientIP, clientPort, "", ""), PROTOCOL.ERRORCODES.INVALID_MESSAGE);
-						} else {
-							byte[] decStr = Encoder.b64Decode(msgParts[0]);
-							String plainText = new String(super.gethAES().decrypt(decStr, tu.getAesKey()));
-							msgParts = plainText.split(PROTOCOL.SPLIT);
-							if (msgParts[0].equals(PROTOCOL.CS.LOGIN)) {
-								handleLogin(tu, msgParts[1], msgParts[2]);
-							} else if (msgParts[0].equals(PROTOCOL.CS.REGISTER)) {
-								handleRegister(tu, msgParts[1], msgParts[2]);
-							}
-
-						}
+						tempUser = tu;
+						break;
 					}
 				}
+				if (tempUser == null) {
+					sendError(new TempUser(clientIP, clientPort), PROTOCOL.ERRORCODES.UNKNOWN_ERROR); // TODO: send more specific error-code
+					return;
+				}
+				msgParts = new String(gethAES().decrypt(Encoder.b64Decode(msgParts[0]), tempUser.getAesKey())).split(PROTOCOL.SPLIT);
+				if (msgParts[0].equals(PROTOCOL.CS.LOGIN)) {
+					handleLogin(tempUser, msgParts[1], msgParts[2]);
+				} else if (msgParts[0].equals(PROTOCOL.CS.REGISTER)) {
+					handleRegister(tempUser, msgParts[1], msgParts[2]);
+				}
 			}
-			return;
-		}
-		if (msgParts.length < 1) {
-			sendError(user, PROTOCOL.ERRORCODES.EMPTY_MESSAGE);
 			return;
 		}
 		switch (msgParts[0]) {
@@ -115,6 +108,14 @@ public class AppServer extends Server {
 		}
 	}
 
+	private void handleCreateSecConnection(TempUser tUser, String[] msgParts) {
+		SecretKey sKey = new SecretKeySpec(msgParts[1].getBytes(), 0, msgParts[1].length(), "RSA");
+		tUser.setRsaKey(sKey);
+		tUser.setAesKey(gethAES().generateKey());
+		tempUsers.add(tUser);
+		sendRSA(new User(tUser.getIp(), tUser.getPort(), "", ""), tUser.getRsaKey(), PROTOCOL.buildMessage(PROTOCOL.SC.SEC_CONNECTION_ACCEPTED, tUser.getAesKey()));
+	}
+
 
 	private void handleRegister(TempUser tUser, String username, String password) {
 		if (db.loadConnectedUser(username, tUser.getIp(), tUser.getPort()) == null) {
@@ -136,12 +137,9 @@ public class AppServer extends Server {
 	private void handleLogin(TempUser tUser, String username, String password) {
 		// TODO: handle login
 		User user = db.loadConnectedUser(username, tUser.getIp(), tUser.getPort());
-		if (user.getPassword().equals(password)) {
+		if (user.getPasswordHash().equals(password)) {
 			tempUsers.remove(tUser);
-			CryptoSession cs = new CryptoSession(user);
-			cs.setMainAESKey(tUser.getAesKey());
-			cs.setUserPublicKey(tUser.getRsaKey());
-			cryptoManager.addSession(cs);
+			cryptoManager.addSession(new CryptoSession(user, tUser.getRsaKey(), tUser.getAesKey()));
 
 			// load all conversations of this user and add them if they are not in the
 			// conversation list yet
@@ -462,19 +460,15 @@ public class AppServer extends Server {
 	}
 
 	private void sendToConversationAES(Conversation con, Object... message) {
-		ArrayList<User> destUsers = new ArrayList<User>();
 		for (String username : con.getUsers()) {
 			User user = users.getUser(username);
 			if (user != null && convCryptoManager.hasSession(user, con)) {
-				destUsers.add(user);
+				ConversationCryptoSession ccs = convCryptoManager.getSession(user, con);
+				String msg = PROTOCOL.buildMessage(message);
+				byte[] cryp = super.gethAES().encrypt(msg.getBytes(), ccs.getAesKey());
+				String enc = Encoder.b64Encode(cryp);
+				send(user.getIp(), user.getPort(), ccs.getConv().getId() + PROTOCOL.SPLIT + enc);
 			}
-		}
-		for (User u : destUsers) {
-			ConversationCryptoSession ccs = convCryptoManager.getSession(u, con);
-			String msg = PROTOCOL.buildMessage(message);
-			byte[] cryp = super.gethAES().encrypt(msg.getBytes(), ccs.getAesKey());
-			String enc = Encoder.b64Encode(cryp);
-			send(u.getIp(), u.getPort(), ccs.getConv().getId() + PROTOCOL.SPLIT + enc);
 		}
 
 	}

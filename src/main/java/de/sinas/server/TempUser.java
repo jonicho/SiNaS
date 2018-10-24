@@ -1,16 +1,15 @@
 package de.sinas.server;
 
+import de.sinas.User;
+
 import javax.crypto.SecretKey;
 
-public class TempUser {
-	private String ip;
-	private int port;
+public class TempUser extends User {
 	private SecretKey aesKey;
 	private SecretKey rsaKey;
 
 	public TempUser(String pClientIP, int pClientPort) {
-		ip = pClientIP;
-		port = pClientPort;
+		super(pClientIP, pClientPort, null, null);
 	}
 
 	/**
@@ -28,20 +27,6 @@ public class TempUser {
 	}
 
 	/**
-	 * @return the ip
-	 */
-	public String getIp() {
-		return ip;
-	}
-
-	/**
-	 * @return the port
-	 */
-	public int getPort() {
-		return port;
-	}
-
-	/**
 	 * @return the rsaKey
 	 */
 	public SecretKey getRsaKey() {
@@ -53,5 +38,15 @@ public class TempUser {
 	 */
 	public void setRsaKey(SecretKey rsaKey) {
 		this.rsaKey = rsaKey;
+	}
+
+	@Override
+	public String getUsername() {
+		throw new IllegalStateException("a temporary user has no username!");
+	}
+
+	@Override
+	public String getPasswordHash() {
+		throw new IllegalStateException("a temporary user has no password hash!");
 	}
 }
