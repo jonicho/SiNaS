@@ -8,16 +8,14 @@ import de.sinas.net.Client;
 import de.sinas.net.PROTOCOL;
 import de.sinas.server.Users;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import javax.crypto.*;
-import javax.crypto.spec.SecretKeySpec;
+import java.util.EventListener;
 
 public class AppClient extends Client {
 	private final ArrayList<Conversation> conversations = new ArrayList<>();
@@ -30,6 +28,9 @@ public class AppClient extends Client {
 	private SecretKey mainAESKey;
 	private ArrayList<ClientCryptoConversation> cryptoSessions = new ArrayList<ClientCryptoConversation>();
 
+	private final ArrayList<UpdateListener> updateListeners = new ArrayList<>();
+	private final ArrayList<ErrorListener> errorListeners = new ArrayList<>();
+
 	public AppClient(String pServerIP, int pServerPort) {
 		super(pServerIP, pServerPort);
 		makeConnection();
@@ -39,19 +40,18 @@ public class AppClient extends Client {
 	public void processMessage(String message) {
 		System.out.println("(CLIENT)New message: " + message);
 		String[] msgParts = message.split(PROTOCOL.SPLIT);
-		if(isRSA) {
+		if (isRSA) {
 			String plainText = new String(this.gethRSA().decrypt(Encoder.b64Decode(msgParts[0]), rsaPrivKey));
 			msgParts = plainText.split(PROTOCOL.SPLIT);
 			isRSA = false;
 		} else {
-			if(msgParts.length == 1) {
+			if (msgParts.length == 1) {
 				String plainText = new String(this.gethAES().decrypt(Encoder.b64Decode(msgParts[0]), mainAESKey));
 				msgParts = plainText.split(PROTOCOL.SPLIT);
-			} 
-			else if (msgParts.length != 2){
+			} else if (msgParts.length != 2) {
 				SecretKey cKey = null;
-				for(ClientCryptoConversation ccc : cryptoSessions) {
-					if(ccc.getConversationID().equals(msgParts[0])) {
+				for (ClientCryptoConversation ccc : cryptoSessions) {
+					if (ccc.getConversationID().equals(msgParts[0])) {
 						cKey = ccc.getAesKey();
 					}
 				}
@@ -65,10 +65,10 @@ public class AppClient extends Client {
 				break;
 			case PROTOCOL.SC.ERROR:
 				handleError(msgParts[1]);
-				break;
-				case PROTOCOL.SC.SEC_CONNECTION_ACCEPTED:
+				return;
+			case PROTOCOL.SC.SEC_CONNECTION_ACCEPTED:
 				handleSecConAccept(msgParts);
-				break;
+				return;
 			case PROTOCOL.SC.CONVERSATION:
 				handleConversation(msgParts);
 				break;
@@ -82,6 +82,9 @@ public class AppClient extends Client {
 				break;
 		}
 
+		for (UpdateListener updateListener : updateListeners) {
+			updateListener.update();
+		}
 	}
 
 	@Override
@@ -90,13 +93,13 @@ public class AppClient extends Client {
 	}
 
 	private void handleSecConAccept(String[] msgParts) {
-		mainAESKey = new SecretKeySpec(Encoder.b64Decode(msgParts[1]),"AES");
+		mainAESKey = new SecretKeySpec(Encoder.b64Decode(msgParts[1]), "AES");
 		try {
-			sendAES(PROTOCOL.CS.REGISTER,"testuser",Encoder.b64Encode(super.getHasher().getSecureHash("testhash",super.getHasher().getCheckSum("testname".getBytes()), 1000, 128)));
+			sendAES(PROTOCOL.CS.REGISTER, "testuser", Encoder.b64Encode(super.getHasher().getSecureHash("testhash", super.getHasher().getCheckSum("testname".getBytes()), 1000, 128)));
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-	} 
+	}
 
 	private void handleLoginOk() {
 		isLoggedIn = true;
@@ -118,6 +121,9 @@ public class AppClient extends Client {
 			default:
 				break;
 		}
+		for (ErrorListener errorListener : errorListeners) {
+			errorListener.error(errorCode);
+		}
 	}
 
 	private void handleConversation(String[] msgParts) {
@@ -125,8 +131,8 @@ public class AppClient extends Client {
 		String conversationId = msgParts[2];
 		String convesationKey = msgParts[3];
 		String[] usernames = Arrays.copyOfRange(msgParts, 3, msgParts.length);
-		SecretKey conKey = new SecretKeySpec(convesationKey.getBytes(),"AES");
-		cryptoSessions.add(new ClientCryptoConversation(conKey,conversationId));
+		SecretKey conKey = new SecretKeySpec(convesationKey.getBytes(), "AES");
+		cryptoSessions.add(new ClientCryptoConversation(conKey, conversationId));
 		int conversationIndex = -1;
 		for (int i = 0; i < conversations.size(); i++) {
 			Conversation c = conversations.get(i);
@@ -185,6 +191,14 @@ public class AppClient extends Client {
 		send(PROTOCOL.buildMessage(PROTOCOL.CS.CREATE_SEC_CONNECTION, Encoder.b64Encode(rsaPubKey.getEncoded())));
 	}
 
+	public void addUpdateListener(UpdateListener updateListener) {
+		updateListeners.add(updateListener);
+	}
+
+	public void addErrorListener(ErrorListener errorListener) {
+		errorListeners.add(errorListener);
+	}
+
 	public void login(String username, String passwordHash) {
 		thisUser = new User("", 0, username, passwordHash);
 		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN, thisUser.getUsername(), thisUser.getPasswordHash()));
@@ -197,21 +211,21 @@ public class AppClient extends Client {
 
 	private void sendMessage(String convID, String content) {
 		Conversation cCon = null;
-		for(Conversation con : conversations) {
-			if(con.getId().equals(convID)) {
+		for (Conversation con : conversations) {
+			if (con.getId().equals(convID)) {
 				cCon = con;
 			}
 		}
 		ClientCryptoConversation ccc = null;
-		for(ClientCryptoConversation pccc : cryptoSessions) {
-			if(pccc.getConversationID().equals(convID)) {
+		for (ClientCryptoConversation pccc : cryptoSessions) {
+			if (pccc.getConversationID().equals(convID)) {
 				ccc = pccc;
 			}
 		}
 		content = false + PROTOCOL.SPLIT + content;
 		byte[] cryp = super.gethAES().encrypt(content.getBytes(), ccc.getAesKey());
 		String enc = Encoder.b64Encode(cryp);
-		send(convID+PROTOCOL.SPLIT+enc);
+		send(convID + PROTOCOL.SPLIT + enc);
 	}
 
 	public User getThisUser() {
@@ -246,5 +260,15 @@ public class AppClient extends Client {
 		byte[] cryp = super.gethRSA().encrypt(msg.getBytes(), key);
 		String enc = Encoder.b64Encode(cryp);
 		send(enc);
+	}
+
+	@FunctionalInterface
+	public interface UpdateListener extends EventListener {
+		void update();
+	}
+
+	@FunctionalInterface
+	public interface ErrorListener extends  EventListener {
+		void error(int errorCode);
 	}
 }
