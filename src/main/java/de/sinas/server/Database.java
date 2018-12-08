@@ -41,13 +41,13 @@ public class Database {
 	 * @see HashHandler
 	 */
 	private byte[] getSalt() {
-		return ((new HashHandler()).getSecureRandomBytes(amount));
+		return new HashHandler().getSecureRandomBytes(1); // TODO
 	}
 
 	/**
 	 * Loads the user with the given name with ip and port.<br>
 	 * This method is to get a user that connected to the server.<br>
-	 * If no user with the given name exists a new one is created.
+	 * If no user with the given name exists a new one is returned.
 	 *
 	 * @param ip
 	 * @param port
@@ -62,7 +62,7 @@ public class Database {
 			if (rs.next()) {
 				return new User(ip, port, rs.getString("username"), rs.getString("password_hash"));
 			} else {
-				return null;
+				return new TempUser(ip, port);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

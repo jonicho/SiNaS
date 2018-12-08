@@ -22,6 +22,7 @@ public class AppClient extends Client {
 	private final Users users = new Users();
 	private User thisUser = new User("", 0, "", "");
 	private boolean isLoggedIn;
+	private boolean isSecConAccepted;
 	private boolean isRSA;
 	private PrivateKey rsaPrivKey;
 	private PublicKey rsaPubKey;
@@ -30,19 +31,22 @@ public class AppClient extends Client {
 
 	private final ArrayList<UpdateListener> updateListeners = new ArrayList<>();
 	private final ArrayList<ErrorListener> errorListeners = new ArrayList<>();
+	private final ConnectionListener connectionListener;
 
-	public AppClient(String pServerIP, int pServerPort) {
+	public AppClient(String pServerIP, int pServerPort, ConnectionListener connectionListener) {
 		super(pServerIP, pServerPort);
+		this.connectionListener = connectionListener;
 		makeConnection();
 	}
 
 	@Override
 	public void processMessage(String message) {
-		System.out.println("(CLIENT)New message: " + message);
+		System.out.println("(CLIENT) New message: " + message);
 		String[] msgParts = message.split(PROTOCOL.SPLIT);
 		if (isRSA) {
 			String plainText = new String(this.gethRSA().decrypt(Encoder.b64Decode(msgParts[0]), rsaPrivKey));
 			msgParts = plainText.split(PROTOCOL.SPLIT);
+			System.out.println("(CLIENT) Decoded message: " + plainText);
 			isRSA = false;
 		} else {
 			if (msgParts.length == 1) {
@@ -94,11 +98,8 @@ public class AppClient extends Client {
 
 	private void handleSecConAccept(String[] msgParts) {
 		mainAESKey = new SecretKeySpec(Encoder.b64Decode(msgParts[1]), "AES");
-		try {
-			sendAES(PROTOCOL.CS.REGISTER, "testuser", Encoder.b64Encode(super.getHasher().getSecureHash("testhash", super.getHasher().getCheckSum("testname".getBytes()), 1000, 128)));
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
+		isSecConAccepted = true;
+		connectionListener.connected(this);
 	}
 
 	private void handleLoginOk() {
@@ -231,6 +232,10 @@ public class AppClient extends Client {
 	public User getThisUser() {
 		return thisUser;
 	}
+	
+	public boolean isSecConAccepted() {
+		return isSecConAccepted;
+	}
 
 	public boolean isLoggedIn() {
 		return isLoggedIn;
@@ -268,7 +273,12 @@ public class AppClient extends Client {
 	}
 
 	@FunctionalInterface
-	public interface ErrorListener extends  EventListener {
+	public interface ErrorListener extends EventListener {
 		void error(int errorCode);
+	}
+
+	@FunctionalInterface
+	public interface ConnectionListener extends EventListener {
+		void connected(AppClient appClient);
 	}
 }

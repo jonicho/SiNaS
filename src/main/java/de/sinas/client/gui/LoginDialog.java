@@ -1,37 +1,33 @@
 package de.sinas.client.gui;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import de.sinas.client.AppClient;
+import de.sinas.net.PROTOCOL;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
 
 public class LoginDialog extends JDialog {
 	private final JPanel contentPanel = new JPanel();
 	private JTextField textField;
 	private JPasswordField passwordField;
+	private JButton loginButton;
+	private JLabel statusLabel;
 
 	public LoginDialog() {
 		setBounds(0, 0, 450, 300);
+		setAlwaysOnTop(true);
 		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_contentPanel = new GridBagLayout();
-		gbl_contentPanel.columnWidths = new int[] { 0, 0, 0 };
-		gbl_contentPanel.rowHeights = new int[] { 0, 0, 0, 0, 0 };
-		gbl_contentPanel.columnWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
-		gbl_contentPanel.rowWeights = new double[] { 1.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
+		gbl_contentPanel.columnWidths = new int[]{0, 0, 0};
+		gbl_contentPanel.rowHeights = new int[]{0, 0, 0, 0, 0};
+		gbl_contentPanel.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
+		gbl_contentPanel.rowWeights = new double[]{1.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		contentPanel.setLayout(gbl_contentPanel);
 		{
 			JLabel lblUsername = new JLabel("Username");
@@ -71,39 +67,75 @@ public class LoginDialog extends JDialog {
 			contentPanel.add(passwordField, gbc_passwordField);
 		}
 		{
-			JPanel buttonPane = new JPanel();
-			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-			getContentPane().add(buttonPane, BorderLayout.SOUTH);
+			JPanel panel = new JPanel();
+			getContentPane().add(panel, BorderLayout.SOUTH);
+			panel.setLayout(new BorderLayout(0, 0));
 			{
-				JButton okButton = new JButton("Login");
-				okButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						onLoginButton();
-					}
-				});
-				okButton.setActionCommand("Login");
-				buttonPane.add(okButton);
-				getRootPane().setDefaultButton(okButton);
+				JPanel buttonPane = new JPanel();
+				panel.add(buttonPane, BorderLayout.EAST);
+				buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+				{
+					loginButton = new JButton("Login");
+					loginButton.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							onLoginButton();
+						}
+					});
+					loginButton.setActionCommand("Login");
+					buttonPane.add(loginButton);
+					getRootPane().setDefaultButton(loginButton);
+				}
+				{
+					JButton cancelButton = new JButton("Cancel");
+					cancelButton.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							onCancelButton();
+						}
+					});
+					cancelButton.setActionCommand("Cancel");
+					buttonPane.add(cancelButton);
+				}
 			}
 			{
-				JButton cancelButton = new JButton("Cancel");
-				cancelButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						onCancelButton();
-					}
-				});
-				cancelButton.setActionCommand("Cancel");
-				buttonPane.add(cancelButton);
+				statusLabel = new JLabel("");
+				statusLabel.setBorder(new EmptyBorder(0, 10, 0, 0));
+				panel.add(statusLabel, BorderLayout.WEST);
 			}
 		}
 	}
 
 	private void onLoginButton() {
-		//TODO handle on login button
+		if (textField.getText().isEmpty() || passwordField.getPassword().length == 0) {
+			statusLabel.setText("<html><font color='red'>Enter your username and password!</font></html>");
+			return;
+		}
+		loginButton.setEnabled(false);
+		statusLabel.setText("Logging in...");
+		AppClient appClient;
+		appClient = new AppClient(PROTOCOL.IP, PROTOCOL.PORT, innerAppClient -> {
+			innerAppClient.addErrorListener(errorCode -> {
+				if (errorCode == PROTOCOL.ERRORCODES.LOGIN_FAILED) {
+					statusLabel.setText("<html><font color='red'>Invalid username or password!</font></html>");
+					loginButton.setEnabled(true);
+					innerAppClient.close();
+				}
+			});
+			innerAppClient.addUpdateListener(() -> {
+				if (innerAppClient.isLoggedIn()) {
+					// TODO: open GUI
+				}
+			});
+			innerAppClient.login(textField.getText(), new String(passwordField.getPassword()));
+
+		});
+		if (!appClient.isConnected()) {
+			statusLabel.setText("<html><font color='red'>Can't reach the Server!</font></html>");
+			loginButton.setEnabled(true);
+			appClient.close();
+		}
 	}
 
 	private void onCancelButton() {
 		dispose();
 	}
-
 }

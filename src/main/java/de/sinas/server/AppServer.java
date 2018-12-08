@@ -146,7 +146,7 @@ public class AppServer extends Server {
 	private void handleLogin(TempUser tUser, String username, String password) {
 		// TODO: handle login
 		User user = db.loadConnectedUser(username, tUser.getIp(), tUser.getPort());
-		if (user.getPasswordHash().equals(password)) {
+		if (!(user instanceof TempUser) && user.getPasswordHash().equals(password)) {
 			tempUsers.remove(tUser);
 			cryptoManager.addSession(new CryptoSession(user, tUser.getRsaKey(), tUser.getAesKey()));
 
