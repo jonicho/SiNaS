@@ -14,6 +14,8 @@ public class HashHandler {
     private SecureRandom prng;
     private SecretKeyFactory hgen;
     private int SEED_SIZE = 2048;
+    private final int PBKDF2_ITERATIONS = 1000;
+    private final int PBKDF2_SIZE = 128;
 
     public HashHandler() {
         try {
@@ -34,8 +36,8 @@ public class HashHandler {
         return sha.digest(pInput);
     }
 
-    public byte[] getSecureHash(String pInput,byte[] pSalt,int iterations, int hSize) throws InvalidKeySpecException {
-        PBEKeySpec pbSpec = new PBEKeySpec(pInput.toCharArray(), pSalt, iterations, hSize);
+    public byte[] getSecureHash(String pInput,byte[] pSalt) throws InvalidKeySpecException {
+        PBEKeySpec pbSpec = new PBEKeySpec(pInput.toCharArray(), pSalt, PBKDF2_ITERATIONS, PBKDF2_SIZE);
         return hgen.generateSecret(pbSpec).getEncoded();
     }
 
