@@ -8,7 +8,6 @@ import de.sinas.net.PROTOCOL;
 import de.sinas.net.Server;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -130,10 +129,10 @@ public class AppServer extends Server {
 	private void handleRegister(TempUser tUser, String username, String password) {
 		if (db.loadConnectedUser(username, tUser.getIp(), tUser.getPort()) == null) {
 			db.createUser(new User(tUser.getIp(), tUser.getPort(), username, password));
-			handleLogin(tUser, username, password); //TODO
+			handleLogin(tUser, username, password); // TODO
 		} else {
 			send(tUser.getIp(), tUser.getPort(), PROTOCOL.buildMessage(PROTOCOL.SC.ERROR, PROTOCOL.ERRORCODES.ALREADY_REGISTERED));
-			handleLogin(tUser, username, password); //TODO
+			handleLogin(tUser, username, password); // TODO
 		}
 	}
 
@@ -426,17 +425,6 @@ public class AppServer extends Server {
 	 * Sends the given message to the given user.
 	 * The message is encrypted using the given key and the AES Algorithm
 	 */
-	private void sendAES(User user, SecretKey key, Object... message) {
-		String msg = PROTOCOL.buildMessage(message);
-		byte[] cryp = super.gethAES().encrypt(msg.getBytes(), key);
-		String enc = Encoder.b64Encode(cryp);
-		send(user.getIp(), user.getPort(), enc);
-	}
-
-	/**
-	 * Sends the given message to the given user.
-	 * The message is encrypted using the given key and the AES Algorithm
-	 */
 	private void sendAES(User user, Object... message) {
 		String msg = PROTOCOL.buildMessage(message);
 		byte[] cryp = super.gethAES().encrypt(msg.getBytes(), cryptoManager.getSessionByUser(user).getMainAESKey());
@@ -454,19 +442,6 @@ public class AppServer extends Server {
 		byte[] cryp = super.gethRSA().encrypt(msg.getBytes(), key);
 		String enc = Encoder.b64Encode(cryp);
 		send(user.getIp(), user.getPort(), enc);
-	}
-
-	/**
-	 * Sends the given message to all participants of the given conversation if they
-	 * are online.
-	 */
-	private void sendToConversation(Conversation conversation, Object... message) {
-		for (String username : conversation.getUsers()) {
-			User user = users.getUser(username);
-			if (user != null) {
-				sendToUser(user, message);
-			}
-		}
 	}
 
 	private void sendToConversationAES(Conversation con, Object... message) {
