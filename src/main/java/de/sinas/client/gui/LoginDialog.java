@@ -95,14 +95,14 @@ public class LoginDialog extends JDialog {
 					getRootPane().setDefaultButton(loginButton);
 				}
 				{
-					JButton cancelButton = new JButton("Cancel");
-					cancelButton.addActionListener(new ActionListener() {
+					JButton exitButton = new JButton("Exit");
+					exitButton.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
-							onCancelButton();
+							onExitButton();
 						}
 					});
-					cancelButton.setActionCommand("Cancel");
-					buttonPane.add(cancelButton);
+					exitButton.setActionCommand("Cancel");
+					buttonPane.add(exitButton);
 				}
 			}
 			{
@@ -187,8 +187,9 @@ public class LoginDialog extends JDialog {
 		}
 	}
 
-	private void onCancelButton() {
+	private void onExitButton() {
 		dispose();
+		System.exit(0);
 	}
 
 	private void setGuiEnabled(boolean enabled) {
