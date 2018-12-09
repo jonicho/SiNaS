@@ -47,7 +47,7 @@ public class Database {
 	/**
 	 * Loads the user with the given name with ip and port.<br>
 	 * This method is to get a user that connected to the server.<br>
-	 * If no user with the given name exists a new one is returned.
+	 * If no user with the given name exists a temporary user is returned.
 	 *
 	 * @param ip
 	 * @param port
@@ -74,7 +74,7 @@ public class Database {
 	 * Loads the user with the given name with an empty ip and the port 0.<br>
 	 * This method is to get information about a user without having the user to
 	 * connect to the server.<br>
-	 * If no user with the given name exists {@code null} is returned.
+	 * If no user with the given name exists a temporary user is returned.
 	 *
 	 * @param username
 	 * @return The user with the given username. {@code null} if no user with the
@@ -186,7 +186,7 @@ public class Database {
 	 * @return true if the user did not already exist and the user could successfully be created, false otherwise
 	 */
 	public boolean createUser(User user) {
-		if (loadUserInfo(user.getUsername()) != null) {
+		if (!(loadUserInfo(user.getUsername()) instanceof TempUser)) {
 			return false;
 		}
 		try {

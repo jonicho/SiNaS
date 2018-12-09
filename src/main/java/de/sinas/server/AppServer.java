@@ -127,7 +127,7 @@ public class AppServer extends Server {
 
 
 	private void handleRegister(TempUser tUser, String username, String password) {
-		if (db.loadConnectedUser(username, tUser.getIp(), tUser.getPort()) == null) {
+		if (db.loadConnectedUser(username, tUser.getIp(), tUser.getPort()) instanceof TempUser) {
 			db.createUser(new User(tUser.getIp(), tUser.getPort(), username, password));
 			handleLogin(tUser, username, password); // TODO
 		} else {
