@@ -15,9 +15,11 @@ public class LoginDialog extends JDialog {
 	private JPasswordField passwordField;
 	private JButton loginButton;
 	private JLabel statusLabel;
+	private JButton registerButton;
 
 	public LoginDialog() {
-		setBounds(0, 0, 450, 300);
+		setMinimumSize(new Dimension(600, 150));
+		setBounds(0, 0, 700, 200);
 		setAlwaysOnTop(true);
 		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
@@ -81,6 +83,13 @@ public class LoginDialog extends JDialog {
 							onLoginButton();
 						}
 					});
+					registerButton = new JButton("Register");
+					registerButton.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							onRegisterButton();
+						}
+					});
+					buttonPane.add(registerButton);
 					loginButton.setActionCommand("Login");
 					buttonPane.add(loginButton);
 					getRootPane().setDefaultButton(loginButton);
@@ -109,16 +118,22 @@ public class LoginDialog extends JDialog {
 			statusLabel.setText("<html><font color='red'>Enter your username and password!</font></html>");
 			return;
 		}
-		loginButton.setEnabled(false);
+		setGuiEnabled(false);
 		statusLabel.setText("Logging in...");
 		AppClient appClient;
 		appClient = new AppClient(PROTOCOL.IP, PROTOCOL.PORT, innerAppClient -> {
 			innerAppClient.addErrorListener(errorCode -> {
-				if (errorCode == PROTOCOL.ERRORCODES.LOGIN_FAILED) {
-					statusLabel.setText("<html><font color='red'>Invalid username or password!</font></html>");
-					loginButton.setEnabled(true);
-					innerAppClient.close();
+				switch (errorCode) {
+					case PROTOCOL.ERRORCODES.LOGIN_FAILED:
+						statusLabel.setText("<html><font color='red'>Invalid username or password!</font></html>");
+						break;
+					default:
+						statusLabel.setText("<html><font color='red'>Some error occurred! Error code: " + errorCode + "</font></html>");
+						break;
+
 				}
+				setGuiEnabled(true);
+				innerAppClient.close();
 			});
 			innerAppClient.addUpdateListener(() -> {
 				if (innerAppClient.isLoggedIn()) {
@@ -130,12 +145,56 @@ public class LoginDialog extends JDialog {
 		});
 		if (!appClient.isConnected()) {
 			statusLabel.setText("<html><font color='red'>Can't reach the Server!</font></html>");
-			loginButton.setEnabled(true);
+			setGuiEnabled(true);
+			appClient.close();
+		}
+	}
+
+	private void onRegisterButton() {
+		if (textField.getText().isEmpty() || passwordField.getPassword().length == 0) {
+			statusLabel.setText("<html><font color='red'>Enter your username and password!</font></html>");
+			return;
+		}
+		setGuiEnabled(false);
+		statusLabel.setText("Registering...");
+		AppClient appClient;
+		appClient = new AppClient(PROTOCOL.IP, PROTOCOL.PORT, innerAppClient -> {
+			innerAppClient.addErrorListener(errorCode -> {
+				switch (errorCode) {
+					case PROTOCOL.ERRORCODES.ALREADY_REGISTERED:
+						statusLabel.setText("<html><font color='red'>This user is already registered!</font></html>");
+						break;
+					default:
+						statusLabel.setText("<html><font color='red'>Some error occurred! Error code: " + errorCode + "</font></html>");
+						break;
+
+				}
+				setGuiEnabled(true);
+				innerAppClient.close();
+			});
+			innerAppClient.addUpdateListener(() -> {
+				if (innerAppClient.isLoggedIn()) {
+					// TODO: open GUI
+				}
+			});
+			innerAppClient.register(textField.getText(), new String(passwordField.getPassword()));
+
+		});
+		if (!appClient.isConnected()) {
+			statusLabel.setText("<html><font color='red'>Can't reach the Server!</font></html>");
+			setGuiEnabled(true);
 			appClient.close();
 		}
 	}
 
 	private void onCancelButton() {
 		dispose();
+	}
+
+	private void setGuiEnabled(boolean enabled) {
+		registerButton.setEnabled(enabled);
+		loginButton.setEnabled(enabled);
+		textField.setEnabled(enabled);
+		passwordField.setEnabled(enabled);
 	}
 }
