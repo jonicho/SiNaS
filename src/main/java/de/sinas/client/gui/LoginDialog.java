@@ -138,7 +138,7 @@ public class LoginDialog extends JDialog {
 			});
 			innerAppClient.addUpdateListener(() -> {
 				if (innerAppClient.isLoggedIn()) {
-					// TODO: open GUI
+					openGUI(innerAppClient);
 				}
 			});
 			innerAppClient.login(textField.getText(), new String(passwordField.getPassword()));
@@ -198,5 +198,11 @@ public class LoginDialog extends JDialog {
 		loginButton.setEnabled(enabled);
 		textField.setEnabled(enabled);
 		passwordField.setEnabled(enabled);
+	}
+
+	private void openGUI(AppClient appClient) {
+		dispose();
+		GUI gui = new GUI(appClient);
+		gui.setVisible(true);
 	}
 }
