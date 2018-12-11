@@ -29,7 +29,7 @@ public class Language {
 	private Map<String, String> langMap;
 
 	private Language(String langId) {
-		loadString(langId);
+		loadStrings(langId);
 	}
 
 	/**
