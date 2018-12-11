@@ -1,0 +1,13 @@
+username: Username
+password: Password
+login: Login
+register: Register
+exit: Exit
+enter_username_password: Enter your username and password!
+logging_in: Logging in...
+invalid_username_password: Invalid username or password!
+some_error_occurred: Some error occurred!
+error_code: Error code
+cant_reach_server: Can't reach the Server!
+registering: Registering...
+user_already_registered: This user is already registered!
