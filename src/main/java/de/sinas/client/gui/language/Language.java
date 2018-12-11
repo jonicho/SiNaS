@@ -5,6 +5,7 @@ import java.util.Map;
 
 public class Language {
 	public static Language
+			GERMAN = new Language(Locale.GERMAN),
 			ENGLISH = new Language(Locale.ENGLISH);
 
 	private Map<String, String> langMap;

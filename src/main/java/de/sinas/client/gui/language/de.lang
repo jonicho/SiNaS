@@ -1,0 +1,13 @@
+username: Benutzername
+password: Passwort
+login: Einloggen
+register: Registrieren
+exit: Beenden
+enter_username_password: Gib deinen Benutzernamen und dein Passwort ein!
+logging_in: Logge ein...
+invalid_username_password: Ungültiger Benutzername oder ungültiges pPasswort!
+some_error_occurred: Ein Fehler trat auf!
+error_code: Fehlercode
+cant_reach_server: Kann den Server nicht erreichen!
+registering: Registriere...
+user_already_registered: Dieser Benutzer ist bereits registriert!
