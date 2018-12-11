@@ -4,6 +4,9 @@ import javax.swing.JDialog;
 import javax.swing.UIManager;
 
 import de.sinas.client.gui.LoginDialog;
+import de.sinas.client.gui.language.Language;
+
+import java.util.Locale;
 
 public class ClientLauncher {
 
@@ -14,7 +17,7 @@ public class ClientLauncher {
 			e.printStackTrace();
 		}
 		try {
-			LoginDialog dialog = new LoginDialog();
+			LoginDialog dialog = new LoginDialog(Language.getLanguage(Locale.getDefault()));
 			dialog.setTitle("SiNaS - Login");
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
