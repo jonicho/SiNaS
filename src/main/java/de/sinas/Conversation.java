@@ -115,6 +115,29 @@ public class Conversation {
 		return Collections.unmodifiableList(users);
 	}
 
+	/**
+	 * Returns the name of this conversation wrapped in html tags.
+	 *
+	 * @return the html string
+	 */
+	public String getHTMLSummary() {
+		return "<html>" + name + "</html>"; // TODO: change doc when changing code
+	}
+
+	/**
+	 * Returns the contents of this conversation's messages wrapped in html.
+	 *
+	 * @return the html string
+	 */
+	public String getHTMLMessages() {
+		StringBuilder result = new StringBuilder("<html>");
+		for (Message message : messages) {
+			result.append(message.getContent()).append("<br/>");
+		}
+		result.append("</html>");
+		return result.toString();
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof Conversation && ((Conversation) obj).getId().equals(id);
