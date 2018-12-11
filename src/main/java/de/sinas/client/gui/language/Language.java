@@ -31,7 +31,7 @@ public class Language {
 	 * @param locale
 	 * @throws IllegalArgumentException if the given locale is not supported
 	 */
-	private void loadString(Locale locale) throws IllegalArgumentException {
+	private void loadStrings(Locale locale) throws IllegalArgumentException {
 		// TODO: implement
 	}
 }
