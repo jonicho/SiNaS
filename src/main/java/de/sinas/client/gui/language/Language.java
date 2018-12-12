@@ -1,5 +1,6 @@
 package de.sinas.client.gui.language;
 
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -26,7 +27,7 @@ public class Language {
 		}
 	}
 
-	private Map<String, String> langMap;
+	private Map<String, String> langMap = new HashMap<>();
 
 	private Language(String langId) {
 		loadStrings(langId);
@@ -40,7 +41,7 @@ public class Language {
 	 */
 	public String getString(String identifier) {
 		String string = langMap.get(identifier);
-		return string == null ? "" : string;
+		return string == null ? identifier : string;
 	}
 
 	/**
