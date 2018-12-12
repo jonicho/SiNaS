@@ -25,9 +25,11 @@ public class AppServer extends Server {
 	private final ArrayList<TempUser> tempUsers = new ArrayList<TempUser>();
 	private final ConversationCryptoManager convCryptoManager = new ConversationCryptoManager();
 
+	private static final int SALT_LENGTH = 128;
+
 	public AppServer(int pPort, String dbPath) {
 		super(pPort);
-		db = new Database(dbPath);
+		db = new Database(dbPath, SALT_LENGTH);
 	}
 
 	@Override
