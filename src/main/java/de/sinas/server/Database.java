@@ -28,8 +28,11 @@ public class Database {
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `conversations` ( `conversation_id` TEXT NOT NULL PRIMARY KEY UNIQUE, `name` TEXT NOT NULL )");
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `messages` ( `id` TEXT NOT NULL PRIMARY KEY UNIQUE, `content` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `sender` TEXT NOT NULL, `is_file` REAL NOT NULL, `conversation_id` TEXT NOT NULL, FOREIGN KEY(`sender`) REFERENCES `users`(`username`), FOREIGN KEY(`conversation_id`) REFERENCES `conversations`(`conversation_id`) )");
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `conversations_users` ( `conversation_id` TEXT NOT NULL, `username` TEXT NOT NULL, FOREIGN KEY(`conversation_id`) REFERENCES `conversations`(`conversation_id`), FOREIGN KEY(`username`) REFERENCES `users`(`username`), PRIMARY KEY(`conversation_id`,`username`) )");
-			statement.executeUpdate("CREATE TABLE `configuration` ( `salt` TEXT NOT NULL, `id` TINYINT NOT NULL DEFAULT 1 CHECK(id=1), PRIMARY KEY(`id`) )");
-			statement.executeUpdate("INSERT INTO `configuration`(`salt`) VALUES ('" + Encoder.b64Encode(new HashHandler().getSecureRandomBytes(saltSize)) + "')");
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `configuration` ( `salt` TEXT NOT NULL, `id` TINYINT NOT NULL DEFAULT 1 CHECK(id=1), PRIMARY KEY(`id`) )");
+			ResultSet rs = statement.executeQuery("SELECT * FROM `configuration` WHERE `id`=1");
+			if (!rs.next()) {
+				statement.executeUpdate("INSERT INTO `configuration`(`salt`) VALUES ('" + Encoder.b64Encode(new HashHandler().getSecureRandomBytes(saltSize)) + "')");
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
