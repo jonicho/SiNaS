@@ -52,7 +52,7 @@ public class AppServer extends Server {
 				key = convCryptoManager.getSession(user, getConversationById(msgParts[0])).getAesKey();
 				encodedMessage = msgParts[1];
 			}
-			msgParts = new String(gethAES().decrypt(Encoder.b64Decode(encodedMessage), key)).split(PROTOCOL.SPLIT);
+			msgParts = new String(getAesHandler().decrypt(Encoder.b64Decode(encodedMessage), key)).split(PROTOCOL.SPLIT);
 		}
 		if (user == null) {
 			if (msgParts[0].equals(PROTOCOL.CS.CREATE_SEC_CONNECTION)) {
@@ -73,7 +73,7 @@ public class AppServer extends Server {
 					sendError(new TempUser(clientIP, clientPort), PROTOCOL.ERRORCODES.NOT_SEC_CONNECTED);
 					return;
 				}
-				msgParts = new String(gethAES().decrypt(Encoder.b64Decode(msgParts[0]), tempUser.getAesKey()))
+				msgParts = new String(getAesHandler().decrypt(Encoder.b64Decode(msgParts[0]), tempUser.getAesKey()))
 						.split(PROTOCOL.SPLIT);
 				switch (msgParts[0]) {
 					case PROTOCOL.CS.LOGIN:
@@ -125,7 +125,7 @@ public class AppServer extends Server {
 			KeyFactory keyFact = KeyFactory.getInstance("RSA");
 			PublicKey pubKey = keyFact.generatePublic(keySpec);
 			tUser.setRsaKey(pubKey);
-			tUser.setAesKey(gethAES().generateKey());
+			tUser.setAesKey(getAesHandler().generateKey());
 			tempUsers.add(tUser);
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -187,7 +187,7 @@ public class AppServer extends Server {
 				}
 				if (!convCryptoManager.hasSession(user, conversation)) {
 					ConversationCryptoSession ccs = new ConversationCryptoSession(conversation, user);
-					ccs.setAesKey(super.gethAES().generateKey());
+					ccs.setAesKey(getAesHandler().generateKey());
 					convCryptoManager.addSession(ccs);
 				}
 				sendAES(user, PROTOCOL.SC.CONVERSATION, conversation.getName(), conversation.getId(), convCryptoManager.getSession(user, conversation).getAesKey().getEncoded(), usersString.toString());
@@ -433,7 +433,7 @@ public class AppServer extends Server {
 	 */
 	private void sendAES(User user, Object... message) {
 		String msg = PROTOCOL.buildMessage(message);
-		byte[] cryp = super.gethAES().encrypt(msg.getBytes(), cryptoManager.getSessionByUser(user).getMainAESKey());
+		byte[] cryp = getAesHandler().encrypt(msg.getBytes(), cryptoManager.getSessionByUser(user).getMainAESKey());
 		String enc = Encoder.b64Encode(cryp);
 		send(user.getIp(), user.getPort(), enc);
 	}
@@ -444,7 +444,7 @@ public class AppServer extends Server {
 	 */
 	private void sendRSA(User user, PublicKey key, Object... message) {
 		String msg = PROTOCOL.buildMessage(message);
-		byte[] cryp = super.gethRSA().encrypt(msg.getBytes(), key);
+		byte[] cryp = getRsaHandler().encrypt(msg.getBytes(), key);
 		String enc = Encoder.b64Encode(cryp);
 		send(user.getIp(), user.getPort(), enc);
 	}
@@ -455,7 +455,7 @@ public class AppServer extends Server {
 			if (user != null && convCryptoManager.hasSession(user, con)) {
 				ConversationCryptoSession ccs = convCryptoManager.getSession(user, con);
 				String msg = PROTOCOL.buildMessage(message);
-				byte[] cryp = super.gethAES().encrypt(msg.getBytes(), ccs.getAesKey());
+				byte[] cryp = getAesHandler().encrypt(msg.getBytes(), ccs.getAesKey());
 				String enc = Encoder.b64Encode(cryp);
 				send(user.getIp(), user.getPort(), ccs.getConv().getId() + PROTOCOL.SPLIT + enc);
 			}

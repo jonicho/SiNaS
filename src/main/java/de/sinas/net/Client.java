@@ -125,21 +125,21 @@ public abstract class Client {
 	/**
 	 * @return the hAES
 	 */
-	public AESHandler gethAES() {
+	public AESHandler getAESHandler() {
 		return hAES;
 	}
 
 	/**
 	 * @return the hasher
 	 */
-	public HashHandler getHasher() {
+	public HashHandler getHashHandler() {
 		return hasher;
 	}
 
 	/**
 	 * @return the hRSA
 	 */
-	public RSAHandler gethRSA() {
+	public RSAHandler getRsaHandler() {
 		return hRSA;
 	}
 	
