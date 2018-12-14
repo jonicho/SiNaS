@@ -263,7 +263,8 @@ public class AppClient extends Client {
 			}
 		}
 		// Run Substitution/Permutation Network
-		for (int i = 0; i < 15; i++) {
+		byte[] cKey = comboHash;
+		for (int i = 0; i < 255; i++) {
 			// Substitution
 			for (int x = 0; i < xor2D.length; x++) {
 				for (int j = 0; j < xor2D[0].length; j++) {
@@ -277,10 +278,12 @@ public class AppClient extends Client {
 			}
 			// Mix Columns
 			mixColumns(xor2D, galois);
-			// Link to combo Hash via XOR
+			// Link to cKey via XOR
 			for (int x = 0; x < 255; x++) {
-				xor2D[x] = XOR_ARR(xor2D[x], comboHash);
+				xor2D[x] = XOR_ARR(xor2D[x], cKey);
 			}
+			// Generate next cKey
+			cKey = XOR_ARR(xor2D[i], cKey);
 		}
 		// Diagonally Collapse the Table into an array
 		byte[] snp = new byte[256];
