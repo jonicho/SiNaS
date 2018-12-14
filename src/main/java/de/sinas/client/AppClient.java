@@ -211,7 +211,7 @@ public class AppClient extends Client {
 		pHash = getHashHandler().getSecureHash(Encoder.b64Encode(pHash), uHash);
 		//XOR username with password
 		byte[] key = new byte[uHash.length];
-		for(int i = 0; i < uHash.length; i++) {
+		for(int i = 0; i < uHash.length-1; i++) {
 			key[i] = (byte)((uHash[i] ^ pHash[i]) & 0x000000ff);
 		}
 		return Encoder.b64Encode(key);
