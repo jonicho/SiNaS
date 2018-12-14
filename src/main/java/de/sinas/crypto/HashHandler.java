@@ -32,16 +32,16 @@ public class HashHandler {
         prng.setSeed(seedRNG.generateSeed(SEED_SIZE));
     }
 
-    public byte[] getSHA512Hash(byte[] pInput) {
+    public byte[] getCheckSum(byte[] pInput) {
         return sha.digest(pInput);
     }
 
-    public byte[] getPBKDF2Hash(String pInput,byte[] pSalt) throws InvalidKeySpecException {
+    public byte[] getSecureHash(String pInput,byte[] pSalt) throws InvalidKeySpecException {
         PBEKeySpec pbSpec = new PBEKeySpec(pInput.toCharArray(), pSalt, PBKDF2_ITERATIONS, PBKDF2_SIZE);
         return hgen.generateSecret(pbSpec).getEncoded();
     }
 
-    public byte[] getSHA1PRNGBytes(int bSize) {
+    public byte[] getSecureRandomBytes(int bSize) {
         byte[] ret = new byte[bSize];
         prng.nextBytes(ret);
         return ret;
