@@ -11,7 +11,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 
 public class RSAHandler {
     private Cipher cipher;

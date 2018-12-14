@@ -9,7 +9,6 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.security.SecureRandom;
-import java.util.Arrays;
 
 public class AESHandler {
     private Cipher cipher;
