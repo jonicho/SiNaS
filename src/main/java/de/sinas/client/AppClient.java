@@ -13,6 +13,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EventListener;
@@ -200,8 +201,24 @@ public class AppClient extends Client {
 		errorListeners.add(errorListener);
 	}
 
-	public void login(String username, String passwordHash) {
-		thisUser = new User("", 0, username, passwordHash);
+	public String generateSalt(String username, String password) throws InvalidKeySpecException{
+		//Remove Spaces from username
+		username.replace(" ", "");
+		//SHA512-Hash username and Password
+		byte[] uHash = getHashHandler().getCheckSum(username.getBytes());
+		byte[] pHash = getHashHandler().getCheckSum(password.getBytes());
+		//PBKDF2-Hash the password hash using the username as salt to increase complexity of the diffusion
+		pHash = getHashHandler().getSecureHash(Encoder.b64Encode(pHash), uHash);
+		//XOR username with password
+		byte[] key = new byte[uHash.length];
+		for(int i = 0; i < uHash.length; i++) {
+			key[i] = (byte)((uHash[i] ^ pHash[i]) & 0x000000ff);
+		}
+		return Encoder.b64Encode(key);
+	}
+
+	public void login(String username, String password) {
+		thisUser = new User("", 0, username, password);
 		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN, thisUser.getUsername(), thisUser.getPasswordHash()));
 	}
 
