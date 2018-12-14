@@ -201,7 +201,7 @@ public class AppClient extends Client {
 		errorListeners.add(errorListener);
 	}
 
-	public String generateSalt(String username, String password) throws InvalidKeySpecException{
+	public byte[] generateSalt(String username, String password) throws InvalidKeySpecException{
 		//Remove Spaces from username
 		username.replace(" ", "");
 		//SHA512-Hash username and Password
@@ -210,15 +210,16 @@ public class AppClient extends Client {
 		//PBKDF2-Hash the password hash using the username as salt to increase complexity of the diffusion
 		pHash = getHashHandler().getSecureHash(Encoder.b64Encode(pHash), uHash);
 		//XOR username with password
-		byte[] key = new byte[uHash.length];
+		byte[] salt = new byte[uHash.length];
 		for(int i = 0; i < uHash.length-1; i++) {
-			key[i] = (byte)((uHash[i] ^ pHash[i]) & 0x000000ff);
+			salt[i] = (byte)((uHash[i] ^ pHash[i]) & 0x000000ff);
 		}
-		return Encoder.b64Encode(key);
+		return salt;
 	}
 
-	public void login(String username, String password) {
-		thisUser = new User("", 0, username, password);
+	public void login(String username, String password) throws InvalidKeySpecException {
+		String pwdHash = Encoder.b64Encode(getHashHandler().getSecureHash(password, generateSalt(username, password)));
+		thisUser = new User("", 0, username, pwdHash);
 		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN, thisUser.getUsername(), thisUser.getPasswordHash()));
 	}
 
