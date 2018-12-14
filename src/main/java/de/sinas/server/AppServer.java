@@ -131,10 +131,10 @@ public class AppServer extends Server {
 	private void handleRegister(TempUser tUser, String username, String password) {
 		if (db.loadConnectedUser(username, tUser.getIp(), tUser.getPort()) instanceof TempUser) {
 			db.createUser(new User(tUser.getIp(), tUser.getPort(), username, password));
-			handleLogin(tUser, username, password); // TODO
+			handleLogin(tUser, username, password);
 		} else {
 			send(tUser.getIp(), tUser.getPort(), PROTOCOL.buildMessage(PROTOCOL.SC.ERROR, PROTOCOL.ERRORCODES.ALREADY_REGISTERED));
-			handleLogin(tUser, username, password); // TODO
+			handleLogin(tUser, username, password);
 		}
 	}
 
@@ -146,7 +146,6 @@ public class AppServer extends Server {
 	 * @see PROTOCOL.CS
 	 */
 	private void handleLogin(TempUser tUser, String username, String password) {
-		// TODO: handle login
 		User user = db.loadConnectedUser(username, tUser.getIp(), tUser.getPort());
 		if (!(user instanceof TempUser) && user.getPasswordHash().equals(password)) {
 			tempUsers.remove(tUser);
