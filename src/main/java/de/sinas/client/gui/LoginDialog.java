@@ -163,7 +163,7 @@ public class LoginDialog extends JDialog {
 			innerAppClient.addErrorListener(errorCode -> {
 				switch (errorCode) {
 					case PROTOCOL.ERRORCODES.ALREADY_REGISTERED:
-						statusLabel.setText("<html><font color='red'>" + lang.getString("user_already_registered") + "</font></html>");//This user is already registered!
+						statusLabel.setText("<html><font color='red'>" + lang.getString("user_already_registered") + "</font></html>");
 						break;
 					default:
 						statusLabel.setText("<html><font color='red'>" + lang.getString("some_error_occurred") + " " + lang.getString("error_code") + ":" + errorCode + "</font></html>");
