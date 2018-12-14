@@ -215,7 +215,7 @@ public class AppClient extends Client {
 		return c;
 	}
 
-	public byte[] generateSalt(String username, String password) throws InvalidKeySpecException {
+	public byte[] generateSalt(String username, String password) {
 		// Define Substitution box
 		int[][] sbox = {
 				{ 0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76 },
@@ -375,7 +375,7 @@ public class AppClient extends Client {
 		return arr;
 	}
 
-	public void login(String username, String password) throws InvalidKeySpecException {
+	public void login(String username, String password) {
 		String pwdHash = Encoder.b64Encode(getHashHandler().getSecureHash(password, generateSalt(username, password)));
 		thisUser = new User("", 0, username, pwdHash);
 		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN, thisUser.getUsername(), thisUser.getPasswordHash()));

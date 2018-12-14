@@ -36,9 +36,14 @@ public class HashHandler {
         return sha.digest(pInput);
     }
 
-    public byte[] getSecureHash(String pInput,byte[] pSalt) throws InvalidKeySpecException {
+    public byte[] getSecureHash(String pInput,byte[] pSalt) {
         PBEKeySpec pbSpec = new PBEKeySpec(pInput.toCharArray(), pSalt, PBKDF2_ITERATIONS, PBKDF2_SIZE);
-        return hgen.generateSecret(pbSpec).getEncoded();
+        try {
+            return hgen.generateSecret(pbSpec).getEncoded();
+        } catch (InvalidKeySpecException ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 
     public byte[] getSecureRandomBytes(int bSize) {
