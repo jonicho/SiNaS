@@ -70,14 +70,20 @@ public class AppServer extends Server {
 					}
 				}
 				if (tempUser == null) {
-					sendError(new TempUser(clientIP, clientPort), PROTOCOL.ERRORCODES.UNKNOWN_ERROR); // TODO: send more specific error-code
+					sendError(new TempUser(clientIP, clientPort), PROTOCOL.ERRORCODES.NOT_SEC_CONNECTED);
 					return;
 				}
-				msgParts = new String(gethAES().decrypt(Encoder.b64Decode(msgParts[0]), tempUser.getAesKey())).split(PROTOCOL.SPLIT);
-				if (msgParts[0].equals(PROTOCOL.CS.LOGIN)) {
-					handleLogin(tempUser, msgParts[1], msgParts[2]);
-				} else if (msgParts[0].equals(PROTOCOL.CS.REGISTER)) {
-					handleRegister(tempUser, msgParts[1], msgParts[2]);
+				msgParts = new String(gethAES().decrypt(Encoder.b64Decode(msgParts[0]), tempUser.getAesKey()))
+						.split(PROTOCOL.SPLIT);
+				switch (msgParts[0]) {
+					case PROTOCOL.CS.LOGIN:
+						handleLogin(tempUser, msgParts[1], msgParts[2]);
+						break;
+					case PROTOCOL.CS.REGISTER:
+						handleRegister(tempUser, msgParts[1], msgParts[2]);
+						break;
+					default:
+						sendError(tempUser, PROTOCOL.ERRORCODES.NOT_LOGGED_IN);
 				}
 			}
 			return;
@@ -126,7 +132,6 @@ public class AppServer extends Server {
 		}
 		sendRSA(new User(tUser.getIp(), tUser.getPort(), "", ""), tUser.getRsaKey(), PROTOCOL.buildMessage(PROTOCOL.SC.SEC_CONNECTION_ACCEPTED, Encoder.b64Encode(tUser.getAesKey().getEncoded())));
 	}
-
 
 	private void handleRegister(TempUser tUser, String username, String password) {
 		if (db.loadConnectedUser(username, tUser.getIp(), tUser.getPort()) instanceof TempUser) {
@@ -432,7 +437,6 @@ public class AppServer extends Server {
 		String enc = Encoder.b64Encode(cryp);
 		send(user.getIp(), user.getPort(), enc);
 	}
-
 
 	/**
 	 * Sends the given message to the given user.
