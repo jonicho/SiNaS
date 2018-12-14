@@ -150,9 +150,11 @@ public class AppServer extends Server {
 	 *
 	 * @see PROTOCOL.CS
 	 */
-	private void handleLogin(TempUser tUser, String username, String password) {
+	private void handleLogin(TempUser tUser, String username, String passwordHash) {
+		byte[] salt = db.loadSalt();
+		passwordHash = Encoder.b64Encode(getHashHandler().getCheckSum((passwordHash+Encoder.b64Encode(salt)).getBytes()));
 		User user = db.loadConnectedUser(username, tUser.getIp(), tUser.getPort());
-		if (!(user instanceof TempUser) && user.getPasswordHash().equals(password)) {
+		if (!(user instanceof TempUser) && user.getPasswordHash().equals(passwordHash)) {
 			tempUsers.remove(tUser);
 			cryptoManager.addSession(new CryptoSession(user, tUser.getRsaKey(), tUser.getAesKey()));
 
