@@ -202,7 +202,7 @@ public class LoginDialog extends JDialog {
 
 	private void openGUI(AppClient appClient) {
 		dispose();
-		GUI gui = new GUI(appClient);
+		GUI gui = new GUI(appClient, lang);
 		gui.setVisible(true);
 	}
 }
