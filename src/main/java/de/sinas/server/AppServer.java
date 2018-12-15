@@ -133,15 +133,15 @@ public class AppServer extends Server {
 		sendRSA(new User(tUser.getIp(), tUser.getPort(), "", ""), tUser.getRsaKey(), PROTOCOL.buildMessage(PROTOCOL.SC.SEC_CONNECTION_ACCEPTED, Encoder.b64Encode(tUser.getAesKey().getEncoded())));
 	}
 
-	private void handleRegister(TempUser tUser, String username, String passwordHash) {
+	private void handleRegister(TempUser tUser, String username, String password) {
 		byte[] salt = db.loadSalt();
-		passwordHash = Encoder.b64Encode(getHashHandler().getCheckSum((passwordHash + Encoder.b64Encode(salt)).getBytes()));
+		String passwordHash = Encoder.b64Encode(getHashHandler().getCheckSum((password + Encoder.b64Encode(salt)).getBytes()));
 		if (db.loadConnectedUser(username, tUser.getIp(), tUser.getPort()) instanceof TempUser) {
 			db.createUser(new User(tUser.getIp(), tUser.getPort(), username, passwordHash));
-			handleLogin(tUser, username, passwordHash);
+			handleLogin(tUser, username, password);
 		} else {
 			send(tUser.getIp(), tUser.getPort(), PROTOCOL.buildMessage(PROTOCOL.SC.ERROR, PROTOCOL.ERRORCODES.ALREADY_REGISTERED));
-			handleLogin(tUser, username, passwordHash);
+			handleLogin(tUser, username, password);
 		}
 	}
 
@@ -152,9 +152,9 @@ public class AppServer extends Server {
 	 *
 	 * @see PROTOCOL.CS
 	 */
-	private void handleLogin(TempUser tUser, String username, String passwordHash) {
+	private void handleLogin(TempUser tUser, String username, String password) {
 		byte[] salt = db.loadSalt();
-		passwordHash = Encoder.b64Encode(getHashHandler().getCheckSum((passwordHash + Encoder.b64Encode(salt)).getBytes()));
+		String passwordHash = Encoder.b64Encode(getHashHandler().getCheckSum((password + Encoder.b64Encode(salt)).getBytes()));
 		User user = db.loadConnectedUser(username, tUser.getIp(), tUser.getPort());
 		if (!(user instanceof TempUser) && user.getPasswordHash().equals(passwordHash)) {
 			tempUsers.remove(tUser);
