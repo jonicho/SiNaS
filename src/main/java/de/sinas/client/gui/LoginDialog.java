@@ -214,6 +214,8 @@ public class LoginDialog extends JDialog {
 	private void openGUI(AppClient appClient) {
 		new Thread(() -> {
 			dispose();
+			appClient.removeAllUpdateListeners();
+			appClient.removeAllErrorListeners();
 			GUI gui = new GUI(appClient, lang);
 			gui.setVisible(true);
 		}).start();

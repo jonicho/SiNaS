@@ -197,8 +197,16 @@ public class AppClient extends Client {
 		updateListeners.add(updateListener);
 	}
 
+	public void removeAllUpdateListeners() {
+		updateListeners.clear();
+	}
+
 	public void addErrorListener(ErrorListener errorListener) {
 		errorListeners.add(errorListener);
+	}
+
+	public void removeAllErrorListeners() {
+		errorListeners.clear();
 	}
 
 	public void login(String username, String password) {
