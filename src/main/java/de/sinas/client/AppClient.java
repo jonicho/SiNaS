@@ -204,17 +204,17 @@ public class AppClient extends Client {
 	public void login(String username, String password) {
 		//String pwdHash = Encoder.b64Encode(getHashHandler().getSecureHash(password, SaltGenerator.generateSalt(username, password, getHashHandler())));
 		thisUser = new User("", 0, username, /*pwdHash*/password);
-		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN, thisUser.getUsername(), thisUser.getPasswordHash()));
+		sendAES(PROTOCOL.CS.LOGIN, thisUser.getUsername(), thisUser.getPasswordHash());
 	}
 
 	public void register(String username, String password) {
 		//String pwdHash = Encoder.b64Encode(getHashHandler().getSecureHash(password, SaltGenerator.generateSalt(username, password, getHashHandler())));
 		thisUser = new User("", 0, username, /*pwdHash*/password);
-		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.REGISTER, thisUser.getUsername(), thisUser.getPasswordHash()));
+		sendAES(PROTOCOL.CS.REGISTER, thisUser.getUsername(), thisUser.getPasswordHash());
 	}
 
 	public void requestConversations() {
-		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.GET_CONVERSATIONS));
+		sendAES(PROTOCOL.CS.GET_CONVERSATIONS);
 	}
 
 	private void sendMessage(String convID, String content) {
