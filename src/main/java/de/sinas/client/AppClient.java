@@ -215,12 +215,6 @@ public class AppClient extends Client {
 	}
 
 	private void sendMessage(String convID, String content) {
-		Conversation cCon = null;
-		for (Conversation con : conversations) {
-			if (con.getId().equals(convID)) {
-				cCon = con;
-			}
-		}
 		ClientCryptoConversation ccc = null;
 		for (ClientCryptoConversation pccc : cryptoSessions) {
 			if (pccc.getConversationID().equals(convID)) {
