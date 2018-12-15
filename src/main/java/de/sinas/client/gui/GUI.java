@@ -4,13 +4,16 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -19,6 +22,9 @@ import javax.swing.border.EmptyBorder;
 import de.sinas.Conversation;
 import de.sinas.client.AppClient;
 import de.sinas.client.gui.language.Language;
+import javax.swing.ListSelectionModel;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class GUI extends JFrame {
 	private JPanel contentPane;
@@ -26,10 +32,12 @@ public class GUI extends JFrame {
 	private JPanel conversationPanel;
 	private JList<GUIConversation> conversationsList;
 	private Language lang;
+	private AppClient appClient;
 
 	public GUI(AppClient appClient, Language lang) {
-		setTitle("SiNaS");
 		this.lang = lang;
+		this.appClient = appClient;
+		setTitle("SiNaS");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 600, 300);
 		contentPane = new JPanel();
@@ -53,6 +61,7 @@ public class GUI extends JFrame {
 		contentPane.add(scrollPane, gbc_scrollPane);
 
 		conversationsList = new JList<GUIConversation>();
+		conversationsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		scrollPane.setViewportView(conversationsList);
 
 		JScrollPane scrollPane_1 = new JScrollPane();
@@ -75,6 +84,17 @@ public class GUI extends JFrame {
 		gbc_menuBar.gridx = 0;
 		gbc_menuBar.gridy = 0;
 		contentPane.add(menuBar, gbc_menuBar);
+		
+		JMenu mnOptions = new JMenu(lang.getString("options"));
+		menuBar.add(mnOptions);
+		
+		JMenuItem mntmAddConversation = new JMenuItem(lang.getString("add_conversation"));
+		mntmAddConversation.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				onAddConversation();
+			}
+		});
+		mnOptions.add(mntmAddConversation);
 
 		JMenu mnHelp = new JMenu(lang.getString("help"));
 		menuBar.add(mnHelp);
@@ -97,19 +117,28 @@ public class GUI extends JFrame {
 		gbc_sendButton.gridy = 2;
 		contentPane.add(sendButton, gbc_sendButton);
 
-		createUpdateListener(appClient);
-		createErrorListener(appClient);
+		createUpdateListener();
+		createErrorListener();
 
 		appClient.requestConversations();
 	}
 
-	private void createUpdateListener(AppClient appClient) {
+	private void onAddConversation() {
+		String conversationName = JOptionPane.showInputDialog(this, lang.getString("enter_conversation_name"), lang.getString("add_conversation"), JOptionPane.QUESTION_MESSAGE);
+		if (conversationName == null || conversationName.equals("")) {
+			return;
+		}
+		appClient.addConversation(conversationName);
+		appClient.requestConversations();
+	}
+
+	private void createUpdateListener() {
 		appClient.addUpdateListener(() -> {
-			// TODO: update gui
+			conversationsList.setListData(appClient.getConversations().stream().map(c -> new GUIConversation(c)).toArray(GUIConversation[]::new));
 		});
 	}
 
-	private void createErrorListener(AppClient appClient) {
+	private void createErrorListener() {
 		appClient.addErrorListener(errorCode -> {
 			// TODO: handle error
 		});

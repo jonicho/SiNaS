@@ -14,3 +14,6 @@ user_already_registered: Dieser Benutzer ist bereits registriert!
 help: Hilfe
 about: Über
 send: Senden
+options: Optionen
+add_conversation: Koversation hinzufügen
+enter_conversation_name: Gib einen Konversationsnamen ein

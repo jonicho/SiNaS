@@ -225,6 +225,10 @@ public class AppClient extends Client {
 		sendAES(PROTOCOL.CS.GET_CONVERSATIONS);
 	}
 
+	public void addConversation(String name) {
+		sendAES(PROTOCOL.CS.CREATE_CONVERSATION, name, thisUser.getUsername());
+	}
+
 	private void sendMessage(String convID, String content) {
 		ClientCryptoConversation ccc = null;
 		for (ClientCryptoConversation pccc : cryptoSessions) {
