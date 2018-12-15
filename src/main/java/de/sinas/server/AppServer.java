@@ -195,7 +195,7 @@ public class AppServer extends Server {
 					convCryptoManager.addSession(ccs);
 				}
 				sendAES(user, PROTOCOL.SC.CONVERSATION, conversation.getName(), conversation.getId(),
-						convCryptoManager.getSession(user, conversation).getAesKey().getEncoded(),
+						Encoder.b64Encode(convCryptoManager.getSession(user, conversation).getAesKey().getEncoded()),
 						usersString.toString());
 			}
 		}
