@@ -106,7 +106,6 @@ public class AppClient extends Client {
 
 	private void handleLoginOk() {
 		isLoggedIn = true;
-		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.GET_CONVERSATIONS));
 	}
 
 	private void handleError(String error) {
@@ -212,6 +211,10 @@ public class AppClient extends Client {
 	public void register(String username, String passwordHash) {
 		thisUser = new User("", 0, username, passwordHash);
 		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.REGISTER, thisUser.getUsername(), thisUser.getPasswordHash()));
+	}
+
+	public void requestConversations() {
+		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.GET_CONVERSATIONS));
 	}
 
 	private void sendMessage(String convID, String content) {

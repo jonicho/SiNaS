@@ -96,6 +96,23 @@ public class GUI extends JFrame {
 		gbc_sendButton.gridx = 2;
 		gbc_sendButton.gridy = 2;
 		contentPane.add(sendButton, gbc_sendButton);
+
+		createUpdateListener(appClient);
+		createErrorListener(appClient);
+
+		appClient.requestConversations();
+	}
+
+	private void createUpdateListener(AppClient appClient) {
+		appClient.addUpdateListener(() -> {
+			// TODO: update gui
+		});
+	}
+
+	private void createErrorListener(AppClient appClient) {
+		appClient.addErrorListener(errorCode -> {
+			// TODO: handle error
+		});
 	}
 
 	private class GUIConversation {
