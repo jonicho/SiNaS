@@ -1,14 +1,5 @@
 package de.sinas.server;
 
-import de.sinas.Conversation;
-import de.sinas.Message;
-import de.sinas.User;
-import de.sinas.crypto.Encoder;
-import de.sinas.net.PROTOCOL;
-import de.sinas.net.Server;
-
-import javax.crypto.SecretKey;
-
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -16,6 +7,15 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.crypto.SecretKey;
+
+import de.sinas.Conversation;
+import de.sinas.Message;
+import de.sinas.User;
+import de.sinas.crypto.Encoder;
+import de.sinas.net.PROTOCOL;
+import de.sinas.net.Server;
 
 public class AppServer extends Server {
 	private final Database db;
@@ -76,46 +76,46 @@ public class AppServer extends Server {
 				msgParts = new String(getAesHandler().decrypt(Encoder.b64Decode(msgParts[0]), tempUser.getAesKey()))
 						.split(PROTOCOL.SPLIT);
 				switch (msgParts[0]) {
-					case PROTOCOL.CS.LOGIN:
-						handleLogin(tempUser, msgParts[1], msgParts[2]);
-						break;
-					case PROTOCOL.CS.REGISTER:
-						handleRegister(tempUser, msgParts[1], msgParts[2]);
-						break;
-					default:
-						sendError(tempUser, PROTOCOL.ERRORCODES.NOT_LOGGED_IN);
+				case PROTOCOL.CS.LOGIN:
+					handleLogin(tempUser, msgParts[1], msgParts[2]);
+					break;
+				case PROTOCOL.CS.REGISTER:
+					handleRegister(tempUser, msgParts[1], msgParts[2]);
+					break;
+				default:
+					sendError(tempUser, PROTOCOL.ERRORCODES.NOT_LOGGED_IN);
 				}
 			}
 			return;
 		}
 		switch (msgParts[0]) {
-			case PROTOCOL.CS.MESSAGE:
-				handleMessage(user, msgParts);
-				break;
-			case PROTOCOL.CS.GET_CONVERSATIONS:
-				handleGetConversations(user);
-				break;
-			case PROTOCOL.CS.GET_USER:
-				handleGetUser(user, msgParts);
-				break;
-			case PROTOCOL.CS.GET_MESSAGES:
-				handleGetMessages(user, msgParts);
-				break;
-			case PROTOCOL.CS.CREATE_CONVERSATION:
-				handleCreateConversation(user, msgParts);
-				break;
-			case PROTOCOL.CS.CONVERSATION_ADD:
-				handleConversationAddUser(user, msgParts);
-				break;
-			case PROTOCOL.CS.CONVERSATION_REM:
-				handleConversationRemoveUser(user, msgParts);
-				break;
-			case PROTOCOL.CS.CONVERSATION_RENAME:
-				handleConversationRename(user, msgParts);
-				break;
-			default:
-				sendError(user, PROTOCOL.ERRORCODES.UNKNOWN_MESSAGE_BASE);
-				break;
+		case PROTOCOL.CS.MESSAGE:
+			handleMessage(user, msgParts);
+			break;
+		case PROTOCOL.CS.GET_CONVERSATIONS:
+			handleGetConversations(user);
+			break;
+		case PROTOCOL.CS.GET_USER:
+			handleGetUser(user, msgParts);
+			break;
+		case PROTOCOL.CS.GET_MESSAGES:
+			handleGetMessages(user, msgParts);
+			break;
+		case PROTOCOL.CS.CREATE_CONVERSATION:
+			handleCreateConversation(user, msgParts);
+			break;
+		case PROTOCOL.CS.CONVERSATION_ADD:
+			handleConversationAddUser(user, msgParts);
+			break;
+		case PROTOCOL.CS.CONVERSATION_REM:
+			handleConversationRemoveUser(user, msgParts);
+			break;
+		case PROTOCOL.CS.CONVERSATION_RENAME:
+			handleConversationRename(user, msgParts);
+			break;
+		default:
+			sendError(user, PROTOCOL.ERRORCODES.UNKNOWN_MESSAGE_BASE);
+			break;
 		}
 	}
 
@@ -135,7 +135,7 @@ public class AppServer extends Server {
 
 	private void handleRegister(TempUser tUser, String username, String passwordHash) {
 		byte[] salt = db.loadSalt();
-		passwordHash = Encoder.b64Encode(getHashHandler().getCheckSum((passwordHash+Encoder.b64Encode(salt)).getBytes()));
+		passwordHash = Encoder.b64Encode(getHashHandler().getCheckSum((passwordHash + Encoder.b64Encode(salt)).getBytes()));
 		if (db.loadConnectedUser(username, tUser.getIp(), tUser.getPort()) instanceof TempUser) {
 			db.createUser(new User(tUser.getIp(), tUser.getPort(), username, passwordHash));
 			handleLogin(tUser, username, passwordHash);
@@ -154,7 +154,7 @@ public class AppServer extends Server {
 	 */
 	private void handleLogin(TempUser tUser, String username, String passwordHash) {
 		byte[] salt = db.loadSalt();
-		passwordHash = Encoder.b64Encode(getHashHandler().getCheckSum((passwordHash+Encoder.b64Encode(salt)).getBytes()));
+		passwordHash = Encoder.b64Encode(getHashHandler().getCheckSum((passwordHash + Encoder.b64Encode(salt)).getBytes()));
 		User user = db.loadConnectedUser(username, tUser.getIp(), tUser.getPort());
 		if (!(user instanceof TempUser) && user.getPasswordHash().equals(passwordHash)) {
 			tempUsers.remove(tUser);
@@ -194,7 +194,9 @@ public class AppServer extends Server {
 					ccs.setAesKey(getAesHandler().generateKey());
 					convCryptoManager.addSession(ccs);
 				}
-				sendAES(user, PROTOCOL.SC.CONVERSATION, conversation.getName(), conversation.getId(), convCryptoManager.getSession(user, conversation).getAesKey().getEncoded(), usersString.toString());
+				sendAES(user, PROTOCOL.SC.CONVERSATION, conversation.getName(), conversation.getId(),
+						convCryptoManager.getSession(user, conversation).getAesKey().getEncoded(),
+						usersString.toString());
 			}
 		}
 	}
@@ -478,7 +480,7 @@ public class AppServer extends Server {
 	 * Returns the conversation with the given id.
 	 *
 	 * @return the conversation with the given id. {@code null} if there is no such
-	 * conversations.
+	 *         conversations.
 	 */
 	private Conversation getConversationById(String id) {
 		for (Conversation c : conversations) {

@@ -95,7 +95,7 @@ public class GUI extends JFrame {
 		GridBagConstraints gbc_sendButton = new GridBagConstraints();
 		gbc_sendButton.gridx = 2;
 		gbc_sendButton.gridy = 2;
-		contentPane.add(sendButton, gbc_sendButton);	
+		contentPane.add(sendButton, gbc_sendButton);
 	}
 
 	private class GUIConversation {

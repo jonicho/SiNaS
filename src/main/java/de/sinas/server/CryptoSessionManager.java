@@ -1,14 +1,15 @@
 package de.sinas.server;
 
 import java.util.ArrayList;
+
 import de.sinas.User;
 
 public class CryptoSessionManager {
     private ArrayList<CryptoSession> sessions = new ArrayList<CryptoSession>();
 
     public CryptoSession getSessionByUser(User u) {
-        for(CryptoSession cs : sessions) {
-            if(cs.getOwner().equals(u)) {
+        for (CryptoSession cs : sessions) {
+            if (cs.getOwner().equals(u)) {
                 return cs;
             }
         }
@@ -16,7 +17,7 @@ public class CryptoSessionManager {
     }
 
     public void addSession(CryptoSession cs) {
-        if(cs != null) {
+        if (cs != null) {
             sessions.add(cs);
         }
     }

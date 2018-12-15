@@ -6,7 +6,7 @@ public class ClientCryptoConversation {
     private SecretKey aesKey;
     private String conversationID;
 
-    public ClientCryptoConversation(SecretKey pKey,String pID) {
+    public ClientCryptoConversation(SecretKey pKey, String pID) {
         aesKey = pKey;
         conversationID = pID;
     }
@@ -25,4 +25,3 @@ public class ClientCryptoConversation {
         return conversationID;
     }
 }
-

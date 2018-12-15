@@ -1,14 +1,25 @@
 package de.sinas.client.gui;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
+
 import de.sinas.client.AppClient;
 import de.sinas.client.gui.language.Language;
 import de.sinas.net.PROTOCOL;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class LoginDialog extends JDialog {
 	private final JPanel contentPanel = new JPanel();
@@ -29,10 +40,10 @@ public class LoginDialog extends JDialog {
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_contentPanel = new GridBagLayout();
-		gbl_contentPanel.columnWidths = new int[]{0, 0, 0};
-		gbl_contentPanel.rowHeights = new int[]{0, 0, 0, 0, 0};
-		gbl_contentPanel.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-		gbl_contentPanel.rowWeights = new double[]{1.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_contentPanel.columnWidths = new int[] { 0, 0, 0 };
+		gbl_contentPanel.rowHeights = new int[] { 0, 0, 0, 0, 0 };
+		gbl_contentPanel.columnWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
+		gbl_contentPanel.rowWeights = new double[] { 1.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
 		contentPanel.setLayout(gbl_contentPanel);
 		{
 			JLabel lblUsername = new JLabel(lang.getString("username"));
@@ -125,12 +136,12 @@ public class LoginDialog extends JDialog {
 		appClient = new AppClient(PROTOCOL.IP, PROTOCOL.PORT, innerAppClient -> {
 			innerAppClient.addErrorListener(errorCode -> {
 				switch (errorCode) {
-					case PROTOCOL.ERRORCODES.LOGIN_FAILED:
-						statusLabel.setText("<html><font color='red'>" + lang.getString("invalid_username_password") + "</font></html>");
-						break;
-					default:
-						statusLabel.setText("<html><font color='red'>" + lang.getString("some_error_occurred") + " " + lang.getString("error_code") + ":" + errorCode + "</font></html>");
+				case PROTOCOL.ERRORCODES.LOGIN_FAILED:
+					statusLabel.setText("<html><font color='red'>" + lang.getString("invalid_username_password") + "</font></html>");
 					break;
+				default:
+					statusLabel.setText("<html><font color='red'>" + lang.getString("some_error_occurred") + " " + lang.getString("error_code") + ":" + errorCode + "</font></html>");
+				break;
 
 				}
 				setGuiEnabled(true);
@@ -162,12 +173,12 @@ public class LoginDialog extends JDialog {
 		appClient = new AppClient(PROTOCOL.IP, PROTOCOL.PORT, innerAppClient -> {
 			innerAppClient.addErrorListener(errorCode -> {
 				switch (errorCode) {
-					case PROTOCOL.ERRORCODES.ALREADY_REGISTERED:
-						statusLabel.setText("<html><font color='red'>" + lang.getString("user_already_registered") + "</font></html>");
-						break;
-					default:
-						statusLabel.setText("<html><font color='red'>" + lang.getString("some_error_occurred") + " " + lang.getString("error_code") + ":" + errorCode + "</font></html>");
-						break;
+				case PROTOCOL.ERRORCODES.ALREADY_REGISTERED:
+					statusLabel.setText("<html><font color='red'>" + lang.getString("user_already_registered") + "</font></html>");
+					break;
+				default:
+					statusLabel.setText("<html><font color='red'>" + lang.getString("some_error_occurred") + " " + lang.getString("error_code") + ":" + errorCode + "</font></html>");
+					break;
 
 				}
 				setGuiEnabled(true);

@@ -1,12 +1,12 @@
 package de.sinas.client;
 
+import java.util.Locale;
+
 import javax.swing.JDialog;
 import javax.swing.UIManager;
 
 import de.sinas.client.gui.LoginDialog;
 import de.sinas.client.gui.language.Language;
-
-import java.util.Locale;
 
 public class ClientLauncher {
 

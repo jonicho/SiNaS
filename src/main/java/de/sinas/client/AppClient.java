@@ -1,5 +1,15 @@
 package de.sinas.client;
 
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EventListener;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 import de.sinas.Conversation;
 import de.sinas.Message;
 import de.sinas.User;
@@ -8,16 +18,6 @@ import de.sinas.crypto.SaltGenerator;
 import de.sinas.net.Client;
 import de.sinas.net.PROTOCOL;
 import de.sinas.server.Users;
-
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EventListener;
 
 public class AppClient extends Client {
 	private final ArrayList<Conversation> conversations = new ArrayList<>();
@@ -203,7 +203,8 @@ public class AppClient extends Client {
 	}
 
 	public void login(String username, String password) {
-		String pwdHash = Encoder.b64Encode(getHashHandler().getSecureHash(password, SaltGenerator.generateSalt(username, password, getHashHandler())));
+		String pwdHash = Encoder.b64Encode(getHashHandler().getSecureHash(password,
+				SaltGenerator.generateSalt(username, password, getHashHandler())));
 		thisUser = new User("", 0, username, pwdHash);
 		sendAES(PROTOCOL.buildMessage(PROTOCOL.CS.LOGIN, thisUser.getUsername(), thisUser.getPasswordHash()));
 	}

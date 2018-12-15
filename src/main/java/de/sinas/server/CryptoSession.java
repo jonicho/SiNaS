@@ -1,10 +1,10 @@
 package de.sinas.server;
 
-import de.sinas.User;
-
 import java.security.PublicKey;
 
 import javax.crypto.SecretKey;
+
+import de.sinas.User;
 
 public class CryptoSession {
 	private PublicKey userPublicKey;
@@ -37,6 +37,5 @@ public class CryptoSession {
 	public PublicKey getUserPublicKey() {
 		return userPublicKey;
 	}
-
 
 }

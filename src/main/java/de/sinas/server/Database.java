@@ -1,13 +1,18 @@
 package de.sinas.server;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+
 import de.sinas.Conversation;
 import de.sinas.Message;
 import de.sinas.User;
 import de.sinas.crypto.Encoder;
 import de.sinas.crypto.HashHandler;
-
-import java.sql.*;
-import java.util.ArrayList;
 
 public class Database {
 	private Connection connection;
@@ -92,7 +97,7 @@ public class Database {
 	 *
 	 * @param username
 	 * @return The user with the given username. {@code null} if no user with the
-	 * given name exists.
+	 *         given name exists.
 	 */
 	public User loadUserInfo(String username) {
 		return loadConnectedUser(username, "", 0);
@@ -100,7 +105,8 @@ public class Database {
 
 	/**
 	 * Loads all conversations of the given user<br>
-	 * (NOTE: this method only loads the conversations, not the conversation's messages;<br>
+	 * (NOTE: this method only loads the conversations, not the conversation's
+	 * messages;<br>
 	 * to load messages use {@link #loadMessages(Conversation)})
 	 *
 	 * @param user
@@ -124,7 +130,8 @@ public class Database {
 
 	/**
 	 * Loads the conversation with the given conversation id<br>
-	 * (NOTE: this method only loads the conversation, not the conversation's messages;<br>
+	 * (NOTE: this method only loads the conversation, not the conversation's
+	 * messages;<br>
 	 * to load messages use {@link #loadMessages(Conversation)})
 	 *
 	 * @param conversationId
@@ -165,7 +172,8 @@ public class Database {
 	 * Loads the messages from the given conversation
 	 *
 	 * @param conversation
-	 * @return true if the conversation exists and the message could be loaded successfully, false otherwise
+	 * @return true if the conversation exists and the message could be loaded
+	 *         successfully, false otherwise
 	 */
 	public boolean loadMessages(Conversation conversation) {
 		try {
@@ -182,7 +190,8 @@ public class Database {
 				statement.setString(1, conversation.getId());
 				ResultSet rs = statement.executeQuery();
 				while (rs.next()) {
-					Message message = new Message(rs.getString("id"), rs.getString("content"), rs.getLong("timestamp"), rs.getString("sender"), rs.getBoolean("is_file"), rs.getString("conversation_id"));
+					Message message = new Message(rs.getString("id"), rs.getString("content"), rs.getLong("timestamp"),
+							rs.getString("sender"), rs.getBoolean("is_file"), rs.getString("conversation_id"));
 					conversation.addMessages(message);
 				}
 			}
@@ -197,7 +206,8 @@ public class Database {
 	 * Creates the given user in the database
 	 *
 	 * @param user
-	 * @return true if the user did not already exist and the user could successfully be created, false otherwise
+	 * @return true if the user did not already exist and the user could
+	 *         successfully be created, false otherwise
 	 */
 	public boolean createUser(User user) {
 		if (!(loadUserInfo(user.getUsername()) instanceof TempUser)) {
@@ -219,7 +229,8 @@ public class Database {
 	 * Updates the given user in the database
 	 *
 	 * @param user
-	 * @return true if the user exists and the user could successfully be updated, false otherwise
+	 * @return true if the user exists and the user could successfully be updated,
+	 *         false otherwise
 	 */
 	public boolean updateUser(User user) {
 		if (loadUserInfo(user.getUsername()) != null) {
@@ -239,7 +250,8 @@ public class Database {
 
 	/**
 	 * Creates the given conversation in the database<br>
-	 * (NOTE: this method only creates the conversation, not the conversation's messages;<br>
+	 * (NOTE: this method only creates the conversation, not the conversation's
+	 * messages;<br>
 	 * to create messages use {@link #createMessage(Message)})
 	 *
 	 * @param conversation
@@ -268,7 +280,8 @@ public class Database {
 
 	/**
 	 * Updates the given conversation in the database<br>
-	 * (NOTE: this method only updates the conversation, not the conversation's messages)
+	 * (NOTE: this method only updates the conversation, not the conversation's
+	 * messages)
 	 *
 	 * @param conversation
 	 * @return true if the conversation exists, false otherwise
@@ -330,7 +343,8 @@ public class Database {
 	 *
 	 * @param conversation
 	 * @param user
-	 * @return true if both the conversation and the user exist and the user is not already in the conversation, false otherwise
+	 * @return true if both the conversation and the user exist and the user is not
+	 *         already in the conversation, false otherwise
 	 */
 	public boolean addUserToConversation(Conversation conversation, String user) {
 		try {
@@ -375,7 +389,8 @@ public class Database {
 	 *
 	 * @param conversation
 	 * @param user
-	 * @return true if both the conversation and the user exist and the user was in the conversation, false otherwise
+	 * @return true if both the conversation and the user exist and the user was in
+	 *         the conversation, false otherwise
 	 */
 	public boolean removeUserFromConversation(Conversation conversation, String user) {
 		try {

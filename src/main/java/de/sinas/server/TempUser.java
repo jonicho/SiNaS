@@ -1,10 +1,10 @@
 package de.sinas.server;
 
-import de.sinas.User;
-
 import java.security.PublicKey;
 
 import javax.crypto.SecretKey;
+
+import de.sinas.User;
 
 public class TempUser extends User {
 	private SecretKey aesKey;

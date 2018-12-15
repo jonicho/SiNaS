@@ -18,12 +18,12 @@ public class Language {
 	 */
 	public static Language getLanguage(Locale locale) {
 		switch (locale.getLanguage()) {
-			case "en":
-				return ENGLISH;
-			case "de":
-				return GERMAN;
-			default:
-				return ENGLISH;
+		case "en":
+			return ENGLISH;
+		case "de":
+			return GERMAN;
+		default:
+			return ENGLISH;
 		}
 	}
 

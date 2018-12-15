@@ -11,14 +11,13 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 
 public class RSAHandler {
     private Cipher cipher;
     private KeyPairGenerator kpg;
     private final int KEY_SIZE = 2048;
 
-    public RSAHandler() { 
+    public RSAHandler() {
         try {
             cipher = Cipher.getInstance("RSA");
             kpg = KeyPairGenerator.getInstance("RSA");
@@ -34,9 +33,9 @@ public class RSAHandler {
 
     public byte[] encrypt(byte[] input, PublicKey pKey) {
         try {
-            cipher.init(Cipher.ENCRYPT_MODE, pKey);  
-            return cipher.doFinal(input);   
-        } catch(InvalidKeyException | BadPaddingException | IllegalBlockSizeException ex) {
+            cipher.init(Cipher.ENCRYPT_MODE, pKey);
+            return cipher.doFinal(input);
+        } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException ex) {
             ex.printStackTrace();
         }
         return null;
@@ -44,9 +43,9 @@ public class RSAHandler {
 
     public byte[] decrypt(byte[] input, PrivateKey pKey) {
         try {
-            cipher.init(Cipher.DECRYPT_MODE, pKey);  
-            return cipher.doFinal(input);   
-        } catch(InvalidKeyException | BadPaddingException | IllegalBlockSizeException ex) {
+            cipher.init(Cipher.DECRYPT_MODE, pKey);
+            return cipher.doFinal(input);
+        } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException ex) {
             ex.printStackTrace();
         }
         return null;

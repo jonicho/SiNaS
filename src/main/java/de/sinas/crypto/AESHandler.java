@@ -2,14 +2,14 @@ package de.sinas.crypto;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
+import java.security.SecureRandom;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.security.SecureRandom;
-import java.util.Arrays;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 public class AESHandler {
     private Cipher cipher;
@@ -17,7 +17,7 @@ public class AESHandler {
     private final int SEED_SIZE = 1024;
     private SecureRandom prng;
 
-    public AESHandler() { 
+    public AESHandler() {
         try {
             cipher = Cipher.getInstance("AES");
             prng = SecureRandom.getInstance("SHA1PRNG");
@@ -40,9 +40,9 @@ public class AESHandler {
 
     public byte[] encrypt(byte[] input, SecretKey pKey) {
         try {
-            cipher.init(Cipher.ENCRYPT_MODE, pKey);  
-            return cipher.doFinal(input);   
-        } catch(InvalidKeyException | BadPaddingException | IllegalBlockSizeException ex) {
+            cipher.init(Cipher.ENCRYPT_MODE, pKey);
+            return cipher.doFinal(input);
+        } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException ex) {
             ex.printStackTrace();
         }
         return null;
@@ -50,11 +50,11 @@ public class AESHandler {
 
     public byte[] decrypt(byte[] input, SecretKey pKey) {
         try {
-            cipher.init(Cipher.DECRYPT_MODE, pKey); 
-            byte [] decBytes = cipher.doFinal(input);
-            System.out.println("(AES)"+new String(decBytes));
-            return decBytes;   
-        } catch(InvalidKeyException | BadPaddingException | IllegalBlockSizeException ex) {
+            cipher.init(Cipher.DECRYPT_MODE, pKey);
+            byte[] decBytes = cipher.doFinal(input);
+            System.out.println("(AES)" + new String(decBytes));
+            return decBytes;
+        } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException ex) {
             ex.printStackTrace();
         }
         return null;

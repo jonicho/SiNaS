@@ -11,7 +11,7 @@ public class ConversationCryptoSession {
     private User owner;
     private SecretKey aesKey;
 
-    public ConversationCryptoSession(Conversation pConv,User pUser) {
+    public ConversationCryptoSession(Conversation pConv, User pUser) {
         conv = pConv;
         owner = pUser;
     }
