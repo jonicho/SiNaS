@@ -11,3 +11,6 @@ error_code: Fehlercode
 cant_reach_server: Kann den Server nicht erreichen!
 registering: Registriere...
 user_already_registered: Dieser Benutzer ist bereits registriert!
+help: Hilfe
+about: Über
+send: Senden
