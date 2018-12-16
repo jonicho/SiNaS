@@ -1,5 +1,8 @@
 package de.sinas.client.gui.language;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -51,6 +54,15 @@ public class Language {
 	 * @throws IllegalArgumentException if the given language id is not supported
 	 */
 	private void loadStrings(String langId) throws IllegalArgumentException {
-		// TODO: implement
+		InputStream is = getClass().getResourceAsStream("/de/sinas/client/gui/language/" + langId + ".lang");
+		if (is == null) {
+			throw new IllegalArgumentException("The language with the language id \"" + langId + "\" is not supported!");
+		}
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		langMap.clear();
+		br.lines().forEach(line -> {
+			String[] string = line.split(": ");
+			langMap.put(string[0], string[1]);
+		});
 	}
 }
