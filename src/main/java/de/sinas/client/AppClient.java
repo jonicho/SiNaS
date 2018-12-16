@@ -54,14 +54,14 @@ public class AppClient extends Client {
 			if (msgParts.length == 1) {
 				String plainText = new String(getAESHandler().decrypt(Encoder.b64Decode(msgParts[0]), mainAESKey));
 				msgParts = plainText.split(PROTOCOL.SPLIT);
-			} else if (msgParts.length != 2) {
+			} else {
 				SecretKey cKey = null;
 				for (ClientCryptoConversation ccc : cryptoSessions) {
 					if (ccc.getConversationID().equals(msgParts[0])) {
 						cKey = ccc.getAesKey();
 					}
 				}
-				String plainText = new String(getAESHandler().decrypt(Encoder.b64Decode(msgParts[0]), cKey));
+				String plainText = new String(getAESHandler().decrypt(Encoder.b64Decode(msgParts[1]), cKey));
 				msgParts = plainText.split(PROTOCOL.SPLIT);
 			}
 		}
