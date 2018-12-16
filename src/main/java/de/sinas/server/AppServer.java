@@ -326,6 +326,9 @@ public class AppServer extends Server {
 		Conversation newConversation = new Conversation(name, users);
 		conversations.add(newConversation);
 		db.createConversation(newConversation);
+		for (String username : users) {
+			db.addUserToConversation(newConversation, username);
+		}
 		for (String u : newConversation.getUsers()) {
 			sendConversationToUser(newConversation, this.users.getUser(u));
 		}
