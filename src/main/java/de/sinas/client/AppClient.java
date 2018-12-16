@@ -213,14 +213,14 @@ public class AppClient extends Client {
 	}
 
 	public void login(String username, String password) {
-		//String pwdHash = Encoder.b64Encode(getHashHandler().getSecureHash(password, SaltGenerator.generateSalt(username, password, getHashHandler())));
-		thisUser = new User("", 0, username, /*pwdHash*/password);
+		String pwdHash = Encoder.b64Encode(getHashHandler().getSecureHash(password, SaltGenerator.generateSalt(username, password, getHashHandler())));
+		thisUser = new User("", 0, username, pwdHash);
 		sendAES(PROTOCOL.CS.LOGIN, thisUser.getUsername(), thisUser.getPasswordHash());
 	}
 
 	public void register(String username, String password) {
-		//String pwdHash = Encoder.b64Encode(getHashHandler().getSecureHash(password, SaltGenerator.generateSalt(username, password, getHashHandler())));
-		thisUser = new User("", 0, username, /*pwdHash*/password);
+		String pwdHash = Encoder.b64Encode(getHashHandler().getSecureHash(password, SaltGenerator.generateSalt(username, password, getHashHandler())));
+		thisUser = new User("", 0, username, pwdHash);
 		sendAES(PROTOCOL.CS.REGISTER, thisUser.getUsername(), thisUser.getPasswordHash());
 	}
 

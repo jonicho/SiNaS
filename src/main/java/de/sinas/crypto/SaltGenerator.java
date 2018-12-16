@@ -58,9 +58,7 @@ public class SaltGenerator {
         // Run Substitution/Permutation Network
         byte[] cKey = comboHash;
         for (int i = 0; i < 64; i++) {
-            System.out.println("Iteration "+i);
             // Substitution
-            System.out.println("Substitution...");
             for (int x = 0; x < 64; x++) {
                 for (int j = 0; j < 64; j++) {
                     int hex = xor2D[j][x];
@@ -68,22 +66,17 @@ public class SaltGenerator {
                 }
             }
             // Shift Rows
-            System.out.println("Shifting...");
             for (int x = 0; x < 64; x++) {
                 xor2D[x] = leftrotate(xor2D[x], x);
             }
             // Mix Columns
-            System.out.println("Mixing...");
             mixColumns(xor2D, galois);
             // Link to cKey via XOR
-            System.out.println("Linking...");
             for (int x = 0; x < 64; x++) {
                 xor2D[x] = xorArray(xor2D[x], cKey);
             }
-            System.out.println("Generating Next Key...");
             // Generate next cKey
             cKey = xorArray(xor2D[i], cKey);
-            System.out.println("END");
         }
         // Diagonally Collapse the Table into an array
         byte[] snp = new byte[64];
