@@ -1,6 +1,7 @@
 package de.sinas.crypto;
 
 public class SaltGenerator {
+
     private SaltGenerator() {
     }
 
@@ -25,6 +26,9 @@ public class SaltGenerator {
                 { 0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16 } };
         // Define Galois Body
         int[][] galois = { { 0x02, 0x03, 0x01, 0x01 }, { 0x01, 0x02, 0x03, 0x01 }, { 0x01, 0x01, 0x02, 0x03 },
+                { 0x03, 0x01, 0x01, 0x02 }, { 0x02, 0x03, 0x01, 0x01 }, { 0x01, 0x02, 0x03, 0x01 }, { 0x01, 0x01, 0x02, 0x03 },
+                { 0x03, 0x01, 0x01, 0x02 }, { 0x02, 0x03, 0x01, 0x01 }, { 0x01, 0x02, 0x03, 0x01 }, { 0x01, 0x01, 0x02, 0x03 },
+                { 0x03, 0x01, 0x01, 0x02 }, { 0x02, 0x03, 0x01, 0x01 }, { 0x01, 0x02, 0x03, 0x01 }, { 0x01, 0x01, 0x02, 0x03 },
                 { 0x03, 0x01, 0x01, 0x02 } };
         // Remove Spaces from username
         username.replace(" ", "");
@@ -34,9 +38,9 @@ public class SaltGenerator {
         // Use PBKDF2 for combo hash
         byte[] comboHash = hashHandler.getSecureHash(new String(uHash), pHash);
         // Create 2D Array
-        byte[][] xor2D = new byte[256][256];
+        byte[][] xor2D = new byte[64][64];
         // Fill the Array
-        for (int i = 0; i < 255; i++) {
+        for (int i = 0; i < 64; i++) {
             // Each column linked to that before it
             byte[] thisColumn;
             if (i > 0) {
@@ -44,7 +48,7 @@ public class SaltGenerator {
             } else
                 thisColumn = hashHandler.getCheckSum(uHash);
             xor2D[i] = thisColumn;
-            for (int x = 0; x < 256; x++) {
+            for (int x = 0; x < 64; x++) {
                 // Each row element linked to the same element of the upper row
                 if (i > 0) {
                     xor2D[i][x] = xor(xor2D[i][x], xor2D[i - 1][x]);
@@ -53,30 +57,37 @@ public class SaltGenerator {
         }
         // Run Substitution/Permutation Network
         byte[] cKey = comboHash;
-        for (int i = 0; i < 255; i++) {
+        for (int i = 0; i < 64; i++) {
+            System.out.println("Iteration "+i);
             // Substitution
-            for (int x = 0; i < xor2D.length; x++) {
-                for (int j = 0; j < xor2D[0].length; j++) {
+            System.out.println("Substitution...");
+            for (int x = 0; x < 64; x++) {
+                for (int j = 0; j < 64; j++) {
                     int hex = xor2D[j][x];
-                    xor2D[j][x] = (byte) sbox[hex / 16][hex % 16];
+                    xor2D[j][x] = (byte) sbox[Math.abs(hex / 16)][Math.abs(hex % 16)];
                 }
             }
             // Shift Rows
-            for (int x = 1; x < xor2D.length; x++) {
+            System.out.println("Shifting...");
+            for (int x = 0; x < 64; x++) {
                 xor2D[x] = leftrotate(xor2D[x], x);
             }
             // Mix Columns
+            System.out.println("Mixing...");
             mixColumns(xor2D, galois);
             // Link to cKey via XOR
-            for (int x = 0; x < 255; x++) {
+            System.out.println("Linking...");
+            for (int x = 0; x < 64; x++) {
                 xor2D[x] = xorArray(xor2D[x], cKey);
             }
+            System.out.println("Generating Next Key...");
             // Generate next cKey
             cKey = xorArray(xor2D[i], cKey);
+            System.out.println("END");
         }
         // Diagonally Collapse the Table into an array
-        byte[] snp = new byte[256];
-        for (int i = 0; i < 255; i++) {
+        byte[] snp = new byte[64];
+        for (int i = 0; i < 64; i++) {
             snp[i] = xor2D[i][i];
         }
         // PBKDF2 Hash the combo hash with the snp array and return
@@ -85,7 +96,7 @@ public class SaltGenerator {
 
     private static byte[] xorArray(byte[] a, byte[] b) {
         byte[] c = new byte[a.length];
-        for (int i = 0; i < a.length - 1; i++) {
+        for (int i = 0; i < a.length; i++) {
             c[i] = (byte) ((a[i] ^ b[i]) & 0x000000ff);
         }
         return c;
@@ -157,9 +168,9 @@ public class SaltGenerator {
         if (a == 1) {
             return b;
         } else if (a == 2) {
-            return mc2[b / 16][b % 16];
+            return mc2[Math.abs(b / 16)][Math.abs(b % 16)];
         } else if (a == 3) {
-            return mc3[b / 16][b % 16];
+            return mc3[Math.abs(b / 16)][Math.abs(b % 16)];
         }
         return 0;
     }
