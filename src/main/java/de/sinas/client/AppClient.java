@@ -229,7 +229,7 @@ public class AppClient extends Client {
 		sendAES(PROTOCOL.CS.CREATE_CONVERSATION, name, thisUser.getUsername());
 	}
 
-	private void sendMessage(String convID, String content) {
+	public void sendMessage(String convID, String message) {
 		ClientCryptoConversation ccc = null;
 		for (ClientCryptoConversation pccc : cryptoSessions) {
 			if (pccc.getConversationID().equals(convID)) {

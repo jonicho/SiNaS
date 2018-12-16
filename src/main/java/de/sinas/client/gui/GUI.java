@@ -1,14 +1,16 @@
 package de.sinas.client.gui;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.ArrayList;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -17,22 +19,24 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import de.sinas.Conversation;
 import de.sinas.client.AppClient;
 import de.sinas.client.gui.language.Language;
-import javax.swing.ListSelectionModel;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 public class GUI extends JFrame {
 	private JPanel contentPane;
 	private JTextField messageTextField;
-	private JPanel conversationPanel;
 	private JList<GUIConversation> conversationsList;
 	private Language lang;
 	private AppClient appClient;
+	private Conversation currentConversation;
+	private JLabel conversationLabel;
 
 	public GUI(AppClient appClient, Language lang) {
 		this.lang = lang;
@@ -61,6 +65,11 @@ public class GUI extends JFrame {
 		contentPane.add(scrollPane, gbc_scrollPane);
 
 		conversationsList = new JList<GUIConversation>();
+		conversationsList.addListSelectionListener(new ListSelectionListener() {
+			public void valueChanged(ListSelectionEvent e) {
+				onConversationSelected();
+			}
+		});
 		conversationsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		scrollPane.setViewportView(conversationsList);
 
@@ -72,9 +81,11 @@ public class GUI extends JFrame {
 		gbc_scrollPane_1.gridx = 1;
 		gbc_scrollPane_1.gridy = 1;
 		contentPane.add(scrollPane_1, gbc_scrollPane_1);
-
-		conversationPanel = new JPanel();
-		scrollPane_1.setViewportView(conversationPanel);
+		
+		conversationLabel = new JLabel("");
+		conversationLabel.setBackground(Color.WHITE);
+		conversationLabel.setVerticalAlignment(SwingConstants.TOP);
+		scrollPane_1.setViewportView(conversationLabel);
 
 		JMenuBar menuBar = new JMenuBar();
 		GridBagConstraints gbc_menuBar = new GridBagConstraints();
@@ -112,6 +123,11 @@ public class GUI extends JFrame {
 		messageTextField.setColumns(10);
 
 		JButton sendButton = new JButton(lang.getString("send"));
+		sendButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				onSendButton();
+			}
+		});
 		GridBagConstraints gbc_sendButton = new GridBagConstraints();
 		gbc_sendButton.gridx = 2;
 		gbc_sendButton.gridy = 2;
@@ -131,9 +147,33 @@ public class GUI extends JFrame {
 		appClient.addConversation(conversationName);
 	}
 
+	private void onConversationSelected() {
+		if (conversationsList.getSelectedValue() == null) {
+			currentConversation = null;
+			conversationLabel.setText("");
+			return;
+		}
+		currentConversation = conversationsList.getSelectedValue().getConversation();
+		conversationLabel.setText(currentConversation.getHTMLMessages());
+	}
+
+	private void onSendButton() {
+		if (currentConversation == null) {
+			return;
+		}
+		appClient.sendMessage(currentConversation.getId(), messageTextField.getText());
+	}
+
 	private void createUpdateListener() {
 		appClient.addUpdateListener(() -> {
+			Conversation lastCurrentConversation = currentConversation;
 			conversationsList.setListData(appClient.getConversations().stream().map(c -> new GUIConversation(c)).toArray(GUIConversation[]::new));
+			for (int i = 0; i < conversationsList.getModel().getSize(); i++) {
+				if (conversationsList.getModel().getElementAt(i).getConversation().equals(lastCurrentConversation)) {
+					conversationsList.setSelectedIndex(i);
+					return;
+				}
+			}
 		});
 	}
 
