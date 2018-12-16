@@ -112,6 +112,33 @@ public class GUI extends JFrame {
 
 		JMenuItem mntmAbout = new JMenuItem(lang.getString("about"));
 		mnHelp.add(mntmAbout);
+		
+		JMenu mnConversation = new JMenu(lang.getString("conversation"));
+		menuBar.add(mnConversation);
+		
+		JMenuItem mntmAddUser = new JMenuItem(lang.getString("add_user"));
+		mntmAddUser.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				onConversationAddUser();
+			}
+		});
+		mnConversation.add(mntmAddUser);
+		
+		JMenuItem mntmRemoveUser = new JMenuItem(lang.getString("remove_user"));
+		mntmRemoveUser.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				onConversationRemoveUser();
+			}
+		});
+		mnConversation.add(mntmRemoveUser);
+		
+		JMenuItem mntmRename = new JMenuItem(lang.getString("rename"));
+		mntmRename.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				onConversationRename();
+			}
+		});
+		mnConversation.add(mntmRename);
 
 		messageTextField = new JTextField();
 		GridBagConstraints gbc_messageTextField = new GridBagConstraints();
@@ -162,6 +189,30 @@ public class GUI extends JFrame {
 			return;
 		}
 		appClient.sendMessage(currentConversation.getId(), messageTextField.getText());
+	}
+
+	private void onConversationAddUser() {
+		String username = JOptionPane.showInputDialog(this, lang.getString("enter_username"), lang.getString("add_user"), JOptionPane.QUESTION_MESSAGE);
+		if (username == null || username.equals("")) {
+			return;
+		}
+		appClient.addUserToConversation(currentConversation.getId(), username);
+	}
+
+	private void onConversationRemoveUser() {
+		String username = JOptionPane.showInputDialog(this, lang.getString("enter_username"), lang.getString("remove_user"), JOptionPane.QUESTION_MESSAGE);
+		if (username == null || username.equals("")) {
+			return;
+		}
+		appClient.removeUserFromConversation(currentConversation.getId(), username);
+	}
+
+	private void onConversationRename() {
+		String conversationName = JOptionPane.showInputDialog(this, lang.getString("enter_conversation_name"), lang.getString("rename"), JOptionPane.QUESTION_MESSAGE);
+		if (conversationName == null || conversationName.equals("")) {
+			return;
+		}
+		appClient.renameConversation(currentConversation.getId(), conversationName);
 	}
 
 	private void createUpdateListener() {

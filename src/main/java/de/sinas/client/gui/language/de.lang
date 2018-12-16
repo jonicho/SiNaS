@@ -17,3 +17,8 @@ send: Senden
 options: Optionen
 add_conversation: Koversation hinzufügen
 enter_conversation_name: Gib einen Konversationsnamen ein
+conversation: Konversation
+add_user: Benutzer hinzufügen
+remove_user: Benutzer entfernen
+rename: Umbenennen
+enter_username: Gib einen Benutzernamen ein

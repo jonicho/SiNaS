@@ -229,6 +229,18 @@ public class AppClient extends Client {
 		sendAES(PROTOCOL.CS.CREATE_CONVERSATION, name, thisUser.getUsername());
 	}
 
+	public void addUserToConversation(String convId, String user) {
+		sendAES(PROTOCOL.CS.CONVERSATION_ADD, convId, user);
+	}
+
+	public void removeUserFromConversation(String convId, String user) {
+		sendAES(PROTOCOL.CS.CONVERSATION_REM, convId, user);
+	}
+
+	public void renameConversation(String convId, String newName) {
+		sendAES(PROTOCOL.CS.CONVERSATION_RENAME, convId, newName);
+	}
+
 	public void sendMessage(String convID, String message) {
 		ClientCryptoConversation ccc = null;
 		for (ClientCryptoConversation pccc : cryptoSessions) {
