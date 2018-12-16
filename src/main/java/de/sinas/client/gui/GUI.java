@@ -140,7 +140,7 @@ public class GUI extends JFrame {
 
 	private void createErrorListener() {
 		appClient.addErrorListener(errorCode -> {
-			// TODO: handle error
+			JOptionPane.showMessageDialog(this, lang.getString("error_code") + ": " + errorCode, lang.getString("some_error_occurred"), JOptionPane.ERROR_MESSAGE);
 		});
 	}
 
