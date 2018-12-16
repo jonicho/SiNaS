@@ -185,18 +185,7 @@ public class AppServer extends Server {
 	private void handleGetConversations(User user) {
 		for (Conversation conversation : conversations) {
 			if (conversation.contains(user.getUsername())) {
-				StringBuilder usersString = new StringBuilder(conversation.getUsers().get(0));
-				for (int i = 1; i < conversation.getUsers().size(); i++) {
-					usersString.append(PROTOCOL.SPLIT).append(conversation.getUsers().get(i));
-				}
-				if (!convCryptoManager.hasSession(user, conversation)) {
-					ConversationCryptoSession ccs = new ConversationCryptoSession(conversation, user);
-					ccs.setAesKey(getAesHandler().generateKey());
-					convCryptoManager.addSession(ccs);
-				}
-				sendAES(user, PROTOCOL.SC.CONVERSATION, conversation.getName(), conversation.getId(),
-						Encoder.b64Encode(convCryptoManager.getSession(user, conversation).getAesKey().getEncoded()),
-						usersString.toString());
+				sendConversationToUser(conversation, user);
 			}
 		}
 	}
@@ -337,12 +326,9 @@ public class AppServer extends Server {
 		Conversation newConversation = new Conversation(name, users);
 		conversations.add(newConversation);
 		db.createConversation(newConversation);
-		StringBuilder usersString = new StringBuilder(newConversation.getUsers().get(0));
-		for (int i = 1; i < newConversation.getUsers().size(); i++) {
-			usersString.append(PROTOCOL.SPLIT).append(newConversation.getUsers().get(i));
+		for (String u : newConversation.getUsers()) {
+			sendConversationToUser(newConversation, this.users.getUser(u));
 		}
-		sendToConversationAES(newConversation, PROTOCOL.SC.CONVERSATION, newConversation.getId(),
-				newConversation.getName(), usersString.toString());
 	}
 
 	/**
@@ -364,12 +350,9 @@ public class AppServer extends Server {
 		}
 		conversation.addUser(msgParts[2]);
 		db.addUserToConversation(conversation, msgParts[2]);
-		StringBuilder usersString = new StringBuilder(conversation.getUsers().get(0));
-		for (int i = 1; i < conversation.getUsers().size(); i++) {
-			usersString.append(PROTOCOL.SPLIT).append(conversation.getUsers().get(i));
+		for (String u : conversation.getUsers()) {
+			sendConversationToUser(conversation, this.users.getUser(u));
 		}
-		sendToConversationAES(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(),
-				usersString.toString());
 	}
 
 	/**
@@ -391,12 +374,9 @@ public class AppServer extends Server {
 		}
 		conversation.removeUser(msgParts[2]);
 		db.removeUserFromConversation(conversation, msgParts[2]);
-		String usersString = conversation.getUsers().get(0);
-		for (int i = 1; i < conversation.getUsers().size(); i++) {
-			usersString += PROTOCOL.SPLIT + conversation.getUsers().get(i);
+		for (String u : conversation.getUsers()) {
+			sendConversationToUser(conversation, this.users.getUser(u));
 		}
-		sendToConversationAES(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(),
-				usersString);
 	}
 
 	/**
@@ -418,12 +398,9 @@ public class AppServer extends Server {
 		}
 		conversation.rename(msgParts[2]);
 		db.updateConversation(conversation);
-		StringBuilder usersString = new StringBuilder(conversation.getUsers().get(0));
-		for (int i = 1; i < conversation.getUsers().size(); i++) {
-			usersString.append(PROTOCOL.SPLIT).append(conversation.getUsers().get(i));
+		for (String u : conversation.getUsers()) {
+			sendConversationToUser(conversation, this.users.getUser(u));
 		}
-		sendToConversationAES(conversation, PROTOCOL.SC.CONVERSATION, conversation.getId(), conversation.getName(),
-				usersString.toString());
 	}
 
 	/**
@@ -434,8 +411,8 @@ public class AppServer extends Server {
 	}
 
 	/**
-	 * Sends the given message to the given user.
-	 * The message is encrypted using the given key and the AES Algorithm
+	 * Sends the given message to the given user. The message is encrypted using the
+	 * given key and the AES Algorithm
 	 */
 	private void sendAES(User user, Object... message) {
 		String msg = PROTOCOL.buildMessage(message);
@@ -445,8 +422,8 @@ public class AppServer extends Server {
 	}
 
 	/**
-	 * Sends the given message to the given user.
-	 * The message is encrypted using the given key and the RSA Algorithm
+	 * Sends the given message to the given user. The message is encrypted using the
+	 * given key and the RSA Algorithm
 	 */
 	private void sendRSA(User user, PublicKey key, Object... message) {
 		String msg = PROTOCOL.buildMessage(message);
@@ -466,7 +443,21 @@ public class AppServer extends Server {
 				send(user.getIp(), user.getPort(), ccs.getConv().getId() + PROTOCOL.SPLIT + enc);
 			}
 		}
+	}
 
+	private void sendConversationToUser(Conversation conversation, User user) {
+		StringBuilder usersString = new StringBuilder(conversation.getUsers().get(0));
+		for (int i = 1; i < conversation.getUsers().size(); i++) {
+			usersString.append(PROTOCOL.SPLIT).append(conversation.getUsers().get(i));
+		}
+		if (!convCryptoManager.hasSession(user, conversation)) {
+			ConversationCryptoSession ccs = new ConversationCryptoSession(conversation, user);
+			ccs.setAesKey(getAesHandler().generateKey());
+			convCryptoManager.addSession(ccs);
+		}
+		sendAES(user, PROTOCOL.SC.CONVERSATION, conversation.getName(), conversation.getId(),
+				Encoder.b64Encode(convCryptoManager.getSession(user, conversation).getAesKey().getEncoded()),
+				usersString.toString());
 	}
 
 	/**
