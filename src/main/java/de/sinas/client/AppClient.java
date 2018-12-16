@@ -59,10 +59,13 @@ public class AppClient extends Client {
 				for (ClientCryptoConversation ccc : cryptoSessions) {
 					if (ccc.getConversationID().equals(msgParts[0])) {
 						cKey = ccc.getAesKey();
+						break;
 					}
 				}
-				String plainText = new String(getAESHandler().decrypt(Encoder.b64Decode(msgParts[1]), cKey));
-				msgParts = plainText.split(PROTOCOL.SPLIT);
+				if (cKey != null) {
+					String plainText = new String(getAESHandler().decrypt(Encoder.b64Decode(msgParts[1]), cKey));
+					msgParts = plainText.split(PROTOCOL.SPLIT);
+				}
 			}
 		}
 		switch (msgParts[0]) {
