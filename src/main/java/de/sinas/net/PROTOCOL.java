@@ -32,7 +32,7 @@ public final class PROTOCOL {
 				CONVERSATION_ADD = "conadd", //{ENRYPTED:MAINAES} Base [Split] id [Split] name
 				CONVERSATION_REM = "conrem", //{ENRYPTED:MAINAES} Base [Split] id [Split] name
 				CONVERSATION_RENAME = "conren", //{ENRYPTED:MAINAES} Base [Split] id [Split] new names
-				MESSAGE = "msg"; //conversation id[split]{ENCRYPTED:CONVAES} Base [split] is file [split] content
+				MESSAGE = "msg"; //conversation id[split]{ENCRYPTED:CONVAES} Base [split] conversation id [split] is file [split] content
 	}
 
 	public final class ERRORCODES {

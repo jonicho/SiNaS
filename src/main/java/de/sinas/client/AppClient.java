@@ -236,7 +236,7 @@ public class AppClient extends Client {
 				ccc = pccc;
 			}
 		}
-		content = false + PROTOCOL.SPLIT + content;
+		String content = PROTOCOL.buildMessage(PROTOCOL.CS.MESSAGE, convID, false, message);
 		byte[] cryp = getAESHandler().encrypt(content.getBytes(), ccc.getAesKey());
 		String enc = Encoder.b64Encode(cryp);
 		send(convID + PROTOCOL.SPLIT + enc);
