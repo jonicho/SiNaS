@@ -15,7 +15,7 @@ public class HashHandler {
     private SecretKeyFactory hgen;
     private int SEED_SIZE = 2048;
     private final int PBKDF2_ITERATIONS = 1000;
-    private final int PBKDF2_SIZE = 128;
+    private final int PBKDF2_SIZE = 512;
 
     public HashHandler() {
         try {
