@@ -247,6 +247,7 @@ public class AppServer extends Server {
 			sendError(user, PROTOCOL.ERRORCODES.UNKNOWN_ERROR);
 			return;
 		}
+		db.loadMessages(conversation);
 		List<Message> messages = conversation.getMessages();
 		for (int i = 0; i < lastNMessages; i++) {
 			int index = messages.size() - 1 - i;
