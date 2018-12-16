@@ -129,7 +129,6 @@ public class GUI extends JFrame {
 			return;
 		}
 		appClient.addConversation(conversationName);
-		appClient.requestConversations();
 	}
 
 	private void createUpdateListener() {
