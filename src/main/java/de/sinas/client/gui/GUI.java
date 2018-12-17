@@ -271,7 +271,7 @@ public class GUI extends JFrame {
 		 * @return the html string
 		 */
 		private String getHTML() {
-			return "<html>" + conversation.getName() + "</html>"; // TODO: change doc when changing code
+			return "<html>" + conversation.getName() + "</html>";
 		}
 
 		@Override
