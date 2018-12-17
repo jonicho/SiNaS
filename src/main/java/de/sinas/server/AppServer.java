@@ -268,7 +268,7 @@ public class AppServer extends Server {
 	 * @see PROTOCOL.CS
 	 */
 	private void handleMessage(User user, String[] msgParts) {
-		if (msgParts.length < 3) {
+		if (msgParts.length < 4) {
 			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
 			return;
 		}
