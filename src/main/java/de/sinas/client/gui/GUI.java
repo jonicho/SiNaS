@@ -1,5 +1,6 @@
 package de.sinas.client.gui;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -7,6 +8,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -32,11 +34,11 @@ import de.sinas.net.PROTOCOL;
 public class GUI extends JFrame {
 	private JPanel contentPane;
 	private JTextField messageTextField;
-	private JList<GUIConversation> conversationsList;
+	private JList<Conversation> conversationsList;
 	private Language lang;
 	private AppClient appClient;
 	private Conversation currentConversation;
-	private JList<GUIMessage> messagesList;
+	private JList<Message> messagesList;
 
 	public GUI(AppClient appClient, Language lang) {
 		this.lang = lang;
@@ -64,10 +66,17 @@ public class GUI extends JFrame {
 		gbc_scrollPane.gridy = 1;
 		contentPane.add(scrollPane, gbc_scrollPane);
 
-		conversationsList = new JList<GUIConversation>();
+		conversationsList = new JList<Conversation>();
 		conversationsList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
 				onConversationSelected();
+			}
+		});
+		conversationsList.setCellRenderer(new DefaultListCellRenderer() {
+			@Override
+			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+				Conversation conversation = (Conversation) value;
+				return super.getListCellRendererComponent(list, "<html>" + conversation.getName() + "</html>", index, isSelected, cellHasFocus);
 			}
 		});
 		conversationsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -90,6 +99,13 @@ public class GUI extends JFrame {
 			}
 		});
 		messagesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		messagesList.setCellRenderer(new DefaultListCellRenderer() {
+			@Override
+			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+				Message message = (Message) value;
+				return super.getListCellRendererComponent(list, "<html>" + message.getContent() + "</html>", index, isSelected, cellHasFocus);
+			}
+		});
 		scrollPane_1.setViewportView(messagesList);
 
 		JMenuBar menuBar = new JMenuBar();
@@ -183,11 +199,11 @@ public class GUI extends JFrame {
 		if (conversationsList.getSelectedValue() == null) {
 			return;
 		}
-		if (conversationsList.getSelectedValue().conversation.equals(currentConversation)) {
+		if (conversationsList.getSelectedValue().equals(currentConversation)) {
 			return;
 		}
-		currentConversation = conversationsList.getSelectedValue().conversation;
-		messagesList.setListData(currentConversation.getMessages().stream().map(m -> new GUIMessage(m)).toArray(GUIMessage[]::new));
+		currentConversation = conversationsList.getSelectedValue();
+		messagesList.setListData(currentConversation.getMessages().toArray(new Message[0]));
 		appClient.requestMessages(currentConversation.getId(), 1000);
 	}
 
@@ -237,9 +253,9 @@ public class GUI extends JFrame {
 
 	private void onConversationUpdate() {
 		Conversation lastCurrentConversation = currentConversation;
-		conversationsList.setListData(appClient.getConversations().stream().map(c -> new GUIConversation(c)).toArray(GUIConversation[]::new));
+		conversationsList.setListData(appClient.getConversations().toArray(new Conversation[0]));
 		for (int i = 0; i < conversationsList.getModel().getSize(); i++) {
-			if (conversationsList.getModel().getElementAt(i).conversation.equals(lastCurrentConversation)) {
+			if (conversationsList.getModel().getElementAt(i).equals(lastCurrentConversation)) {
 				conversationsList.setSelectedIndex(i);
 				break;
 			}
@@ -248,7 +264,7 @@ public class GUI extends JFrame {
 
 	private void onMessageUpdate() {
 		if (currentConversation != null) {
-			messagesList.setListData(currentConversation.getMessages().stream().map(m -> new GUIMessage(m)).toArray(GUIMessage[]::new));
+			messagesList.setListData(currentConversation.getMessages().toArray(new Message[0]));
 		}
 	}
 
@@ -257,49 +273,4 @@ public class GUI extends JFrame {
 			JOptionPane.showMessageDialog(this, lang.getString("error_code") + ": " + errorCode, lang.getString("some_error_occurred"), JOptionPane.ERROR_MESSAGE);
 		});
 	}
-
-	private class GUIConversation {
-		private final Conversation conversation;
-
-		private GUIConversation(Conversation conversation) {
-			this.conversation = conversation;
-		}
-
-		/**
-		 * Returns the name of this conversation wrapped in html tags.
-		 *
-		 * @return the html string
-		 */
-		private String getHTML() {
-			return "<html>" + conversation.getName() + "</html>";
-		}
-
-		@Override
-		public String toString() {
-			return getHTML();
-		}
-	}
-
-	private class GUIMessage {
-		private final Message message;
-
-		private GUIMessage(Message message) {
-			this.message = message;
-		}
-
-		/**
-		 * Returns this message wrapped in html.
-		 * 
-		 * @return the html string
-		 */
-		private String getHTML() {
-			return "<html>" + message.getContent() + "</html>";
-		}
-
-		@Override
-		public String toString() {
-			return getHTML();
-		}
-	}
-
 }
