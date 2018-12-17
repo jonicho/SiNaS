@@ -1,6 +1,5 @@
 package de.sinas.client.gui;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -8,9 +7,9 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -20,12 +19,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import de.sinas.Conversation;
+import de.sinas.Message;
 import de.sinas.client.AppClient;
 import de.sinas.client.gui.language.Language;
 import de.sinas.net.PROTOCOL;
@@ -37,7 +36,7 @@ public class GUI extends JFrame {
 	private Language lang;
 	private AppClient appClient;
 	private Conversation currentConversation;
-	private JLabel conversationLabel;
+	private JList<GUIMessage> messagesList;
 
 	public GUI(AppClient appClient, Language lang) {
 		this.lang = lang;
@@ -82,11 +81,16 @@ public class GUI extends JFrame {
 		gbc_scrollPane_1.gridx = 1;
 		gbc_scrollPane_1.gridy = 1;
 		contentPane.add(scrollPane_1, gbc_scrollPane_1);
-		
-		conversationLabel = new JLabel("");
-		conversationLabel.setBackground(Color.WHITE);
-		conversationLabel.setVerticalAlignment(SwingConstants.TOP);
-		scrollPane_1.setViewportView(conversationLabel);
+
+		messagesList = new JList<>();
+		messagesList.setSelectionModel(new DefaultListSelectionModel() {
+			@Override
+			public void setSelectionInterval(int index0, int index1) {
+				super.setSelectionInterval(-1, -1);
+			}
+		});
+		messagesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		scrollPane_1.setViewportView(messagesList);
 
 		JMenuBar menuBar = new JMenuBar();
 		GridBagConstraints gbc_menuBar = new GridBagConstraints();
@@ -179,12 +183,12 @@ public class GUI extends JFrame {
 		if (conversationsList.getSelectedValue() == null) {
 			return;
 		}
-		if (conversationsList.getSelectedValue().getConversation().equals(currentConversation)) {
+		if (conversationsList.getSelectedValue().conversation.equals(currentConversation)) {
 			return;
 		}
-		currentConversation = conversationsList.getSelectedValue().getConversation();
-		conversationLabel.setText(currentConversation.getHTMLMessages());
-		appClient.requestMessages(currentConversation.getId(), 100);
+		currentConversation = conversationsList.getSelectedValue().conversation;
+		messagesList.setListData(currentConversation.getMessages().stream().map(m -> new GUIMessage(m)).toArray(GUIMessage[]::new));
+		appClient.requestMessages(currentConversation.getId(), 1000);
 	}
 
 	private void onSendButton() {
@@ -235,7 +239,7 @@ public class GUI extends JFrame {
 		Conversation lastCurrentConversation = currentConversation;
 		conversationsList.setListData(appClient.getConversations().stream().map(c -> new GUIConversation(c)).toArray(GUIConversation[]::new));
 		for (int i = 0; i < conversationsList.getModel().getSize(); i++) {
-			if (conversationsList.getModel().getElementAt(i).getConversation().equals(lastCurrentConversation)) {
+			if (conversationsList.getModel().getElementAt(i).conversation.equals(lastCurrentConversation)) {
 				conversationsList.setSelectedIndex(i);
 				break;
 			}
@@ -244,7 +248,7 @@ public class GUI extends JFrame {
 
 	private void onMessageUpdate() {
 		if (currentConversation != null) {
-			conversationLabel.setText(currentConversation.getHTMLMessages());
+			messagesList.setListData(currentConversation.getMessages().stream().map(m -> new GUIMessage(m)).toArray(GUIMessage[]::new));
 		}
 	}
 
@@ -257,17 +261,44 @@ public class GUI extends JFrame {
 	private class GUIConversation {
 		private final Conversation conversation;
 
-		public GUIConversation(Conversation conversation) {
+		private GUIConversation(Conversation conversation) {
 			this.conversation = conversation;
 		}
 
-		public Conversation getConversation() {
-			return conversation;
+		/**
+		 * Returns the name of this conversation wrapped in html tags.
+		 *
+		 * @return the html string
+		 */
+		private String getHTML() {
+			return "<html>" + conversation.getName() + "</html>"; // TODO: change doc when changing code
 		}
 
 		@Override
 		public String toString() {
-			return conversation.getHTMLSummary();
+			return getHTML();
+		}
+	}
+
+	private class GUIMessage {
+		private final Message message;
+
+		private GUIMessage(Message message) {
+			this.message = message;
+		}
+
+		/**
+		 * Returns this message wrapped in html.
+		 * 
+		 * @return the html string
+		 */
+		private String getHTML() {
+			return "<html>" + message.getContent() + "</html>";
+		}
+
+		@Override
+		public String toString() {
+			return getHTML();
 		}
 	}
 
