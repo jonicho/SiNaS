@@ -228,6 +228,10 @@ public class AppClient extends Client {
 		sendAES(PROTOCOL.CS.GET_CONVERSATIONS);
 	}
 
+	public void requestMessages(String convId, int amount) {
+		sendAES(PROTOCOL.CS.GET_MESSAGES, convId, amount);
+	}
+
 	public void addConversation(String name) {
 		sendAES(PROTOCOL.CS.CREATE_CONVERSATION, name, thisUser.getUsername());
 	}

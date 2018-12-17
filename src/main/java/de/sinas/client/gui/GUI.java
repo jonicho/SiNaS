@@ -176,12 +176,14 @@ public class GUI extends JFrame {
 
 	private void onConversationSelected() {
 		if (conversationsList.getSelectedValue() == null) {
-			currentConversation = null;
-			conversationLabel.setText("");
+			return;
+		}
+		if (conversationsList.getSelectedValue().getConversation().equals(currentConversation)) {
 			return;
 		}
 		currentConversation = conversationsList.getSelectedValue().getConversation();
 		conversationLabel.setText(currentConversation.getHTMLMessages());
+		appClient.requestMessages(currentConversation.getId(), 100);
 	}
 
 	private void onSendButton() {
@@ -222,8 +224,11 @@ public class GUI extends JFrame {
 			for (int i = 0; i < conversationsList.getModel().getSize(); i++) {
 				if (conversationsList.getModel().getElementAt(i).getConversation().equals(lastCurrentConversation)) {
 					conversationsList.setSelectedIndex(i);
-					return;
+					break;
 				}
+			}
+			if (currentConversation != null) {
+				conversationLabel.setText(currentConversation.getHTMLMessages());
 			}
 		});
 	}
