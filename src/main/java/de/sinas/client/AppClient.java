@@ -92,7 +92,7 @@ public class AppClient extends Client {
 		}
 
 		for (UpdateListener updateListener : updateListeners) {
-			updateListener.update();
+			updateListener.update(msgParts[0]);
 		}
 	}
 
@@ -301,7 +301,7 @@ public class AppClient extends Client {
 
 	@FunctionalInterface
 	public interface UpdateListener extends EventListener {
-		void update();
+		void update(String msgBase);
 	}
 
 	@FunctionalInterface

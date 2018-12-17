@@ -28,6 +28,7 @@ import javax.swing.event.ListSelectionListener;
 import de.sinas.Conversation;
 import de.sinas.client.AppClient;
 import de.sinas.client.gui.language.Language;
+import de.sinas.net.PROTOCOL;
 
 public class GUI extends JFrame {
 	private JPanel contentPane;
@@ -218,19 +219,33 @@ public class GUI extends JFrame {
 	}
 
 	private void createUpdateListener() {
-		appClient.addUpdateListener(() -> {
-			Conversation lastCurrentConversation = currentConversation;
-			conversationsList.setListData(appClient.getConversations().stream().map(c -> new GUIConversation(c)).toArray(GUIConversation[]::new));
-			for (int i = 0; i < conversationsList.getModel().getSize(); i++) {
-				if (conversationsList.getModel().getElementAt(i).getConversation().equals(lastCurrentConversation)) {
-					conversationsList.setSelectedIndex(i);
-					break;
-				}
-			}
-			if (currentConversation != null) {
-				conversationLabel.setText(currentConversation.getHTMLMessages());
+		appClient.addUpdateListener(msgBase -> {
+			switch (msgBase) {
+			case PROTOCOL.SC.CONVERSATION:
+				onConversationUpdate();
+				break;
+			case PROTOCOL.SC.MESSAGE:
+				onMessageUpdate();
+				break;
 			}
 		});
+	}
+
+	private void onConversationUpdate() {
+		Conversation lastCurrentConversation = currentConversation;
+		conversationsList.setListData(appClient.getConversations().stream().map(c -> new GUIConversation(c)).toArray(GUIConversation[]::new));
+		for (int i = 0; i < conversationsList.getModel().getSize(); i++) {
+			if (conversationsList.getModel().getElementAt(i).getConversation().equals(lastCurrentConversation)) {
+				conversationsList.setSelectedIndex(i);
+				break;
+			}
+		}
+	}
+
+	private void onMessageUpdate() {
+		if (currentConversation != null) {
+			conversationLabel.setText(currentConversation.getHTMLMessages());
+		}
 	}
 
 	private void createErrorListener() {

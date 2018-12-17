@@ -147,7 +147,7 @@ public class LoginDialog extends JDialog {
 				setGuiEnabled(true);
 				innerAppClient.close();
 			});
-			innerAppClient.addUpdateListener(() -> {
+			innerAppClient.addUpdateListener(msgBase -> {
 				if (innerAppClient.isLoggedIn()) {
 					openGUI(innerAppClient);
 				}
@@ -184,7 +184,7 @@ public class LoginDialog extends JDialog {
 				setGuiEnabled(true);
 				innerAppClient.close();
 			});
-			innerAppClient.addUpdateListener(() -> {
+			innerAppClient.addUpdateListener(msgBase -> {
 				if (innerAppClient.isLoggedIn()) {
 					openGUI(innerAppClient);
 				}
