@@ -7,10 +7,13 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.stream.Collectors;
 
 import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JMenu;
@@ -21,12 +24,15 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.html.HTMLEditorKit;
 
 import de.sinas.Conversation;
-import de.sinas.Message;
 import de.sinas.client.AppClient;
 import de.sinas.client.gui.language.Language;
 import de.sinas.net.PROTOCOL;
@@ -38,7 +44,7 @@ public class GUI extends JFrame {
 	private Language lang;
 	private AppClient appClient;
 	private Conversation currentConversation;
-	private JList<Message> messagesList;
+	private JEditorPane messagesPane;
 
 	public GUI(AppClient appClient, Language lang) {
 		this.lang = lang;
@@ -83,6 +89,8 @@ public class GUI extends JFrame {
 		scrollPane.setViewportView(conversationsList);
 
 		JScrollPane scrollPane_1 = new JScrollPane();
+		scrollPane_1.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		scrollPane_1.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
 		GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
 		gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane_1.gridwidth = 2;
@@ -91,22 +99,10 @@ public class GUI extends JFrame {
 		gbc_scrollPane_1.gridy = 1;
 		contentPane.add(scrollPane_1, gbc_scrollPane_1);
 
-		messagesList = new JList<>();
-		messagesList.setSelectionModel(new DefaultListSelectionModel() {
-			@Override
-			public void setSelectionInterval(int index0, int index1) {
-				super.setSelectionInterval(-1, -1);
-			}
-		});
-		messagesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		messagesList.setCellRenderer(new DefaultListCellRenderer() {
-			@Override
-			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-				Message message = (Message) value;
-				return super.getListCellRendererComponent(list, "<html>" + message.getContent() + "</html>", index, isSelected, cellHasFocus);
-			}
-		});
-		scrollPane_1.setViewportView(messagesList);
+		messagesPane = new JEditorPane();
+		messagesPane.setEditorKit(new HTMLEditorKit());
+		messagesPane.setEditable(false);
+		scrollPane_1.setViewportView(messagesPane);
 
 		JMenuBar menuBar = new JMenuBar();
 		GridBagConstraints gbc_menuBar = new GridBagConstraints();
@@ -203,7 +199,7 @@ public class GUI extends JFrame {
 			return;
 		}
 		currentConversation = conversationsList.getSelectedValue();
-		messagesList.setListData(currentConversation.getMessages().toArray(new Message[0]));
+		updateMessagesPane();
 		appClient.requestMessages(currentConversation.getId(), 1000);
 	}
 
@@ -264,7 +260,7 @@ public class GUI extends JFrame {
 
 	private void onMessageUpdate() {
 		if (currentConversation != null) {
-			messagesList.setListData(currentConversation.getMessages().toArray(new Message[0]));
+			updateMessagesPane();
 		}
 	}
 
@@ -272,5 +268,18 @@ public class GUI extends JFrame {
 		appClient.addErrorListener(errorCode -> {
 			JOptionPane.showMessageDialog(this, lang.getString("error_code") + ": " + errorCode, lang.getString("some_error_occurred"), JOptionPane.ERROR_MESSAGE);
 		});
+	}
+
+	private void updateMessagesPane() {
+		String html = "<html><div>" + String.join("<br>", currentConversation.getMessages().stream().map(m -> m.getContent()).collect(Collectors.toList())) + "</div></html>";
+		Document doc = messagesPane.getEditorKit().createDefaultDocument();
+		try {
+			messagesPane.getEditorKit().read(new StringReader(html), doc, 0);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+		messagesPane.setDocument(doc);
 	}
 }
