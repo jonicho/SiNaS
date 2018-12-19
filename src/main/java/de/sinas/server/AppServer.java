@@ -249,15 +249,16 @@ public class AppServer extends Server {
 		}
 		db.loadMessages(conversation);
 		List<Message> messages = conversation.getMessages();
+		String msgs = PROTOCOL.buildMessage(PROTOCOL.SC.MESSAGES, conversationId);
 		for (int i = 0; i < lastNMessages; i++) {
 			int index = messages.size() - 1 - i;
 			if (index < 0) {
 				break;
 			}
 			Message msg = messages.get(index);
-			sendAES(user, PROTOCOL.SC.MESSAGE, conversationId, msg.getId(), msg.isFile(), msg.getTimestamp(),
-					msg.getSender(), msg.getContent());
+			msgs = PROTOCOL.buildMessage(msgs, msg.getId(), msg.isFile(), msg.getTimestamp(), msg.getSender(), msg.getContent());
 		}
+		sendAES(user, msgs);
 	}
 
 	/**
@@ -296,7 +297,7 @@ public class AppServer extends Server {
 		}
 		conv.addMessages(message);
 		db.createMessage(message);
-		sendToConversationAES(conv, PROTOCOL.SC.MESSAGE, conv.getId(), message.getId(), message.isFile(),
+		sendToConversationAES(conv, PROTOCOL.SC.MESSAGES, conv.getId(), message.getId(), message.isFile(),
 				message.getTimestamp(), message.getSender(), message.getContent());
 	}
 

@@ -84,8 +84,8 @@ public class AppClient extends Client {
 		case PROTOCOL.SC.USER:
 			handleUser(msgParts);
 			break;
-		case PROTOCOL.SC.MESSAGE:
-			handleMessage(msgParts);
+		case PROTOCOL.SC.MESSAGES:
+			handleMessages(msgParts);
 			break;
 		default:
 			break;
@@ -162,7 +162,7 @@ public class AppClient extends Client {
 		users.addUser(new User("", 0, msgParts[1], ""));
 	}
 
-	private void handleMessage(String[] msgParts) {
+	private void handleMessages(String[] msgParts) {
 		String conversationId = msgParts[1];
 		Conversation conversation = null;
 		for (Conversation con : conversations) {
@@ -174,18 +174,22 @@ public class AppClient extends Client {
 		if (conversation == null) {
 			return;
 		}
-		String messageId = msgParts[2];
-		boolean isFile = Boolean.parseBoolean(msgParts[3]);
-		long timestamp;
-		try {
-			timestamp = Long.parseLong(msgParts[4]);
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
-			return;
+		Message[] messages = new Message[msgParts.length / 5];
+		for (int i = 0; i < messages.length; i++) {
+			String messageId = msgParts[i * 5 + 2];
+			boolean isFile = Boolean.parseBoolean(msgParts[i * 5 + 3]);
+			long timestamp;
+			try {
+				timestamp = Long.parseLong(msgParts[i * 5 + 4]);
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
+				return;
+			}
+			String sender = msgParts[i * 5 + 5];
+			String content = msgParts[i * 5 + 6];
+			messages[i] = new Message(messageId, content, timestamp, sender, isFile, conversationId);
 		}
-		String sender = msgParts[5];
-		String content = msgParts[6];
-		conversation.addMessages(new Message(messageId, content, timestamp, sender, isFile, conversationId));
+		conversation.addMessages(messages);
 	}
 
 	private void makeConnection() {

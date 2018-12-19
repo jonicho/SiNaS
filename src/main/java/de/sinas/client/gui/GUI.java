@@ -240,8 +240,8 @@ public class GUI extends JFrame {
 			case PROTOCOL.SC.CONVERSATION:
 				onConversationUpdate();
 				break;
-			case PROTOCOL.SC.MESSAGE:
-				onMessageUpdate();
+			case PROTOCOL.SC.MESSAGES:
+				onMessagesUpdate();
 				break;
 			}
 		});
@@ -258,7 +258,7 @@ public class GUI extends JFrame {
 		}
 	}
 
-	private void onMessageUpdate() {
+	private void onMessagesUpdate() {
 		if (currentConversation != null) {
 			updateMessagesPane();
 		}
