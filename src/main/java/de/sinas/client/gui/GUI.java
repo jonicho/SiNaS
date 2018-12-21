@@ -174,6 +174,11 @@ public class GUI extends JFrame {
 		mnConversation.add(mntmRename);
 
 		messageTextField = new JTextField();
+		messageTextField.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				onMessageTextFieldAction();
+			}
+		});
 		GridBagConstraints gbc_messageTextField = new GridBagConstraints();
 		gbc_messageTextField.insets = new Insets(0, 0, 0, 5);
 		gbc_messageTextField.fill = GridBagConstraints.HORIZONTAL;
@@ -219,11 +224,12 @@ public class GUI extends JFrame {
 		appClient.requestMessages(currentConversation.getId(), 1000);
 	}
 
+	private void onMessageTextFieldAction() {
+		sendMessage();
+	}
+
 	private void onSendButton() {
-		if (currentConversation == null) {
-			return;
-		}
-		appClient.sendMessage(currentConversation.getId(), messageTextField.getText());
+		sendMessage();
 	}
 
 	private void onConversationAddUser() {
@@ -248,6 +254,13 @@ public class GUI extends JFrame {
 			return;
 		}
 		appClient.renameConversation(currentConversation.getId(), conversationName);
+	}
+
+	private void sendMessage() {
+		if (currentConversation == null) {
+			return;
+		}
+		appClient.sendMessage(currentConversation.getId(), messageTextField.getText());
 	}
 
 	private void createUpdateListener() {
