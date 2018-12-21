@@ -6,8 +6,6 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -26,8 +24,6 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import de.sinas.Conversation;
 import de.sinas.Message;
@@ -72,11 +68,7 @@ public class GUI extends JFrame {
 		contentPane.add(scrollPane, gbc_scrollPane);
 
 		conversationsList = new JList<Conversation>();
-		conversationsList.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				onConversationSelected();
-			}
-		});
+		conversationsList.addListSelectionListener(e -> onConversationSelected());
 		conversationsList.setCellRenderer(new DefaultListCellRenderer() {
 			@Override
 			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -133,11 +125,7 @@ public class GUI extends JFrame {
 		menuBar.add(mnOptions);
 		
 		JMenuItem mntmAddConversation = new JMenuItem(lang.getString("add_conversation"));
-		mntmAddConversation.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				onAddConversation();
-			}
-		});
+		mntmAddConversation.addActionListener(e -> onAddConversation());
 		mnOptions.add(mntmAddConversation);
 
 		JMenu mnHelp = new JMenu(lang.getString("help"));
@@ -150,35 +138,19 @@ public class GUI extends JFrame {
 		menuBar.add(mnConversation);
 		
 		JMenuItem mntmAddUser = new JMenuItem(lang.getString("add_user"));
-		mntmAddUser.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				onConversationAddUser();
-			}
-		});
+		mntmAddUser.addActionListener(e -> onConversationAddUser());
 		mnConversation.add(mntmAddUser);
 		
 		JMenuItem mntmRemoveUser = new JMenuItem(lang.getString("remove_user"));
-		mntmRemoveUser.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				onConversationRemoveUser();
-			}
-		});
+		mntmRemoveUser.addActionListener(e -> onConversationRemoveUser());
 		mnConversation.add(mntmRemoveUser);
 		
 		JMenuItem mntmRename = new JMenuItem(lang.getString("rename"));
-		mntmRename.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				onConversationRename();
-			}
-		});
+		mntmRename.addActionListener(e -> onConversationRename());
 		mnConversation.add(mntmRename);
 
 		messageTextField = new JTextField();
-		messageTextField.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e) {
-				onMessageTextFieldAction();
-			}
-		});
+		messageTextField.addActionListener(e -> onMessageTextFieldAction());
 		GridBagConstraints gbc_messageTextField = new GridBagConstraints();
 		gbc_messageTextField.insets = new Insets(0, 0, 0, 5);
 		gbc_messageTextField.fill = GridBagConstraints.HORIZONTAL;
@@ -188,11 +160,7 @@ public class GUI extends JFrame {
 		messageTextField.setColumns(10);
 
 		JButton sendButton = new JButton(lang.getString("send"));
-		sendButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				onSendButton();
-			}
-		});
+		sendButton.addActionListener(e -> onSendButton());
 		GridBagConstraints gbc_sendButton = new GridBagConstraints();
 		gbc_sendButton.gridx = 2;
 		gbc_sendButton.gridy = 2;
