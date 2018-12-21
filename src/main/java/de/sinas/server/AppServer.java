@@ -130,6 +130,8 @@ public class AppServer extends Server {
 			tempUsers.add(tUser);
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			sendError(tUser, PROTOCOL.ERRORCODES.UNKNOWN_ERROR);
+			return;
 		}
 		sendRSA(new User(tUser.getIp(), tUser.getPort(), "", ""), tUser.getRsaKey(), PROTOCOL.buildMessage(PROTOCOL.SC.SEC_CONNECTION_ACCEPTED, Encoder.b64Encode(tUser.getAesKey().getEncoded())));
 	}
