@@ -1,4 +1,4 @@
-package de.sinas.server;
+package de.sinas;
 
 import java.util.ArrayList;
 

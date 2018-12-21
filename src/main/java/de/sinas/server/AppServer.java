@@ -13,6 +13,7 @@ import javax.crypto.SecretKey;
 import de.sinas.Conversation;
 import de.sinas.Message;
 import de.sinas.User;
+import de.sinas.Users;
 import de.sinas.crypto.Encoder;
 import de.sinas.net.PROTOCOL;
 import de.sinas.net.Server;

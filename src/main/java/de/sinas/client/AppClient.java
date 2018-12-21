@@ -13,11 +13,11 @@ import javax.crypto.spec.SecretKeySpec;
 import de.sinas.Conversation;
 import de.sinas.Message;
 import de.sinas.User;
+import de.sinas.Users;
 import de.sinas.crypto.Encoder;
 import de.sinas.crypto.SaltGenerator;
 import de.sinas.net.Client;
 import de.sinas.net.PROTOCOL;
-import de.sinas.server.Users;
 
 public class AppClient extends Client {
 	private final ArrayList<Conversation> conversations = new ArrayList<>();
