@@ -11,6 +11,14 @@ repositories {
     jcenter()
 }
 
+sourceSets {
+    main {
+        resources {
+            srcDirs = ["src/main/java"]
+        }
+    }
+}
+
 task runServer(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'de.sinas.server.ServerLauncher'
@@ -19,4 +27,23 @@ task runServer(type: JavaExec) {
 task runClient(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'de.sinas.client.ClientLauncher'
+}
+
+task serverJar(type: Jar) {
+    baseName = "SiNaS-Server"
+    from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    from sourceSets.main.output
+    manifest {
+        attributes ("Main-Class": "de.sinas.server.ServerLauncher")
+    }
+    exclude "de/sinas/client"
+}
+
+task clientJar(type: Jar) {
+    baseName = "SiNaS-Client"
+    from sourceSets.main.output
+    manifest {
+        attributes ("Main-Class": "de.sinas.client.ClientLauncher")
+    }
+    exclude "de/sinas/server"
 }
