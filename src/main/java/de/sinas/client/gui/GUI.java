@@ -103,6 +103,7 @@ public class GUI extends JFrame {
 			@Override
 			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 				Message message = (Message) value;
+				setHorizontalAlignment(message.getSender().equals(appClient.getThisUser().getUsername()) ? RIGHT : LEFT);
 				return super.getListCellRendererComponent(list, "<html>" + message.getContent() + "</html>", index, isSelected, cellHasFocus);
 			}
 		});
