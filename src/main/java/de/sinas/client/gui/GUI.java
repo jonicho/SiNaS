@@ -1,5 +1,6 @@
 package de.sinas.client.gui;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -7,6 +8,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DateFormat;
+import java.util.Date;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListSelectionModel;
@@ -99,12 +102,18 @@ public class GUI extends JFrame {
 			}
 		});
 		messagesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		messagesList.setSelectionBackground(new Color(230, 230, 230));
 		messagesList.setCellRenderer(new DefaultListCellRenderer() {
 			@Override
 			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 				Message message = (Message) value;
-				setHorizontalAlignment(message.getSender().equals(appClient.getThisUser().getUsername()) ? RIGHT : LEFT);
-				return super.getListCellRendererComponent(list, "<html>" + message.getContent() + "</html>", index, isSelected, cellHasFocus);
+				boolean isOwnMessage = message.getSender().equals(appClient.getThisUser().getUsername());
+				setHorizontalAlignment(isOwnMessage ? RIGHT : LEFT);
+				String string = String.format(
+						"<html><div style=\"margin: 5; padding: 5; background: #aaaaaa; text-align: %s;\">%s<br>%s<br>%s</div></html>",
+						isOwnMessage ? "right" : "left", message.getSender(), message.getContent(),
+						DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(message.getTimestamp())));
+				return super.getListCellRendererComponent(list, string, index, index % 2 == 0, cellHasFocus);
 			}
 		});
 		scrollPane_1.setViewportView(messagesList);
