@@ -24,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -42,6 +43,7 @@ public class GUI extends JFrame {
 	private AppClient appClient;
 	private Conversation currentConversation;
 	private JList<Message> messagesList;
+	private JScrollPane messagesScrollPane;
 
 	public GUI(AppClient appClient, Language lang) {
 		this.lang = lang;
@@ -85,14 +87,14 @@ public class GUI extends JFrame {
 		conversationsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		scrollPane.setViewportView(conversationsList);
 
-		JScrollPane scrollPane_1 = new JScrollPane();
+		messagesScrollPane = new JScrollPane();
 		GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
 		gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane_1.gridwidth = 2;
 		gbc_scrollPane_1.insets = new Insets(0, 0, 5, 0);
 		gbc_scrollPane_1.gridx = 1;
 		gbc_scrollPane_1.gridy = 1;
-		contentPane.add(scrollPane_1, gbc_scrollPane_1);
+		contentPane.add(messagesScrollPane, gbc_scrollPane_1);
 
 		messagesList = new JList<>();
 		messagesList.setSelectionModel(new DefaultListSelectionModel() {
@@ -116,7 +118,7 @@ public class GUI extends JFrame {
 				return super.getListCellRendererComponent(list, string, index, index % 2 == 0, cellHasFocus);
 			}
 		});
-		scrollPane_1.setViewportView(messagesList);
+		messagesScrollPane.setViewportView(messagesList);
 
 		JMenuBar menuBar = new JMenuBar();
 		GridBagConstraints gbc_menuBar = new GridBagConstraints();
@@ -274,7 +276,13 @@ public class GUI extends JFrame {
 
 	private void onMessagesUpdate() {
 		if (currentConversation != null) {
+			boolean scrollToBottom = messagesList.getLastVisibleIndex() == messagesList.getModel().getSize() - 1;
 			messagesList.setListData(currentConversation.getMessages().toArray(new Message[0]));
+			if (scrollToBottom) {
+				SwingUtilities.invokeLater(() -> {
+					messagesScrollPane.getVerticalScrollBar().setValue(Integer.MAX_VALUE);
+				});
+			}
 		}
 	}
 
