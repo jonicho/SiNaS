@@ -104,7 +104,7 @@ public class GUI extends JFrame {
 				boolean isOwnMessage = message.getSender().equals(appClient.getThisUser().getUsername());
 				setHorizontalAlignment(isOwnMessage ? RIGHT : LEFT);
 				String string = String.format(
-						"<html><div style=\"margin: 5; padding: 5; background: #aaaaaa; text-align: %s;\">%s<br>%s<br>%s</div></html>",
+						"<html><div style=\"margin: 5; padding: 5; background: #aaaaaa; color: black; text-align: %s;\">%s<br>%s<br>%s</div></html>",
 						isOwnMessage ? "right" : "left", message.getSender(), message.getContent(),
 						DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(message.getTimestamp())));
 				return super.getListCellRendererComponent(list, string, index, index % 2 == 0, cellHasFocus);
