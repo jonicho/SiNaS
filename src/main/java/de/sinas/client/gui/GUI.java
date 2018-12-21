@@ -261,6 +261,7 @@ public class GUI extends JFrame {
 			return;
 		}
 		appClient.sendMessage(currentConversation.getId(), messageTextField.getText());
+		messageTextField.setText("");
 	}
 
 	private void createUpdateListener() {
