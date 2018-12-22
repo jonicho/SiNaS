@@ -135,7 +135,7 @@ public class AppClient extends Client {
 		String conversationName = msgParts[1];
 		String conversationId = msgParts[2];
 		String convesationKey = msgParts[3];
-		String[] usernames = Arrays.copyOfRange(msgParts, 3, msgParts.length);
+		String[] usernames = Arrays.copyOfRange(msgParts, 4, msgParts.length);
 		SecretKey conKey = new SecretKeySpec(Encoder.b64Decode(convesationKey), "AES");
 		cryptoSessions.add(new ClientCryptoConversation(conKey, conversationId));
 		int conversationIndex = -1;
