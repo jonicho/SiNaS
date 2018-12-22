@@ -60,8 +60,17 @@ public class GUI extends JFrame {
 		gbl_contentPane.rowWeights = new double[] { 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE };
 		contentPane.setLayout(gbl_contentPane);
 
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setMinimumSize(new Dimension(100, 100));
+		JScrollPane scrollPane = new JScrollPane() {
+			@Override
+			public Dimension getPreferredSize() {
+				return new Dimension(300, 100);
+			}
+
+			@Override
+			public Dimension getMinimumSize() {
+				return getPreferredSize();
+			}
+		};
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane.gridheight = 3;
