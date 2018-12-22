@@ -30,6 +30,8 @@ import de.sinas.Message;
 import de.sinas.client.AppClient;
 import de.sinas.client.gui.language.Language;
 import de.sinas.net.PROTOCOL;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 
 public class GUI extends JFrame {
 	private JPanel contentPane;
@@ -40,6 +42,7 @@ public class GUI extends JFrame {
 	private Conversation currentConversation;
 	private JList<Message> messagesList;
 	private JScrollPane messagesScrollPane;
+	private JLabel conversationInfoLabel;
 
 	public GUI(AppClient appClient, Language lang) {
 		this.lang = lang;
@@ -52,16 +55,16 @@ public class GUI extends JFrame {
 		setContentPane(contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
 		gbl_contentPane.columnWidths = new int[] { 0, 0, 0, 0 };
-		gbl_contentPane.rowHeights = new int[] { 0, 0, 0, 0 };
+		gbl_contentPane.rowHeights = new int[] { 0, 0, 0, 0, 0 };
 		gbl_contentPane.columnWeights = new double[] { 0.0, 1.0, 0.0, Double.MIN_VALUE };
-		gbl_contentPane.rowWeights = new double[] { 0.0, 1.0, 0.0, Double.MIN_VALUE };
+		gbl_contentPane.rowWeights = new double[] { 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE };
 		contentPane.setLayout(gbl_contentPane);
 
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setMinimumSize(new Dimension(100, 100));
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane.gridheight = 2;
+		gbc_scrollPane.gridheight = 3;
 		gbc_scrollPane.insets = new Insets(0, 0, 0, 5);
 		gbc_scrollPane.gridx = 0;
 		gbc_scrollPane.gridy = 1;
@@ -79,13 +82,23 @@ public class GUI extends JFrame {
 		conversationsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		scrollPane.setViewportView(conversationsList);
 
+		conversationInfoLabel = new JLabel("");
+		conversationInfoLabel.setHorizontalAlignment(SwingConstants.LEFT);
+		GridBagConstraints gbc_conversationLabel = new GridBagConstraints();
+		gbc_conversationLabel.fill = GridBagConstraints.BOTH;
+		gbc_conversationLabel.gridwidth = 2;
+		gbc_conversationLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_conversationLabel.gridx = 1;
+		gbc_conversationLabel.gridy = 1;
+		contentPane.add(conversationInfoLabel, gbc_conversationLabel);
+
 		messagesScrollPane = new JScrollPane();
 		GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
 		gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane_1.gridwidth = 2;
 		gbc_scrollPane_1.insets = new Insets(0, 0, 5, 0);
 		gbc_scrollPane_1.gridx = 1;
-		gbc_scrollPane_1.gridy = 1;
+		gbc_scrollPane_1.gridy = 2;
 		contentPane.add(messagesScrollPane, gbc_scrollPane_1);
 
 		messagesList = new JList<>();
@@ -155,7 +168,7 @@ public class GUI extends JFrame {
 		gbc_messageTextField.insets = new Insets(0, 0, 0, 5);
 		gbc_messageTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_messageTextField.gridx = 1;
-		gbc_messageTextField.gridy = 2;
+		gbc_messageTextField.gridy = 3;
 		contentPane.add(messageTextField, gbc_messageTextField);
 		messageTextField.setColumns(10);
 
@@ -163,7 +176,7 @@ public class GUI extends JFrame {
 		sendButton.addActionListener(e -> onSendButton());
 		GridBagConstraints gbc_sendButton = new GridBagConstraints();
 		gbc_sendButton.gridx = 2;
-		gbc_sendButton.gridy = 2;
+		gbc_sendButton.gridy = 3;
 		contentPane.add(sendButton, gbc_sendButton);
 
 		createUpdateListener();
@@ -190,6 +203,7 @@ public class GUI extends JFrame {
 		currentConversation = conversationsList.getSelectedValue();
 		messagesList.setListData(currentConversation.getMessages().toArray(new Message[0]));
 		appClient.requestMessages(currentConversation.getId(), 1000);
+		conversationInfoLabel.setText(String.format("<html><div style=\"padding: 5;\"><span style=\"font-size: 20;\">%s</span><br>%s</div></html>", currentConversation.getName(), String.join(", ", currentConversation.getUsers())));
 	}
 
 	private void onMessageTextFieldAction() {
