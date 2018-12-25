@@ -423,7 +423,17 @@ public class AppServer extends Server {
 			sendAES(user, PROTOCOL.SC.USER_SEARCH_RESULT, "", String.join(PROTOCOL.SPLIT, db.loadAllUsernames().toArray(new String[0])));
 			return;
 		}
-		sendAES(user, PROTOCOL.SC.USER_SEARCH_RESULT, msgParts[1], msgParts[1]); // TODO: use proper search algorithm
+		String[] results = db.loadAllUsernames().stream().filter(username -> {
+			int index = -1;
+			for (int i = 0; i < msgParts[1].toCharArray().length; i++) {
+				index = username.indexOf(msgParts[1].toCharArray()[i], index + 1);
+				if (index < 0) {
+					return false;
+				}
+			}
+			return true;
+		}).toArray(String[]::new);
+		sendAES(user, PROTOCOL.SC.USER_SEARCH_RESULT, msgParts[1], String.join(PROTOCOL.SPLIT, results));
 	}
 
 	/**
