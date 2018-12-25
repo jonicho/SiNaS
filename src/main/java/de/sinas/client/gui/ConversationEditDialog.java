@@ -204,6 +204,8 @@ public class ConversationEditDialog extends JDialog {
 				usersSearchList.setListData(results);
 			}
 		});
+
+		appClient.searchUser("");
 	}
 
 	private void onUsernameSearch() {
