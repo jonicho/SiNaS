@@ -359,7 +359,10 @@ public class AppServer extends Server {
 			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
 			return;
 		}
-		// TODO: check whether the user (msgParts[2]) even exists
+		if (db.loadUserInfo(msgParts[2]) == null) {
+			sendError(user, PROTOCOL.ERRORCODES.USER_DOES_NOT_EXIST);
+			return;
+		}
 		conversation.addUser(msgParts[2]);
 		db.addUserToConversation(conversation, msgParts[2]);
 		for (User u : users.getLoggedInUsers(conversation.getUsers())) {
