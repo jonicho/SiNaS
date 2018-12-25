@@ -1,8 +1,8 @@
 package de.sinas;
 
 import java.util.ArrayList;
-
-import de.sinas.User;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A class managing users to ensure that there is no user twice.
@@ -48,6 +48,10 @@ public class Users {
 			}
 		}
 		return null;
+	}
+
+	public List<User> getLoggedInUsers(List<String> usernames) {
+		return usernames.stream().map(username -> getUser(username)).filter(user -> user != null).collect(Collectors.toList());
 	}
 
 	/**

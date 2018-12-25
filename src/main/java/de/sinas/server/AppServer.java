@@ -334,8 +334,8 @@ public class AppServer extends Server {
 		for (String username : users) {
 			db.addUserToConversation(newConversation, username);
 		}
-		for (String u : newConversation.getUsers()) {
-			sendConversationToUser(newConversation, this.users.getUser(u));
+		for (User u : this.users.getLoggedInUsers(newConversation.getUsers())) {
+			sendConversationToUser(newConversation, u);
 		}
 	}
 
@@ -358,8 +358,8 @@ public class AppServer extends Server {
 		}
 		conversation.addUser(msgParts[2]);
 		db.addUserToConversation(conversation, msgParts[2]);
-		for (String u : conversation.getUsers()) {
-			sendConversationToUser(conversation, this.users.getUser(u));
+		for (User u : users.getLoggedInUsers(conversation.getUsers())) {
+			sendConversationToUser(conversation, u);
 		}
 	}
 
@@ -382,8 +382,8 @@ public class AppServer extends Server {
 		}
 		conversation.removeUser(msgParts[2]);
 		db.removeUserFromConversation(conversation, msgParts[2]);
-		for (String u : conversation.getUsers()) {
-			sendConversationToUser(conversation, this.users.getUser(u));
+		for (User u : users.getLoggedInUsers(conversation.getUsers())) {
+			sendConversationToUser(conversation, u);
 		}
 	}
 
@@ -406,8 +406,10 @@ public class AppServer extends Server {
 		}
 		conversation.rename(msgParts[2]);
 		db.updateConversation(conversation);
-		for (String u : conversation.getUsers()) {
-			sendConversationToUser(conversation, this.users.getUser(u));
+		for (User u : users.getLoggedInUsers(conversation.getUsers())) {
+			sendConversationToUser(conversation, u);
+		}
+	}
 		}
 	}
 
