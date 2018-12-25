@@ -34,6 +34,7 @@ public class AppClient extends Client {
 	private final ArrayList<UpdateListener> updateListeners = new ArrayList<>();
 	private final ArrayList<ErrorListener> errorListeners = new ArrayList<>();
 	private final ConnectionListener connectionListener;
+	private SearchResultListener searchResultListener;
 
 	public AppClient(String pServerIP, int pServerPort, ConnectionListener connectionListener) {
 		super(pServerIP, pServerPort);
@@ -87,6 +88,9 @@ public class AppClient extends Client {
 		case PROTOCOL.SC.MESSAGES:
 			handleMessages(msgParts);
 			break;
+		case PROTOCOL.SC.USER_SEARCH_RESULT:
+			handleUserSearchResult(msgParts);
+			return;
 		default:
 			break;
 		}
@@ -192,6 +196,14 @@ public class AppClient extends Client {
 		conversation.addMessages(messages);
 	}
 
+	private void handleUserSearchResult(String[] msgParts) {
+		String query = msgParts.length >= 2 ? msgParts[1] : "";
+		String[] results = msgParts.length >= 3 ? Arrays.copyOfRange(msgParts, 2, msgParts.length) : new String[0];
+		if (searchResultListener != null) {
+			searchResultListener.searchResult(query, results);
+		}
+	}
+
 	private void makeConnection() {
 		KeyPair kp = getRsaHandler().generateKeyPair();
 		rsaPrivKey = kp.getPrivate();
@@ -214,6 +226,14 @@ public class AppClient extends Client {
 
 	public void removeAllErrorListeners() {
 		errorListeners.clear();
+	}
+
+	public void setSearchResultListener(SearchResultListener searchResultListener) {
+		this.searchResultListener = searchResultListener;
+	}
+
+	public void removeSearchResultListener() {
+		searchResultListener = null;
 	}
 
 	public void login(String username, String password) {
@@ -263,6 +283,10 @@ public class AppClient extends Client {
 		byte[] cryp = getAESHandler().encrypt(content.getBytes(), ccc.getAesKey());
 		String enc = Encoder.b64Encode(cryp);
 		send(convID + PROTOCOL.SPLIT + enc);
+	}
+
+	public void searchUser(String query) {
+		sendAES(PROTOCOL.CS.USER_SEARCH, query);
 	}
 
 	public User getThisUser() {
@@ -316,5 +340,10 @@ public class AppClient extends Client {
 	@FunctionalInterface
 	public interface ConnectionListener extends EventListener {
 		void connected(AppClient appClient);
+	}
+
+	@FunctionalInterface
+	public interface SearchResultListener extends EventListener {
+		void searchResult(String query, String[] results);
 	}
 }

@@ -7,11 +7,14 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JMenu;
@@ -95,11 +98,19 @@ public class GUI extends JFrame {
 		conversationInfoLabel.setHorizontalAlignment(SwingConstants.LEFT);
 		GridBagConstraints gbc_conversationLabel = new GridBagConstraints();
 		gbc_conversationLabel.fill = GridBagConstraints.BOTH;
-		gbc_conversationLabel.gridwidth = 2;
 		gbc_conversationLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_conversationLabel.gridx = 1;
 		gbc_conversationLabel.gridy = 1;
 		contentPane.add(conversationInfoLabel, gbc_conversationLabel);
+		
+		JButton editButton = new JButton(lang.getString("edit"));
+		editButton.addActionListener(e -> onEditConversation());
+		GridBagConstraints gbc_editButton = new GridBagConstraints();
+		gbc_editButton.fill = GridBagConstraints.BOTH;
+		gbc_editButton.insets = new Insets(0, 0, 5, 0);
+		gbc_editButton.gridx = 2;
+		gbc_editButton.gridy = 1;
+		contentPane.add(editButton, gbc_editButton);
 
 		messagesScrollPane = new JScrollPane();
 		GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
@@ -138,7 +149,7 @@ public class GUI extends JFrame {
 		GridBagConstraints gbc_menuBar = new GridBagConstraints();
 		gbc_menuBar.anchor = GridBagConstraints.WEST;
 		gbc_menuBar.gridwidth = 3;
-		gbc_menuBar.insets = new Insets(0, 0, 5, 5);
+		gbc_menuBar.insets = new Insets(0, 0, 5, 0);
 		gbc_menuBar.gridx = 0;
 		gbc_menuBar.gridy = 0;
 		contentPane.add(menuBar, gbc_menuBar);
@@ -155,27 +166,12 @@ public class GUI extends JFrame {
 
 		JMenuItem mntmAbout = new JMenuItem(lang.getString("about"));
 		mnHelp.add(mntmAbout);
-		
-		JMenu mnConversation = new JMenu(lang.getString("conversation"));
-		menuBar.add(mnConversation);
-		
-		JMenuItem mntmAddUser = new JMenuItem(lang.getString("add_user"));
-		mntmAddUser.addActionListener(e -> onConversationAddUser());
-		mnConversation.add(mntmAddUser);
-		
-		JMenuItem mntmRemoveUser = new JMenuItem(lang.getString("remove_user"));
-		mntmRemoveUser.addActionListener(e -> onConversationRemoveUser());
-		mnConversation.add(mntmRemoveUser);
-		
-		JMenuItem mntmRename = new JMenuItem(lang.getString("rename"));
-		mntmRename.addActionListener(e -> onConversationRename());
-		mnConversation.add(mntmRename);
 
 		messageTextField = new JTextField();
 		messageTextField.addActionListener(e -> onMessageTextFieldAction());
 		GridBagConstraints gbc_messageTextField = new GridBagConstraints();
 		gbc_messageTextField.insets = new Insets(0, 0, 0, 5);
-		gbc_messageTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_messageTextField.fill = GridBagConstraints.BOTH;
 		gbc_messageTextField.gridx = 1;
 		gbc_messageTextField.gridy = 3;
 		contentPane.add(messageTextField, gbc_messageTextField);
@@ -184,6 +180,7 @@ public class GUI extends JFrame {
 		JButton sendButton = new JButton(lang.getString("send"));
 		sendButton.addActionListener(e -> onSendButton());
 		GridBagConstraints gbc_sendButton = new GridBagConstraints();
+		gbc_sendButton.fill = GridBagConstraints.BOTH;
 		gbc_sendButton.gridx = 2;
 		gbc_sendButton.gridy = 3;
 		contentPane.add(sendButton, gbc_sendButton);
@@ -215,36 +212,37 @@ public class GUI extends JFrame {
 		conversationInfoLabel.setText(String.format("<html><div style=\"padding: 5;\"><span style=\"font-size: 20;\">%s</span><br>%s</div></html>", currentConversation.getName(), String.join(", ", currentConversation.getUsers())));
 	}
 
+	private void onEditConversation() {
+		if (currentConversation == null) {
+			return;
+		}
+		ConversationEditDialog dialog = new ConversationEditDialog(this, appClient, currentConversation, lang);
+		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		if (!dialog.showDialog()) {
+			return;
+		}
+		if (!currentConversation.getName().equals(dialog.getConversationName())) {
+			appClient.renameConversation(currentConversation.getId(), dialog.getConversationName());
+		}
+		List<String> newUsers = Arrays.asList(dialog.getUsers());
+		for (String user : currentConversation.getUsers()) {
+			if (!newUsers.contains(user)) {
+				appClient.removeUserFromConversation(currentConversation.getId(), user);
+			}
+		}
+		for (String user : newUsers) {
+			if (!currentConversation.getUsers().contains(user)) {
+				appClient.addUserToConversation(currentConversation.getId(), user);
+			}
+		}
+	}
+
 	private void onMessageTextFieldAction() {
 		sendMessage();
 	}
 
 	private void onSendButton() {
 		sendMessage();
-	}
-
-	private void onConversationAddUser() {
-		String username = JOptionPane.showInputDialog(this, lang.getString("enter_username"), lang.getString("add_user"), JOptionPane.QUESTION_MESSAGE);
-		if (username == null || username.equals("")) {
-			return;
-		}
-		appClient.addUserToConversation(currentConversation.getId(), username);
-	}
-
-	private void onConversationRemoveUser() {
-		String username = JOptionPane.showInputDialog(this, lang.getString("enter_username"), lang.getString("remove_user"), JOptionPane.QUESTION_MESSAGE);
-		if (username == null || username.equals("")) {
-			return;
-		}
-		appClient.removeUserFromConversation(currentConversation.getId(), username);
-	}
-
-	private void onConversationRename() {
-		String conversationName = JOptionPane.showInputDialog(this, lang.getString("enter_conversation_name"), lang.getString("rename"), JOptionPane.QUESTION_MESSAGE);
-		if (conversationName == null || conversationName.equals("")) {
-			return;
-		}
-		appClient.renameConversation(currentConversation.getId(), conversationName);
 	}
 
 	private void sendMessage() {

@@ -114,6 +114,9 @@ public class AppServer extends Server {
 		case PROTOCOL.CS.CONVERSATION_RENAME:
 			handleConversationRename(user, msgParts);
 			break;
+		case PROTOCOL.CS.USER_SEARCH:
+			handleUserSearch(user, msgParts);
+			break;
 		default:
 			sendError(user, PROTOCOL.ERRORCODES.UNKNOWN_MESSAGE_BASE);
 			break;
@@ -356,6 +359,7 @@ public class AppServer extends Server {
 			sendError(user, PROTOCOL.ERRORCODES.REQUEST_NOT_ALLOWED);
 			return;
 		}
+		// TODO: check whether the user (msgParts[2]) even exists
 		conversation.addUser(msgParts[2]);
 		db.addUserToConversation(conversation, msgParts[2]);
 		for (User u : users.getLoggedInUsers(conversation.getUsers())) {
@@ -410,7 +414,13 @@ public class AppServer extends Server {
 			sendConversationToUser(conversation, u);
 		}
 	}
+
+	private void handleUserSearch(User user, String[] msgParts) {
+		if (msgParts.length < 2) {
+			sendAES(user, PROTOCOL.SC.USER_SEARCH_RESULT, "", ""); // TODO: send all users
+			return;
 		}
+		sendAES(user, PROTOCOL.SC.USER_SEARCH_RESULT, msgParts[1], msgParts[1]); // TODO: use proper search algorithm
 	}
 
 	/**

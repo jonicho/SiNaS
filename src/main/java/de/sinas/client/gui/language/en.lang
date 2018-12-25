@@ -22,3 +22,9 @@ add_user: Add user
 remove_user: Remove user
 rename: Rename
 enter_username: Enter a username
+edit: Edit
+save: Save
+cancel: Cancel
+name: Name
+search: Search
+users: Users

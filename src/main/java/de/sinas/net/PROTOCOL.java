@@ -16,7 +16,8 @@ public final class PROTOCOL {
 				CONVERSATION = "con", //{ENRYPTED:MAINAES} Base [split] conversaion name [split] conversation id [split] conversation AES KEY [split] users ...
 				SEC_CONNECTION_ACCEPTED = "secacc", //{ENCRYPTED:RSA} Base [split] Main AES Key
 				USER = "user", //{ENRYPTED:MAINAES} Base [split] username
-				MESSAGES = "msgs"; //conversation id[split]{ENCRYPTED:CONVAES} Base [split] conversation id {[split] message id [split] is file [split] timestamp [split] sender [split] content}*
+				MESSAGES = "msgs", //conversation id[split]{ENCRYPTED:CONVAES} Base [split] conversation id {[split] message id [split] is file [split] timestamp [split] sender [split] content}*
+				USER_SEARCH_RESULT = "usersearchres"; //{ENRYPTED:MAINAES} Base [split] query {[split] result}*
 	}
 
 	public final class CS {
@@ -32,7 +33,8 @@ public final class PROTOCOL {
 				CONVERSATION_ADD = "conadd", //{ENRYPTED:MAINAES} Base [Split] id [Split] name
 				CONVERSATION_REM = "conrem", //{ENRYPTED:MAINAES} Base [Split] id [Split] name
 				CONVERSATION_RENAME = "conren", //{ENRYPTED:MAINAES} Base [Split] id [Split] new names
-				MESSAGE = "msg"; //conversation id[split]{ENCRYPTED:CONVAES} Base [split] conversation id [split] is file [split] content
+				MESSAGE = "msg", //conversation id[split]{ENCRYPTED:CONVAES} Base [split] conversation id [split] is file [split] content
+				USER_SEARCH = "usersearch"; //{ENRYPTED:MAINAES} Base [split] query
 	}
 
 	public final class ERRORCODES {
