@@ -417,7 +417,7 @@ public class AppServer extends Server {
 
 	private void handleUserSearch(User user, String[] msgParts) {
 		if (msgParts.length < 2) {
-			sendAES(user, PROTOCOL.SC.USER_SEARCH_RESULT, "", ""); // TODO: send all users
+			sendAES(user, PROTOCOL.SC.USER_SEARCH_RESULT, "", String.join(PROTOCOL.SPLIT, db.loadAllUsernames().toArray(new String[0])));
 			return;
 		}
 		sendAES(user, PROTOCOL.SC.USER_SEARCH_RESULT, msgParts[1], msgParts[1]); // TODO: use proper search algorithm

@@ -103,6 +103,21 @@ public class Database {
 		return loadConnectedUser(username, "", 0);
 	}
 
+	public ArrayList<String> loadAllUsernames() {
+		try {
+			Statement statement = connection.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT `username` FROM `users`;");
+			ArrayList<String> result = new ArrayList<>();
+			while(rs.next()) {
+				result.add(rs.getString("username"));
+			}
+			return result;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	/**
 	 * Loads all conversations of the given user<br>
 	 * (NOTE: this method only loads the conversations, not the conversation's
