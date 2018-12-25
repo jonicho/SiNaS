@@ -75,9 +75,9 @@ public class GUI extends JFrame {
 			}
 		};
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+		gbc_scrollPane.gridheight = 2;
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane.gridheight = 3;
-		gbc_scrollPane.insets = new Insets(0, 0, 0, 5);
+		gbc_scrollPane.insets = new Insets(0, 0, 5, 5);
 		gbc_scrollPane.gridx = 0;
 		gbc_scrollPane.gridy = 1;
 		contentPane.add(scrollPane, gbc_scrollPane);
@@ -153,13 +153,6 @@ public class GUI extends JFrame {
 		gbc_menuBar.gridx = 0;
 		gbc_menuBar.gridy = 0;
 		contentPane.add(menuBar, gbc_menuBar);
-		
-		JMenu mnOptions = new JMenu(lang.getString("options"));
-		menuBar.add(mnOptions);
-		
-		JMenuItem mntmAddConversation = new JMenuItem(lang.getString("add_conversation"));
-		mntmAddConversation.addActionListener(e -> onAddConversation());
-		mnOptions.add(mntmAddConversation);
 
 		JMenu mnHelp = new JMenu(lang.getString("help"));
 		menuBar.add(mnHelp);
@@ -169,6 +162,16 @@ public class GUI extends JFrame {
 
 		messageTextField = new JTextField();
 		messageTextField.addActionListener(e -> onMessageTextFieldAction());
+		
+		JButton btnAddconversation = new JButton(lang.getString("add_conversation"));
+		btnAddconversation.addActionListener(e -> onAddConversation());
+		GridBagConstraints gbc_btnAddconversation = new GridBagConstraints();
+		gbc_btnAddconversation.fill = GridBagConstraints.BOTH;
+		gbc_btnAddconversation.insets = new Insets(0, 0, 0, 5);
+		gbc_btnAddconversation.gridx = 0;
+		gbc_btnAddconversation.gridy = 3;
+		contentPane.add(btnAddconversation, gbc_btnAddconversation);
+		
 		GridBagConstraints gbc_messageTextField = new GridBagConstraints();
 		gbc_messageTextField.insets = new Insets(0, 0, 0, 5);
 		gbc_messageTextField.fill = GridBagConstraints.BOTH;
