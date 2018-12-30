@@ -5,7 +5,7 @@ public final class PROTOCOL {
 
 	public static final String IP = "localhost";
 	public static final int PORT = 48333;
-	public static final String SPLIT = "&"; // U+001F: Unit separator
+	public static final String SPLIT = "\u001F"; // U+001F: Unit separator
 
 	public final class SC {
 		private SC() {}
