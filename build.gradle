@@ -5,6 +5,7 @@ plugins {
 dependencies {
     testCompile 'junit:junit:4.12'
     compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.25.2'
+    compile group: 'org.apache.commons', name: 'commons-text', version: '1.6'
 }
 
 repositories {

@@ -10,6 +10,8 @@ import java.util.List;
 
 import javax.crypto.SecretKey;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 import de.sinas.Conversation;
 import de.sinas.Message;
 import de.sinas.User;
@@ -282,7 +284,8 @@ public class AppServer extends Server {
 		long ms = System.currentTimeMillis();
 		String convID = msgParts[1];
 		boolean isFile = Boolean.parseBoolean(msgParts[2]);
-		String content = msgParts[3];
+		String content = StringEscapeUtils.escapeHtml4(msgParts[3]);
+		content = content.equals("") ? " " : content;
 		Conversation conv = null;
 		for (Conversation c : conversations) {
 			if (c.getId().equals(convID)) {
