@@ -13,7 +13,7 @@ public final class PROTOCOL {
 		public static final String ERROR = "err", //{ENRYPTED:MAINAES} Base [split] errorcode
 				OK = "ok", //{ENRYPTED:MAINAES} Base
 				LOGIN_OK = "lgnok", //{ENRYPTED:MAINAES} Base
-				CONVERSATION = "con", //{ENRYPTED:MAINAES} Base [split] conversaion name [split] conversation id [split] conversation AES KEY [split] users ...
+				CONVERSATION = "con", //{ENRYPTED:MAINAES} Base [split] conversation name [split] conversation id [split] conversation AES KEY [split] users ...
 				SEC_CONNECTION_ACCEPTED = "secacc", //{ENCRYPTED:RSA} Base [split] Main AES Key
 				USER = "user", //{ENRYPTED:MAINAES} Base [split] username
 				MESSAGES = "msgs", //conversation id[split]{ENCRYPTED:CONVAES} Base [split] conversation id {[split] message id [split] is file [split] timestamp [split] sender [split] content}*
