@@ -45,16 +45,16 @@ public class AppClient extends Client {
 	@Override
 	public void processMessage(String message) {
 		System.out.println("(CLIENT) New message: " + message);
-		String[] msgParts = message.split(PROTOCOL.SPLIT);
+		String[] msgParts = message.split(PROTOCOL.SPLIT, -1);
 		if (isRSA) {
 			String plainText = new String(getRsaHandler().decrypt(Encoder.b64Decode(msgParts[0]), rsaPrivKey));
-			msgParts = plainText.split(PROTOCOL.SPLIT);
+			msgParts = plainText.split(PROTOCOL.SPLIT, -1);
 			System.out.println("(CLIENT) Decoded message: " + plainText);
 			isRSA = false;
 		} else {
 			if (msgParts.length == 1) {
 				String plainText = new String(getAESHandler().decrypt(Encoder.b64Decode(msgParts[0]), mainAESKey));
-				msgParts = plainText.split(PROTOCOL.SPLIT);
+				msgParts = plainText.split(PROTOCOL.SPLIT, -1);
 			} else {
 				SecretKey cKey = null;
 				for (ClientCryptoConversation ccc : cryptoSessions) {
@@ -65,7 +65,7 @@ public class AppClient extends Client {
 				}
 				if (cKey != null) {
 					String plainText = new String(getAESHandler().decrypt(Encoder.b64Decode(msgParts[1]), cKey));
-					msgParts = plainText.split(PROTOCOL.SPLIT);
+					msgParts = plainText.split(PROTOCOL.SPLIT, -1);
 				}
 			}
 		}

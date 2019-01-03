@@ -43,7 +43,7 @@ public class AppServer extends Server {
 	@Override
 	public void processMessage(String clientIP, int clientPort, String message) {
 		System.out.println("(SERVER)New message: " + clientIP + ":" + clientPort + ", " + message);
-		String[] msgParts = message.split(PROTOCOL.SPLIT);
+		String[] msgParts = message.split(PROTOCOL.SPLIT, -1);
 		User user = users.getUser(clientIP, clientPort);
 		if (user != null && cryptoManager.getSessionByUser(user) != null) {
 			SecretKey key;
@@ -55,7 +55,7 @@ public class AppServer extends Server {
 				key = convCryptoManager.getSession(user, getConversationById(msgParts[0])).getAesKey();
 				encodedMessage = msgParts[1];
 			}
-			msgParts = new String(getAesHandler().decrypt(Encoder.b64Decode(encodedMessage), key)).split(PROTOCOL.SPLIT);
+			msgParts = new String(getAesHandler().decrypt(Encoder.b64Decode(encodedMessage), key)).split(PROTOCOL.SPLIT, -1);
 		}
 		if (user == null) {
 			if (msgParts[0].equals(PROTOCOL.CS.CREATE_SEC_CONNECTION)) {
@@ -77,7 +77,7 @@ public class AppServer extends Server {
 					return;
 				}
 				msgParts = new String(getAesHandler().decrypt(Encoder.b64Decode(msgParts[0]), tempUser.getAesKey()))
-						.split(PROTOCOL.SPLIT);
+						.split(PROTOCOL.SPLIT, -1);
 				switch (msgParts[0]) {
 				case PROTOCOL.CS.LOGIN:
 					handleLogin(tempUser, msgParts[1], msgParts[2]);
@@ -285,7 +285,6 @@ public class AppServer extends Server {
 		String convID = msgParts[1];
 		boolean isFile = Boolean.parseBoolean(msgParts[2]);
 		String content = StringEscapeUtils.escapeHtml4(msgParts[3]);
-		content = content.equals("") ? " " : content;
 		Conversation conv = null;
 		for (Conversation c : conversations) {
 			if (c.getId().equals(convID)) {

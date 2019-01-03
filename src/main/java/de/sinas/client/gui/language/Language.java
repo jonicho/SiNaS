@@ -61,7 +61,7 @@ public class Language {
 		BufferedReader br = new BufferedReader(new InputStreamReader(is));
 		langMap.clear();
 		br.lines().forEach(line -> {
-			String[] string = line.split(": ");
+			String[] string = line.split(": ", -1);
 			langMap.put(string[0], string[1]);
 		});
 	}
