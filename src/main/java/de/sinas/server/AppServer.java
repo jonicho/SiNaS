@@ -228,14 +228,16 @@ public class AppServer extends Server {
 	 * @see PROTOCOL.CS
 	 */
 	private void handleGetMessages(User user, String[] msgParts) {
-		if (msgParts.length < 3) {
+		if (msgParts.length < 4) {
 			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
 			return;
 		}
 		String conversationId = msgParts[1];
+		long lastTimestamp = 0;
 		int lastNMessages = 0;
 		try {
-			lastNMessages = Integer.parseInt(msgParts[2]);
+			lastTimestamp = Long.parseLong(msgParts[2]);
+			lastNMessages = Integer.parseInt(msgParts[3]);
 		} catch (NumberFormatException e) {
 			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
 			return;
@@ -257,16 +259,20 @@ public class AppServer extends Server {
 		}
 		db.loadMessages(conversation);
 		List<Message> messages = conversation.getMessages();
-		String msgs = PROTOCOL.buildMessage(PROTOCOL.SC.MESSAGES, conversationId);
-		for (int i = 0; i < lastNMessages; i++) {
-			int index = messages.size() - 1 - i;
-			if (index < 0) {
-				break;
+		String msgsMessage = PROTOCOL.buildMessage(PROTOCOL.SC.MESSAGES, conversationId);
+		if (!messages.isEmpty()) {
+			int firstIndex = 0;
+			int lastIndex = messages.size() - 1;
+			while (messages.get(lastIndex).getTimestamp() >= lastTimestamp && lastIndex > 0) {
+				lastIndex--;
 			}
-			Message msg = messages.get(index);
-			msgs = PROTOCOL.buildMessage(msgs, msg.getId(), msg.isFile(), msg.getTimestamp(), msg.getSender(), msg.getContent());
+			firstIndex = Math.max(lastIndex - lastNMessages, 0) + 1;
+			for (int i = firstIndex; i <= lastIndex; i++) {
+				Message msg = messages.get(i);
+				msgsMessage = PROTOCOL.buildMessage(msgsMessage, msg.getId(), msg.isFile(), msg.getTimestamp(), msg.getSender(), msg.getContent());
+			}
 		}
-		sendAES(user, msgs);
+		sendAES(user, msgsMessage);
 	}
 
 	/**

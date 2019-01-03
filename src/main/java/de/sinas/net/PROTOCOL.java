@@ -29,7 +29,7 @@ public final class PROTOCOL {
 				CREATE_CONVERSATION = "crtcon", //{ENRYPTED:MAINAES} Base [split] name [split] users ...
 				GET_CONVERSATIONS = "getcons", //{ENRYPTED:MAINAES} Base
 				GET_USER = "getuser", //{ENRYPTED:MAINAES} Base [split] username
-				GET_MESSAGES = "getmsgs", //{ENRYPTED:MAINAES} Base [split] conversation id [split] amount
+				GET_MESSAGES = "getmsgs", //{ENRYPTED:MAINAES} Base [split] conversation id [split] last timestamp [split] amount
 				CONVERSATION_ADD = "conadd", //{ENRYPTED:MAINAES} Base [Split] id [Split] name
 				CONVERSATION_REM = "conrem", //{ENRYPTED:MAINAES} Base [Split] id [Split] name
 				CONVERSATION_RENAME = "conren", //{ENRYPTED:MAINAES} Base [Split] id [Split] new names

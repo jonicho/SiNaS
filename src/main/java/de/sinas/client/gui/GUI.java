@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.AdjustmentEvent;
 import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -16,6 +17,7 @@ import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -25,6 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
@@ -33,8 +36,6 @@ import de.sinas.Message;
 import de.sinas.client.AppClient;
 import de.sinas.client.gui.language.Language;
 import de.sinas.net.PROTOCOL;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
 
 public class GUI extends JFrame {
 	private JPanel contentPane;
@@ -46,6 +47,7 @@ public class GUI extends JFrame {
 	private JList<Message> messagesList;
 	private JScrollPane messagesScrollPane;
 	private JLabel conversationInfoLabel;
+	private boolean messagesUpdating = false;
 
 	public GUI(AppClient appClient, Language lang) {
 		this.lang = lang;
@@ -113,6 +115,7 @@ public class GUI extends JFrame {
 		contentPane.add(editButton, gbc_editButton);
 
 		messagesScrollPane = new JScrollPane();
+		messagesScrollPane.getVerticalScrollBar().addAdjustmentListener(e -> onMessagesScrolled(e));
 		GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
 		gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane_1.gridwidth = 2;
@@ -211,8 +214,14 @@ public class GUI extends JFrame {
 		}
 		currentConversation = conversationsList.getSelectedValue();
 		messagesList.setListData(currentConversation.getMessages().toArray(new Message[0]));
-		appClient.requestMessages(currentConversation.getId(), 1000);
+		appClient.requestMessages(currentConversation.getId(), System.currentTimeMillis(), 20);
 		conversationInfoLabel.setText(String.format("<html><div style=\"padding: 5;\"><span style=\"font-size: 20;\">%s</span><br>%s</div></html>", currentConversation.getName(), String.join(", ", currentConversation.getUsers())));
+	}
+
+	private void onMessagesScrolled(AdjustmentEvent e) {
+		if (currentConversation != null && messagesScrollPane.getVerticalScrollBar().getValue() == 0 && !e.getValueIsAdjusting() && !messagesUpdating) {
+			appClient.requestMessages(currentConversation.getId(), currentConversation.getMessages().get(0).getTimestamp(), 20);
+		}
 	}
 
 	private void onEditConversation() {
@@ -282,13 +291,29 @@ public class GUI extends JFrame {
 
 	private void onMessagesUpdate() {
 		if (currentConversation != null) {
-			boolean scrollToBottom = messagesList.getLastVisibleIndex() == messagesList.getModel().getSize() - 1;
-			messagesList.setListData(currentConversation.getMessages().toArray(new Message[0]));
-			if (scrollToBottom) {
-				SwingUtilities.invokeLater(() -> {
-					messagesScrollPane.getVerticalScrollBar().setValue(Integer.MAX_VALUE);
-				});
+			messagesUpdating = true;
+			Message messageToScrollTo = null;
+			if (messagesList.getModel().getSize() > 0) {
+				messageToScrollTo = messagesList.getModel()
+						.getElementAt(messagesList.getLastVisibleIndex() == messagesList.getModel().getSize() - 1
+								? messagesList.getLastVisibleIndex()
+								: messagesList.getFirstVisibleIndex());
 			}
+			messagesList.setListData(currentConversation.getMessages().toArray(new Message[0]));
+			int index = Integer.MAX_VALUE;
+			if (messageToScrollTo != null) {
+				for (int i = 0; i < messagesList.getModel().getSize() - 1; i++) {
+					if (messagesList.getModel().getElementAt(i).equals(messageToScrollTo)) {
+						index = i;
+						break;
+					}
+				}
+			}
+			int indexToScrollTo = index;
+			SwingUtilities.invokeLater(() -> {
+				messagesList.ensureIndexIsVisible(indexToScrollTo);
+				messagesUpdating = false;
+			});
 		}
 	}
 
