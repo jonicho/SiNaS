@@ -293,14 +293,11 @@ public class GUI extends JFrame {
 		if (currentConversation != null) {
 			messagesUpdating = true;
 			Message messageToScrollTo = null;
-			if (messagesList.getModel().getSize() > 0) {
-				messageToScrollTo = messagesList.getModel()
-						.getElementAt(messagesList.getLastVisibleIndex() == messagesList.getModel().getSize() - 1
-								? messagesList.getLastVisibleIndex()
-								: messagesList.getFirstVisibleIndex());
+			if (messagesList.getModel().getSize() > 0 && messagesList.getLastVisibleIndex() != messagesList.getModel().getSize() - 1) {
+				messageToScrollTo = messagesList.getModel().getElementAt(messagesList.getFirstVisibleIndex());
 			}
 			messagesList.setListData(currentConversation.getMessages().toArray(new Message[0]));
-			int index = Integer.MAX_VALUE;
+			int index = 0;
 			if (messageToScrollTo != null) {
 				for (int i = 0; i < messagesList.getModel().getSize() - 1; i++) {
 					if (messagesList.getModel().getElementAt(i).equals(messageToScrollTo)) {
@@ -308,6 +305,8 @@ public class GUI extends JFrame {
 						break;
 					}
 				}
+			} else {
+				index = messagesList.getModel().getSize() - 1;
 			}
 			int indexToScrollTo = index;
 			SwingUtilities.invokeLater(() -> {
