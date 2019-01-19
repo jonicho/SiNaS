@@ -219,7 +219,7 @@ public class GUI extends JFrame {
 	}
 
 	private void onMessagesScrolled(AdjustmentEvent e) {
-		if (currentConversation != null && messagesScrollPane.getVerticalScrollBar().getValue() == 0 && !e.getValueIsAdjusting() && !messagesUpdating) {
+		if (currentConversation != null && !currentConversation.getMessages().isEmpty() && messagesScrollPane.getVerticalScrollBar().getValue() == 0 && !e.getValueIsAdjusting() && !messagesUpdating) {
 			appClient.requestMessages(currentConversation.getId(), currentConversation.getMessages().get(0).getTimestamp(), 20);
 		}
 	}
