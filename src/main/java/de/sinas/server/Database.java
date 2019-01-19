@@ -248,7 +248,6 @@ public class Database {
 							rs.getString("sender"), rs.getBoolean("is_file"), rs.getString("conversation_id"));
 					conversation.addMessages(message);
 				}
-				System.out.println();
 			}
 			return true;
 		} catch (SQLException e) {
