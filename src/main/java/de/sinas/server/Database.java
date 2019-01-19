@@ -187,7 +187,7 @@ public class Database {
 	 * Loads the messages from the given conversation
 	 *
 	 * @param conversation
-	 * @return true if the conversation exists and the message could be loaded
+	 * @return true if the conversation exists and the messages could be loaded
 	 *         successfully, false otherwise
 	 */
 	public boolean loadMessages(Conversation conversation) {
@@ -209,6 +209,46 @@ public class Database {
 							rs.getString("sender"), rs.getBoolean("is_file"), rs.getString("conversation_id"));
 					conversation.addMessages(message);
 				}
+			}
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	/**
+	 * Loads the last {@code amount} messages sent before {@code lastTimestamp} from
+	 * the given conversation
+	 *
+	 * @param conversation
+	 * @param lastTimestamp
+	 * @param amount
+	 * @return true if the conversation exists and the messages could be loaded
+	 *         successfully, false otherwise
+	 */
+	public boolean loadMessages(Conversation conversation, long lastTimestamp, int amount) {
+		try {
+			{
+				PreparedStatement statement = connection.prepareStatement("SELECT * FROM conversations WHERE conversation_id=?");
+				statement.setString(1, conversation.getId());
+				ResultSet rs = statement.executeQuery();
+				if (!rs.next()) {
+					return false;
+				}
+			}
+			{
+				PreparedStatement statement = connection.prepareStatement("SELECT * FROM messages WHERE conversation_id=? AND timestamp < ? ORDER BY timestamp DESC LIMIT ?");
+				statement.setString(1, conversation.getId());
+				statement.setLong(2, lastTimestamp);
+				statement.setInt(3, amount);
+				ResultSet rs = statement.executeQuery();
+				while (rs.next()) {
+					Message message = new Message(rs.getString("id"), rs.getString("content"), rs.getLong("timestamp"),
+							rs.getString("sender"), rs.getBoolean("is_file"), rs.getString("conversation_id"));
+					conversation.addMessages(message);
+				}
+				System.out.println();
 			}
 			return true;
 		} catch (SQLException e) {

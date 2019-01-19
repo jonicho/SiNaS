@@ -257,7 +257,7 @@ public class AppServer extends Server {
 			sendError(user, PROTOCOL.ERRORCODES.UNKNOWN_ERROR);
 			return;
 		}
-		db.loadMessages(conversation);
+		db.loadMessages(conversation, lastTimestamp, lastNMessages);
 		List<Message> messages = conversation.getMessages();
 		String msgsMessage = PROTOCOL.buildMessage(PROTOCOL.SC.MESSAGES, conversationId);
 		if (!messages.isEmpty()) {
@@ -266,7 +266,7 @@ public class AppServer extends Server {
 			while (messages.get(lastIndex).getTimestamp() >= lastTimestamp && lastIndex > 0) {
 				lastIndex--;
 			}
-			firstIndex = Math.max(lastIndex - lastNMessages, 0) + 1;
+			firstIndex = Math.max(lastIndex - lastNMessages, 0);
 			for (int i = firstIndex; i <= lastIndex; i++) {
 				Message msg = messages.get(i);
 				msgsMessage = PROTOCOL.buildMessage(msgsMessage, msg.getId(), msg.isFile(), msg.getTimestamp(), msg.getSender(), msg.getContent());
