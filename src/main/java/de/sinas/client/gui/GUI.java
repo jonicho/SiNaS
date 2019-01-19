@@ -214,8 +214,8 @@ public class GUI extends JFrame {
 		}
 		currentConversation = conversationsList.getSelectedValue();
 		messagesList.setListData(currentConversation.getMessages().toArray(new Message[0]));
+		updateConversationInfoLabel();
 		appClient.requestMessages(currentConversation.getId(), System.currentTimeMillis(), 20);
-		conversationInfoLabel.setText(String.format("<html><div style=\"padding: 5;\"><span style=\"font-size: 20;\">%s</span><br>%s</div></html>", currentConversation.getName(), String.join(", ", currentConversation.getUsers())));
 	}
 
 	private void onMessagesScrolled(AdjustmentEvent e) {
@@ -257,6 +257,13 @@ public class GUI extends JFrame {
 		sendMessage();
 	}
 
+	private void updateConversationInfoLabel() {
+		if (currentConversation == null) {
+			return;
+		}
+		conversationInfoLabel.setText(String.format("<html><div style=\"padding: 5;\"><span style=\"font-size: 20;\">%s</span><br>%s</div></html>", currentConversation.getName(), String.join(", ", currentConversation.getUsers())));
+	}
+
 	private void sendMessage() {
 		if (currentConversation == null) {
 			return;
@@ -284,6 +291,8 @@ public class GUI extends JFrame {
 		for (int i = 0; i < conversationsList.getModel().getSize(); i++) {
 			if (conversationsList.getModel().getElementAt(i).equals(lastCurrentConversation)) {
 				conversationsList.setSelectedIndex(i);
+				currentConversation = conversationsList.getModel().getElementAt(i);
+				updateConversationInfoLabel();
 				break;
 			}
 		}
