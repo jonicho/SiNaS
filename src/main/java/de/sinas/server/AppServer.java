@@ -371,6 +371,10 @@ public class AppServer extends Server {
 			sendError(user, PROTOCOL.ERRORCODES.USER_DOES_NOT_EXIST);
 			return;
 		}
+		if (conversation.getUsers().contains(msgParts[2])) {
+			sendError(user, PROTOCOL.ERRORCODES.USER_ALREADY_IN_CONVERSATION);
+			return;
+		}
 		conversation.addUser(msgParts[2]);
 		db.addUserToConversation(conversation, msgParts[2]);
 		for (User u : users.getLoggedInUsers(conversation.getUsers())) {
