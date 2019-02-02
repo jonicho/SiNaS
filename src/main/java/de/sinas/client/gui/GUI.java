@@ -10,6 +10,7 @@ import java.awt.event.AdjustmentEvent;
 import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.List;
 
 import javax.swing.DefaultListCellRenderer;
@@ -48,6 +49,7 @@ public class GUI extends JFrame {
 	private JScrollPane messagesScrollPane;
 	private JLabel conversationInfoLabel;
 	private boolean messagesUpdating = false;
+	private Hashtable<String, Message> scrollPositionTable = new Hashtable<>();
 
 	public GUI(AppClient appClient, Language lang) {
 		this.lang = lang;
@@ -212,14 +214,28 @@ public class GUI extends JFrame {
 		if (conversationsList.getSelectedValue().equals(currentConversation)) {
 			return;
 		}
+		if (messagesUpdating) { // if the messages are being updated, try again later
+			SwingUtilities.invokeLater(() -> {
+				onConversationSelected();
+			});
+			return;
+		}
+		messagesUpdating = true;
 		currentConversation = conversationsList.getSelectedValue();
 		messagesList.setListData(currentConversation.getMessages().toArray(new Message[0]));
 		updateConversationInfoLabel();
-		appClient.requestMessages(currentConversation.getId(), System.currentTimeMillis(), 20);
+		if (currentConversation.getMessages().isEmpty()) {
+			appClient.requestMessages(currentConversation.getId(), System.currentTimeMillis(), 20);
+		}
+		scrollToMessage(scrollPositionTable.get(currentConversation.getId()), () -> messagesUpdating = false);
 	}
 
 	private void onMessagesScrolled(AdjustmentEvent e) {
-		if (currentConversation != null && !currentConversation.getMessages().isEmpty() && messagesScrollPane.getVerticalScrollBar().getValue() == 0 && !e.getValueIsAdjusting() && !messagesUpdating) {
+		if (currentConversation == null || currentConversation.getMessages().isEmpty() || messagesUpdating) {
+			return;
+		}
+		scrollPositionTable.put(currentConversation.getId(), messagesList.getModel().getElementAt(messagesList.getLastVisibleIndex()));
+		if (messagesScrollPane.getVerticalScrollBar().getValue() == 0 && !e.getValueIsAdjusting()) {
 			appClient.requestMessages(currentConversation.getId(), currentConversation.getMessages().get(0).getTimestamp(), 20);
 		}
 	}
@@ -264,6 +280,25 @@ public class GUI extends JFrame {
 		conversationInfoLabel.setText(String.format("<html><div style=\"padding: 5;\"><span style=\"font-size: 20;\">%s</span><br>%s</div></html>", currentConversation.getName(), String.join(", ", currentConversation.getUsers())));
 	}
 
+	private void scrollToMessage(Message messageToScrollTo, Runnable runWhenFinishedScrolling) {
+		int index = 0;
+		if (messageToScrollTo != null) {
+			for (int i = 0; i < messagesList.getModel().getSize(); i++) {
+				if (messagesList.getModel().getElementAt(i).equals(messageToScrollTo)) {
+					index = i;
+					break;
+				}
+			}
+		} else {
+			index = messagesList.getModel().getSize() - 1;
+		}
+		int indexToScrollTo = index;
+		SwingUtilities.invokeLater(() -> {
+			messagesList.ensureIndexIsVisible(indexToScrollTo);
+			runWhenFinishedScrolling.run();
+		});
+	}
+
 	private void sendMessage() {
 		if (currentConversation == null) {
 			return;
@@ -300,28 +335,19 @@ public class GUI extends JFrame {
 
 	private void onMessagesUpdate() {
 		if (currentConversation != null) {
+			if (messagesUpdating) { // if the messages are being updated, try again later
+				SwingUtilities.invokeLater(() -> {
+					onMessagesUpdate();
+				});
+				return;
+			}
 			messagesUpdating = true;
 			Message messageToScrollTo = null;
 			if (messagesList.getModel().getSize() > 0 && messagesList.getLastVisibleIndex() != messagesList.getModel().getSize() - 1) {
 				messageToScrollTo = messagesList.getModel().getElementAt(messagesList.getFirstVisibleIndex());
 			}
 			messagesList.setListData(currentConversation.getMessages().toArray(new Message[0]));
-			int index = 0;
-			if (messageToScrollTo != null) {
-				for (int i = 0; i < messagesList.getModel().getSize() - 1; i++) {
-					if (messagesList.getModel().getElementAt(i).equals(messageToScrollTo)) {
-						index = i;
-						break;
-					}
-				}
-			} else {
-				index = messagesList.getModel().getSize() - 1;
-			}
-			int indexToScrollTo = index;
-			SwingUtilities.invokeLater(() -> {
-				messagesList.ensureIndexIsVisible(indexToScrollTo);
-				messagesUpdating = false;
-			});
+			scrollToMessage(messageToScrollTo, () -> messagesUpdating = false);
 		}
 	}
 
