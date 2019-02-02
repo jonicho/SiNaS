@@ -28,3 +28,4 @@ cancel: Cancel
 name: Name
 search: Search
 users: Users
+already_logged_in: This user is already logged in!

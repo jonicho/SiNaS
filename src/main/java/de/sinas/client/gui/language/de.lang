@@ -28,3 +28,4 @@ cancel: Abbrechen
 name: Name
 search: Suchen
 users: Benutzer
+already_logged_in: Dieser Benutzer ist bereits eingeloggt!

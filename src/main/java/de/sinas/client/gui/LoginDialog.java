@@ -139,6 +139,9 @@ public class LoginDialog extends JDialog {
 				case PROTOCOL.ERRORCODES.LOGIN_FAILED:
 					statusLabel.setText("<html><font color='red'>" + lang.getString("invalid_username_password") + "</font></html>");
 					break;
+				case PROTOCOL.ERRORCODES.ALREADY_LOGGED_IN:
+					statusLabel.setText("<html><font color='red'>" + lang.getString("already_logged_in") + "</font></html>");
+					break;
 				default:
 					statusLabel.setText("<html><font color='red'>" + lang.getString("some_error_occurred") + " " + lang.getString("error_code") + ":" + errorCode + "</font></html>");
 				break;
