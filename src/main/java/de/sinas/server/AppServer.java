@@ -165,6 +165,10 @@ public class AppServer extends Server {
 		String passwordHash = Encoder.b64Encode(getHashHandler().getCheckSum((password + Encoder.b64Encode(salt)).getBytes()));
 		User user = db.loadConnectedUser(username, tUser.getIp(), tUser.getPort());
 		if (!(user instanceof TempUser) && user.getPasswordHash().equals(passwordHash)) {
+			if (users.doesUserExist(username)) {
+				sendError(user, PROTOCOL.ERRORCODES.ALREADY_LOGGED_IN);
+				return;
+			}
 			tempUsers.remove(tUser);
 			cryptoManager.addSession(new CryptoSession(user, tUser.getRsaKey(), tUser.getAesKey()));
 
