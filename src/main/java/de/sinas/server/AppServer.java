@@ -1,38 +1,24 @@
 package de.sinas.server;
 
-import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import javax.crypto.SecretKey;
 
 import org.apache.commons.text.StringEscapeUtils;
 
 import de.sinas.Conversation;
 import de.sinas.Message;
 import de.sinas.User;
-import de.sinas.Users;
-import de.sinas.crypto.AESHandler;
 import de.sinas.crypto.Encoder;
 import de.sinas.crypto.HashHandler;
-import de.sinas.crypto.RSAHandler;
+import de.sinas.net.CryptoServer;
 import de.sinas.net.PROTOCOL;
-import de.sinas.net.Server;
 
-public class AppServer extends Server {
+public class AppServer extends CryptoServer {
 	private final Database db;
-	private final Users users = new Users();
 	private final ArrayList<Conversation> conversations = new ArrayList<>();
-	private final CryptoSessionManager cryptoManager = new CryptoSessionManager();
-	private final ArrayList<TempUser> tempUsers = new ArrayList<TempUser>();
-	private final ConversationCryptoManager convCryptoManager = new ConversationCryptoManager();
-	private final AESHandler aesHandler = new AESHandler();
-	private final RSAHandler rsaHandler = new RSAHandler();
-	private final HashHandler hashHandler = new HashHandler();
+    private final HashHandler hashHandler = new HashHandler();
 
 	private static final int SALT_LENGTH = 128;
 
@@ -47,44 +33,15 @@ public class AppServer extends Server {
 	}
 
 	@Override
-	public void processMessage(String clientIP, int clientPort, String message) {
-		System.out.println("(SERVER)New message: " + clientIP + ":" + clientPort + ", " + message);
+	public void processDecryptedMessage(User user, String message) {
 		String[] msgParts = message.split(PROTOCOL.SPLIT, -1);
-		User user = users.getUser(clientIP, clientPort);
-		if (user != null && cryptoManager.getSessionByUser(user) != null) {
-			SecretKey key;
-			String encodedMessage;
-			if (msgParts.length == 1) {
-				key = cryptoManager.getSessionByUser(user).getMainAESKey();
-				encodedMessage = msgParts[0];
-			} else {
-				key = convCryptoManager.getSession(user, getConversationById(msgParts[0])).getAesKey();
-				encodedMessage = msgParts[1];
+		if (!users.doesUserExist(user.getIp(), user.getPort())) {
+			if (!(user instanceof TempUser)) {
+				sendError(user, PROTOCOL.ERRORCODES.UNKNOWN_ERROR);
+				return;
 			}
-			msgParts = new String(aesHandler.decrypt(Encoder.b64Decode(encodedMessage), key)).split(PROTOCOL.SPLIT, -1);
-		}
-		if (user == null) {
-			if (msgParts[0].equals(PROTOCOL.CS.CREATE_SEC_CONNECTION)) {
-				handleCreateSecConnection(new TempUser(clientIP, clientPort), msgParts);
-			} else {
-				if (msgParts.length > 1) {
-					sendError(new TempUser(clientIP, clientPort), PROTOCOL.ERRORCODES.INVALID_MESSAGE);
-					return;
-				}
-				TempUser tempUser = null;
-				for (TempUser tu : tempUsers) {
-					if (tu.getIp().equals(clientIP) && tu.getPort() == clientPort) {
-						tempUser = tu;
-						break;
-					}
-				}
-				if (tempUser == null) {
-					sendError(new TempUser(clientIP, clientPort), PROTOCOL.ERRORCODES.NOT_SEC_CONNECTED);
-					return;
-				}
-				msgParts = new String(aesHandler.decrypt(Encoder.b64Decode(msgParts[0]), tempUser.getAesKey()))
-						.split(PROTOCOL.SPLIT, -1);
-				switch (msgParts[0]) {
+			TempUser tempUser = (TempUser) user;
+			switch (msgParts[0]) {
 				case PROTOCOL.CS.LOGIN:
 					handleLogin(tempUser, msgParts[1], msgParts[2]);
 					break;
@@ -94,8 +51,7 @@ public class AppServer extends Server {
 				default:
 					sendError(tempUser, PROTOCOL.ERRORCODES.NOT_LOGGED_IN);
 				}
-			}
-			return;
+				return;
 		}
 		switch (msgParts[0]) {
 		case PROTOCOL.CS.MESSAGE:
@@ -131,22 +87,6 @@ public class AppServer extends Server {
 		}
 	}
 
-	private void handleCreateSecConnection(TempUser tUser, String[] msgParts) {
-		X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Encoder.b64Decode(msgParts[1]));
-		try {
-			KeyFactory keyFact = KeyFactory.getInstance("RSA");
-			PublicKey pubKey = keyFact.generatePublic(keySpec);
-			tUser.setRsaKey(pubKey);
-			tUser.setAesKey(aesHandler.generateKey());
-			tempUsers.add(tUser);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			sendError(tUser, PROTOCOL.ERRORCODES.UNKNOWN_ERROR);
-			return;
-		}
-		sendRSA(new User(tUser.getIp(), tUser.getPort(), "", ""), tUser.getRsaKey(), PROTOCOL.buildMessage(PROTOCOL.SC.SEC_CONNECTION_ACCEPTED, Encoder.b64Encode(tUser.getAesKey().getEncoded())));
-	}
-
 	private void handleRegister(TempUser tUser, String username, String password) {
 		byte[] salt = db.loadSalt();
 		String passwordHash = Encoder.b64Encode(hashHandler.getCheckSum((password + Encoder.b64Encode(salt)).getBytes()));
@@ -173,8 +113,7 @@ public class AppServer extends Server {
 				sendError(user, PROTOCOL.ERRORCODES.ALREADY_LOGGED_IN);
 				return;
 			}
-			tempUsers.remove(tUser);
-			cryptoManager.addSession(new CryptoSession(user, tUser.getRsaKey(), tUser.getAesKey()));
+			addUserKeys(user, tUser.getRsaKey(), tUser.getAesKey());
 
 			// load all conversations of this user and add them if they are not in the
 			// conversation list yet
@@ -184,7 +123,7 @@ public class AppServer extends Server {
 				}
 			}
 			users.addUser(user);
-			sendAES(user, PROTOCOL.SC.LOGIN_OK, user.getUsername());
+			send(user, PROTOCOL.SC.LOGIN_OK, user.getUsername());
 		} else {
 			sendError(user, PROTOCOL.ERRORCODES.LOGIN_FAILED);
 		}
@@ -226,7 +165,7 @@ public class AppServer extends Server {
 				return;
 			}
 		}
-		sendAES(requestingUser, PROTOCOL.SC.USER, user.getUsername());
+		send(requestingUser, PROTOCOL.SC.USER, user.getUsername());
 	}
 
 	/**
@@ -280,7 +219,7 @@ public class AppServer extends Server {
 				msgsMessage = PROTOCOL.buildMessage(msgsMessage, msg.getId(), msg.isFile(), msg.getTimestamp(), msg.getSender(), msg.getContent());
 			}
 		}
-		sendAES(user, msgsMessage);
+		send(user, msgsMessage);
 	}
 
 	/**
@@ -314,12 +253,12 @@ public class AppServer extends Server {
 			message = new Message(content, ms, user.getUsername(), isFile, conv.getId());
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
-			sendToUser(user, PROTOCOL.SC.ERROR, PROTOCOL.ERRORCODES.UNKNOWN_ERROR);
+			sendError(user, PROTOCOL.ERRORCODES.UNKNOWN_ERROR);
 			return;
 		}
 		conv.addMessages(message);
 		db.createMessage(message);
-		sendToConversationAES(conv, PROTOCOL.SC.MESSAGES, conv.getId(), message.getId(), message.isFile(),
+		sendToConversation(conv, PROTOCOL.SC.MESSAGES, conv.getId(), message.getId(), message.isFile(),
 				message.getTimestamp(), message.getSender(), message.getContent());
 	}
 
@@ -440,7 +379,7 @@ public class AppServer extends Server {
 
 	private void handleUserSearch(User user, String[] msgParts) {
 		if (msgParts.length < 2) {
-			sendAES(user, PROTOCOL.SC.USER_SEARCH_RESULT, "", String.join(PROTOCOL.SPLIT, db.loadAllUsernames().toArray(new String[0])));
+			send(user, PROTOCOL.SC.USER_SEARCH_RESULT, "", String.join(PROTOCOL.SPLIT, db.loadAllUsernames().toArray(new String[0])));
 			return;
 		}
 		String[] results = db.loadAllUsernames().stream().filter(username -> {
@@ -453,49 +392,7 @@ public class AppServer extends Server {
 			}
 			return true;
 		}).toArray(String[]::new);
-		sendAES(user, PROTOCOL.SC.USER_SEARCH_RESULT, msgParts[1], String.join(PROTOCOL.SPLIT, results));
-	}
-
-	/**
-	 * Sends the given message to the given user.
-	 */
-	private void sendToUser(User user, Object... message) {
-		send(user.getIp(), user.getPort(), PROTOCOL.buildMessage(message));
-	}
-
-	/**
-	 * Sends the given message to the given user. The message is encrypted using the
-	 * given key and the AES Algorithm
-	 */
-	private void sendAES(User user, Object... message) {
-		String msg = PROTOCOL.buildMessage(message);
-		byte[] cryp = aesHandler.encrypt(msg.getBytes(), cryptoManager.getSessionByUser(user).getMainAESKey());
-		String enc = Encoder.b64Encode(cryp);
-		send(user.getIp(), user.getPort(), enc);
-	}
-
-	/**
-	 * Sends the given message to the given user. The message is encrypted using the
-	 * given key and the RSA Algorithm
-	 */
-	private void sendRSA(User user, PublicKey key, Object... message) {
-		String msg = PROTOCOL.buildMessage(message);
-		byte[] cryp = rsaHandler.encrypt(msg.getBytes(), key);
-		String enc = Encoder.b64Encode(cryp);
-		send(user.getIp(), user.getPort(), enc);
-	}
-
-	private void sendToConversationAES(Conversation con, Object... message) {
-		for (String username : con.getUsers()) {
-			User user = users.getUser(username);
-			if (user != null && convCryptoManager.hasSession(user, con)) {
-				ConversationCryptoSession ccs = convCryptoManager.getSession(user, con);
-				String msg = PROTOCOL.buildMessage(message);
-				byte[] cryp = aesHandler.encrypt(msg.getBytes(), ccs.getAesKey());
-				String enc = Encoder.b64Encode(cryp);
-				send(user.getIp(), user.getPort(), ccs.getConv().getId() + PROTOCOL.SPLIT + enc);
-			}
-		}
+		send(user, PROTOCOL.SC.USER_SEARCH_RESULT, msgParts[1], String.join(PROTOCOL.SPLIT, results));
 	}
 
 	private void sendConversationToUser(Conversation conversation, User user) {
@@ -503,21 +400,9 @@ public class AppServer extends Server {
 		for (int i = 1; i < conversation.getUsers().size(); i++) {
 			usersString.append(PROTOCOL.SPLIT).append(conversation.getUsers().get(i));
 		}
-		if (!convCryptoManager.hasSession(user, conversation)) {
-			ConversationCryptoSession ccs = new ConversationCryptoSession(conversation, user);
-			ccs.setAesKey(aesHandler.generateKey());
-			convCryptoManager.addSession(ccs);
-		}
-		sendAES(user, PROTOCOL.SC.CONVERSATION, conversation.getName(), conversation.getId(),
-				Encoder.b64Encode(convCryptoManager.getSession(user, conversation).getAesKey().getEncoded()),
+		send(user, PROTOCOL.SC.CONVERSATION, conversation.getName(), conversation.getId(),
+				Encoder.b64Encode(getConversationUserKey(user.getIp(), user.getPort(), conversation.getId()).getEncoded()),
 				usersString.toString());
-	}
-
-	/**
-	 * Sends the given error code to the given user.
-	 */
-	private void sendError(User user, int errorCode) {
-		sendToUser(user, PROTOCOL.getErrorMessage(errorCode));
 	}
 
 	/**
