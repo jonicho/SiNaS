@@ -160,9 +160,7 @@ public class AppServer extends Server {
 	}
 
 	/**
-	 * Handles a login request.<br>
-	 * Determines the username with the owner attribute of the file with the ip as
-	 * filename in the SiNaS login directory.
+	 * Handles a login request.
 	 *
 	 * @see PROTOCOL.CS
 	 */
