@@ -14,7 +14,10 @@ import de.sinas.Conversation;
 import de.sinas.Message;
 import de.sinas.User;
 import de.sinas.Users;
+import de.sinas.crypto.AESHandler;
 import de.sinas.crypto.Encoder;
+import de.sinas.crypto.HashHandler;
+import de.sinas.crypto.RSAHandler;
 import de.sinas.crypto.SaltGenerator;
 import de.sinas.net.Client;
 import de.sinas.net.PROTOCOL;
@@ -30,6 +33,9 @@ public class AppClient extends Client {
 	private PublicKey rsaPubKey;
 	private SecretKey mainAESKey;
 	private ArrayList<ClientCryptoConversation> cryptoSessions = new ArrayList<ClientCryptoConversation>();
+	private final AESHandler aesHandler = new AESHandler();
+	private final RSAHandler rsaHandler = new RSAHandler();
+	private final HashHandler hashHandler = new HashHandler();
 
 	private final ArrayList<UpdateListener> updateListeners = new ArrayList<>();
 	private final ArrayList<ErrorListener> errorListeners = new ArrayList<>();
@@ -47,13 +53,13 @@ public class AppClient extends Client {
 		System.out.println("(CLIENT) New message: " + message);
 		String[] msgParts = message.split(PROTOCOL.SPLIT, -1);
 		if (isRSA) {
-			String plainText = new String(getRsaHandler().decrypt(Encoder.b64Decode(msgParts[0]), rsaPrivKey));
+			String plainText = new String(rsaHandler.decrypt(Encoder.b64Decode(msgParts[0]), rsaPrivKey));
 			msgParts = plainText.split(PROTOCOL.SPLIT, -1);
 			System.out.println("(CLIENT) Decoded message: " + plainText);
 			isRSA = false;
 		} else {
 			if (msgParts.length == 1) {
-				String plainText = new String(getAESHandler().decrypt(Encoder.b64Decode(msgParts[0]), mainAESKey));
+				String plainText = new String(aesHandler.decrypt(Encoder.b64Decode(msgParts[0]), mainAESKey));
 				msgParts = plainText.split(PROTOCOL.SPLIT, -1);
 			} else {
 				SecretKey cKey = null;
@@ -64,7 +70,7 @@ public class AppClient extends Client {
 					}
 				}
 				if (cKey != null) {
-					String plainText = new String(getAESHandler().decrypt(Encoder.b64Decode(msgParts[1]), cKey));
+					String plainText = new String(aesHandler.decrypt(Encoder.b64Decode(msgParts[1]), cKey));
 					msgParts = plainText.split(PROTOCOL.SPLIT, -1);
 				}
 			}
@@ -205,7 +211,7 @@ public class AppClient extends Client {
 	}
 
 	private void makeConnection() {
-		KeyPair kp = getRsaHandler().generateKeyPair();
+		KeyPair kp = rsaHandler.generateKeyPair();
 		rsaPrivKey = kp.getPrivate();
 		rsaPubKey = kp.getPublic();
 		isRSA = true;
@@ -237,13 +243,13 @@ public class AppClient extends Client {
 	}
 
 	public void login(String username, String password) {
-		String pwdHash = Encoder.b64Encode(getHashHandler().getSecureHash(password, SaltGenerator.generateSalt(username, password, getHashHandler())));
+		String pwdHash = Encoder.b64Encode(hashHandler.getSecureHash(password, SaltGenerator.generateSalt(username, password, hashHandler)));
 		thisUser = new User("", 0, username, pwdHash);
 		sendAES(PROTOCOL.CS.LOGIN, thisUser.getUsername(), thisUser.getPasswordHash());
 	}
 
 	public void register(String username, String password) {
-		String pwdHash = Encoder.b64Encode(getHashHandler().getSecureHash(password, SaltGenerator.generateSalt(username, password, getHashHandler())));
+		String pwdHash = Encoder.b64Encode(hashHandler.getSecureHash(password, SaltGenerator.generateSalt(username, password, hashHandler)));
 		thisUser = new User("", 0, username, pwdHash);
 		sendAES(PROTOCOL.CS.REGISTER, thisUser.getUsername(), thisUser.getPasswordHash());
 	}
@@ -280,7 +286,7 @@ public class AppClient extends Client {
 			}
 		}
 		String content = PROTOCOL.buildMessage(PROTOCOL.CS.MESSAGE, convID, false, message);
-		byte[] cryp = getAESHandler().encrypt(content.getBytes(), ccc.getAesKey());
+		byte[] cryp = aesHandler.encrypt(content.getBytes(), ccc.getAesKey());
 		String enc = Encoder.b64Encode(cryp);
 		send(convID + PROTOCOL.SPLIT + enc);
 	}
@@ -311,7 +317,7 @@ public class AppClient extends Client {
 	 */
 	private void sendAES(Object... message) {
 		String msg = PROTOCOL.buildMessage(message);
-		byte[] cryp = getAESHandler().encrypt(msg.getBytes(), mainAESKey);
+		byte[] cryp = aesHandler.encrypt(msg.getBytes(), mainAESKey);
 		String enc = Encoder.b64Encode(cryp);
 		send(enc);
 	}
@@ -322,7 +328,7 @@ public class AppClient extends Client {
 	 */
 	private void sendRSA(PublicKey key, Object... message) {
 		String msg = PROTOCOL.buildMessage(message);
-		byte[] cryp = getRsaHandler().encrypt(msg.getBytes(), key);
+		byte[] cryp = rsaHandler.encrypt(msg.getBytes(), key);
 		String enc = Encoder.b64Encode(cryp);
 		send(enc);
 	}

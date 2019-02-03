@@ -16,7 +16,10 @@ import de.sinas.Conversation;
 import de.sinas.Message;
 import de.sinas.User;
 import de.sinas.Users;
+import de.sinas.crypto.AESHandler;
 import de.sinas.crypto.Encoder;
+import de.sinas.crypto.HashHandler;
+import de.sinas.crypto.RSAHandler;
 import de.sinas.net.PROTOCOL;
 import de.sinas.net.Server;
 
@@ -27,6 +30,9 @@ public class AppServer extends Server {
 	private final CryptoSessionManager cryptoManager = new CryptoSessionManager();
 	private final ArrayList<TempUser> tempUsers = new ArrayList<TempUser>();
 	private final ConversationCryptoManager convCryptoManager = new ConversationCryptoManager();
+	private final AESHandler aesHandler = new AESHandler();
+	private final RSAHandler rsaHandler = new RSAHandler();
+	private final HashHandler hashHandler = new HashHandler();
 
 	private static final int SALT_LENGTH = 128;
 
@@ -55,7 +61,7 @@ public class AppServer extends Server {
 				key = convCryptoManager.getSession(user, getConversationById(msgParts[0])).getAesKey();
 				encodedMessage = msgParts[1];
 			}
-			msgParts = new String(getAesHandler().decrypt(Encoder.b64Decode(encodedMessage), key)).split(PROTOCOL.SPLIT, -1);
+			msgParts = new String(aesHandler.decrypt(Encoder.b64Decode(encodedMessage), key)).split(PROTOCOL.SPLIT, -1);
 		}
 		if (user == null) {
 			if (msgParts[0].equals(PROTOCOL.CS.CREATE_SEC_CONNECTION)) {
@@ -76,7 +82,7 @@ public class AppServer extends Server {
 					sendError(new TempUser(clientIP, clientPort), PROTOCOL.ERRORCODES.NOT_SEC_CONNECTED);
 					return;
 				}
-				msgParts = new String(getAesHandler().decrypt(Encoder.b64Decode(msgParts[0]), tempUser.getAesKey()))
+				msgParts = new String(aesHandler.decrypt(Encoder.b64Decode(msgParts[0]), tempUser.getAesKey()))
 						.split(PROTOCOL.SPLIT, -1);
 				switch (msgParts[0]) {
 				case PROTOCOL.CS.LOGIN:
@@ -131,7 +137,7 @@ public class AppServer extends Server {
 			KeyFactory keyFact = KeyFactory.getInstance("RSA");
 			PublicKey pubKey = keyFact.generatePublic(keySpec);
 			tUser.setRsaKey(pubKey);
-			tUser.setAesKey(getAesHandler().generateKey());
+			tUser.setAesKey(aesHandler.generateKey());
 			tempUsers.add(tUser);
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -143,7 +149,7 @@ public class AppServer extends Server {
 
 	private void handleRegister(TempUser tUser, String username, String password) {
 		byte[] salt = db.loadSalt();
-		String passwordHash = Encoder.b64Encode(getHashHandler().getCheckSum((password + Encoder.b64Encode(salt)).getBytes()));
+		String passwordHash = Encoder.b64Encode(hashHandler.getCheckSum((password + Encoder.b64Encode(salt)).getBytes()));
 		if (db.loadConnectedUser(username, tUser.getIp(), tUser.getPort()) instanceof TempUser) {
 			db.createUser(new User(tUser.getIp(), tUser.getPort(), username, passwordHash));
 			handleLogin(tUser, username, password);
@@ -162,7 +168,7 @@ public class AppServer extends Server {
 	 */
 	private void handleLogin(TempUser tUser, String username, String password) {
 		byte[] salt = db.loadSalt();
-		String passwordHash = Encoder.b64Encode(getHashHandler().getCheckSum((password + Encoder.b64Encode(salt)).getBytes()));
+		String passwordHash = Encoder.b64Encode(hashHandler.getCheckSum((password + Encoder.b64Encode(salt)).getBytes()));
 		User user = db.loadConnectedUser(username, tUser.getIp(), tUser.getPort());
 		if (!(user instanceof TempUser) && user.getPasswordHash().equals(passwordHash)) {
 			if (users.doesUserExist(username)) {
@@ -465,7 +471,7 @@ public class AppServer extends Server {
 	 */
 	private void sendAES(User user, Object... message) {
 		String msg = PROTOCOL.buildMessage(message);
-		byte[] cryp = getAesHandler().encrypt(msg.getBytes(), cryptoManager.getSessionByUser(user).getMainAESKey());
+		byte[] cryp = aesHandler.encrypt(msg.getBytes(), cryptoManager.getSessionByUser(user).getMainAESKey());
 		String enc = Encoder.b64Encode(cryp);
 		send(user.getIp(), user.getPort(), enc);
 	}
@@ -476,7 +482,7 @@ public class AppServer extends Server {
 	 */
 	private void sendRSA(User user, PublicKey key, Object... message) {
 		String msg = PROTOCOL.buildMessage(message);
-		byte[] cryp = getRsaHandler().encrypt(msg.getBytes(), key);
+		byte[] cryp = rsaHandler.encrypt(msg.getBytes(), key);
 		String enc = Encoder.b64Encode(cryp);
 		send(user.getIp(), user.getPort(), enc);
 	}
@@ -487,7 +493,7 @@ public class AppServer extends Server {
 			if (user != null && convCryptoManager.hasSession(user, con)) {
 				ConversationCryptoSession ccs = convCryptoManager.getSession(user, con);
 				String msg = PROTOCOL.buildMessage(message);
-				byte[] cryp = getAesHandler().encrypt(msg.getBytes(), ccs.getAesKey());
+				byte[] cryp = aesHandler.encrypt(msg.getBytes(), ccs.getAesKey());
 				String enc = Encoder.b64Encode(cryp);
 				send(user.getIp(), user.getPort(), ccs.getConv().getId() + PROTOCOL.SPLIT + enc);
 			}
@@ -501,7 +507,7 @@ public class AppServer extends Server {
 		}
 		if (!convCryptoManager.hasSession(user, conversation)) {
 			ConversationCryptoSession ccs = new ConversationCryptoSession(conversation, user);
-			ccs.setAesKey(getAesHandler().generateKey());
+			ccs.setAesKey(aesHandler.generateKey());
 			convCryptoManager.addSession(ccs);
 		}
 		sendAES(user, PROTOCOL.SC.CONVERSATION, conversation.getName(), conversation.getId(),
