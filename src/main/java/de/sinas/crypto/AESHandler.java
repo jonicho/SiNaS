@@ -52,7 +52,6 @@ public class AESHandler {
         try {
             cipher.init(Cipher.DECRYPT_MODE, pKey);
             byte[] decBytes = cipher.doFinal(input);
-            System.out.println("(AES)" + new String(decBytes));
             return decBytes;
         } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException ex) {
             ex.printStackTrace();

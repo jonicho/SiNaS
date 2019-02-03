@@ -17,7 +17,7 @@ public abstract class Client {
 		return messageHandler.active;
 	}
 
-	public void send(String message) {
+	protected void send(String message) {
 		messageHandler.send(message);
 	}
 
@@ -25,9 +25,9 @@ public abstract class Client {
 		messageHandler.close();
 	}
 
-	public abstract void processMessage(String message);
+	protected abstract void processMessage(String message);
 
-	public abstract void connectionLost();
+	protected abstract void connectionLost();
 
 	private class MessageHandler extends Thread {
 		private SocketWrapper socketWrapper;
