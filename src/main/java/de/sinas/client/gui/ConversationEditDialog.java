@@ -6,6 +6,9 @@ import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -29,6 +32,7 @@ public class ConversationEditDialog extends JDialog {
 	private final JPanel contentPanel = new JPanel();
 	private JTextField nameTextField;
 	private JTextField usernameSearchTextField;
+	private String[] userSearchResult = {};
 	private JList<String> usersSearchList;
 	private JList<String> usersList;
 
@@ -199,11 +203,18 @@ public class ConversationEditDialog extends JDialog {
 
 		appClient.setSearchResultListener((query, results) -> {
 			if (usernameSearchTextField.getText().equals(query)) {
-				usersSearchList.setListData(results);
+				userSearchResult = results;
+				updateUsersSearchList();
 			}
 		});
 
 		appClient.searchUser("");
+	}
+
+	private void updateUsersSearchList() {
+		List<String> resultsList = new ArrayList<>(Arrays.asList(userSearchResult));
+		resultsList.removeAll(Arrays.asList(getUsers()));
+		usersSearchList.setListData(resultsList.toArray(String[]::new));
 	}
 
 	private void onUsernameSearch() {
@@ -216,6 +227,7 @@ public class ConversationEditDialog extends JDialog {
 			return;
 		}
 		((DefaultListModel<String>) usersList.getModel()).addElement(user);
+		updateUsersSearchList();
 	}
 
 	private void onRemoveUser() {
@@ -224,6 +236,7 @@ public class ConversationEditDialog extends JDialog {
 			return;
 		}
 		((DefaultListModel<String>) usersList.getModel()).removeElement(user);
+		updateUsersSearchList();
 	}
 
 	private void onSave() {
