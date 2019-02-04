@@ -238,6 +238,10 @@ public class AppServer extends CryptoServer {
 		String convID = msgParts[1];
 		boolean isFile = Boolean.parseBoolean(msgParts[2]);
 		String content = StringEscapeUtils.escapeHtml4(msgParts[3]).strip();
+		if (content.isBlank()) {
+			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
+			return;
+		}
 		Conversation conv = null;
 		for (Conversation c : conversations) {
 			if (c.getId().equals(convID)) {
