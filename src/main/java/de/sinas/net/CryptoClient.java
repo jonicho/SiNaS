@@ -23,7 +23,6 @@ public abstract class CryptoClient extends Client {
 
     public CryptoClient(String serverIP, int serverPort) {
         super(serverIP, serverPort);
-        makeSecureConnection();
     }
 
     @Override
@@ -81,7 +80,7 @@ public abstract class CryptoClient extends Client {
         super.send(convID + PROTOCOL.SPLIT + enc);
     }
 
-    private void makeSecureConnection() {
+    public void makeSecureConnection() {
         if (isRSA || isSecConAccepted) {
             return;
         }

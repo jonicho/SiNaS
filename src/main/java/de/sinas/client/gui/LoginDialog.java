@@ -158,6 +158,7 @@ public class LoginDialog extends JDialog {
 			innerAppClient.login(textField.getText(), new String(passwordField.getPassword()));
 
 		});
+		appClient.makeSecureConnection();
 		if (!appClient.isConnected()) {
 			statusLabel.setText("<html><font color='red'>" + lang.getString("cant_reach_server") + "</font></html>");
 			setGuiEnabled(true);
@@ -195,6 +196,7 @@ public class LoginDialog extends JDialog {
 			innerAppClient.register(textField.getText(), new String(passwordField.getPassword()));
 
 		});
+		appClient.makeSecureConnection();
 		if (!appClient.isConnected()) {
 			statusLabel.setText("<html><font color='red'>" + lang.getString("cant_reach_server") + "</font></html>");
 			setGuiEnabled(true);
