@@ -300,7 +300,7 @@ public class GUI extends JFrame {
 	}
 
 	private void sendMessage() {
-		if (currentConversation == null) {
+		if (currentConversation == null || messageTextField.getText().isBlank()) {
 			return;
 		}
 		appClient.sendMessage(currentConversation.getId(), messageTextField.getText());
