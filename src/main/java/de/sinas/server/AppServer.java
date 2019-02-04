@@ -237,7 +237,7 @@ public class AppServer extends CryptoServer {
 		long ms = System.currentTimeMillis();
 		String convID = msgParts[1];
 		boolean isFile = Boolean.parseBoolean(msgParts[2]);
-		String content = StringEscapeUtils.escapeHtml4(msgParts[3]);
+		String content = StringEscapeUtils.escapeHtml4(msgParts[3]).strip();
 		Conversation conv = null;
 		for (Conversation c : conversations) {
 			if (c.getId().equals(convID)) {
