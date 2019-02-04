@@ -33,13 +33,11 @@ public class ConversationEditDialog extends JDialog {
 	private JList<String> usersList;
 
 	private AppClient appClient;
-	private Conversation conversation;
 	private boolean save;
 
 	public ConversationEditDialog(Frame owner, AppClient appClient, Conversation conversation, Language lang) {
 		super(owner, ModalityType.APPLICATION_MODAL);
 		this.appClient = appClient;
-		this.conversation = conversation;
 		setBounds(100, 100, 450, 494);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
