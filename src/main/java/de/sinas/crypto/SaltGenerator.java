@@ -2,8 +2,6 @@ package de.sinas.crypto;
 
 import java.util.ArrayList;
 
-import com.sun.tools.javac.util.ArrayUtils;
-
 public class SaltGenerator {
 
     private SaltGenerator() {
@@ -13,16 +11,26 @@ public class SaltGenerator {
         byte[] uHash = hashHandler.getCheckSum(username.getBytes());
         byte[] pHash = hashHandler.getCheckSum(password.getBytes());
         byte[][] xorTable = new byte[16][uHash.length];
+        int index = 1;
+        xorTable[0] = uHash;
+        for(byte[] arr : xorTable) {
+            if(index % 2 == 0) {
+                xorTable[index-1] = uHash;
+            } else{
+                xorTable[index-1] = pHash;
+            } 
+            index++;
+        }
         byte[] roundKey = pHash;
         for(int i= 0; i < 16; i++) {
             for(byte[] arr : xorTable) {
                 for(byte b : arr) {
                     int byteIndex = org.apache.commons.lang3.ArrayUtils.indexOf(arr, b);
                     int rowIndex = org.apache.commons.lang3.ArrayUtils.indexOf(xorTable,arr);
-                    if(byteIndex > 0 && byteIndex < uHash.length){
+                    if(byteIndex > 1 && byteIndex < uHash.length){
                         b = xor(b, arr[byteIndex-1]);
-                    } 
-                    if(i > 0) {
+                    }
+                    if(i > 1 && rowIndex > 1) {
                         b = xor(b,xorTable[rowIndex-1][byteIndex]);
                         arr = xorArray(xorTable[rowIndex-1],arr);
                     }
@@ -38,8 +46,8 @@ public class SaltGenerator {
                 state += b;
                 state %= 256;
                 if(stepCounter == 4) {
-                    derivate.add(b);
-                    b = 0;
+                    derivate.add(state);
+                    state = 0;
                     stepCounter = 0;
                 } else {
                     stepCounter++;
