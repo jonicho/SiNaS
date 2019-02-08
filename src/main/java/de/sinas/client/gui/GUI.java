@@ -52,6 +52,7 @@ public class GUI extends JFrame {
 	private JLabel conversationInfoLabel;
 	private boolean messagesUpdating = false;
 	private Hashtable<String, Message> scrollPositionTable = new Hashtable<>();
+	private JButton sendButton;
 
 	public GUI(AppClient appClient, Language lang) {
 		this.lang = lang;
@@ -175,6 +176,7 @@ public class GUI extends JFrame {
 		mnHelp.add(mntmAbout);
 
 		messageTextField = new JTextField();
+		messageTextField.setEnabled(false);
 		messageTextField.addActionListener(e -> onMessageTextFieldAction());
 		
 		JButton btnAddconversation = new JButton(lang.getString("add_conversation"));
@@ -194,7 +196,8 @@ public class GUI extends JFrame {
 		contentPane.add(messageTextField, gbc_messageTextField);
 		messageTextField.setColumns(10);
 
-		JButton sendButton = new JButton(lang.getString("send"));
+		sendButton = new JButton(lang.getString("send"));
+		sendButton.setEnabled(false);
 		sendButton.addActionListener(e -> onSendButton());
 		GridBagConstraints gbc_sendButton = new GridBagConstraints();
 		gbc_sendButton.fill = GridBagConstraints.BOTH;
@@ -231,6 +234,8 @@ public class GUI extends JFrame {
 		}
 		messagesUpdating = true;
 		currentConversation = conversationsList.getSelectedValue();
+		sendButton.setEnabled(true);
+		messageTextField.setEnabled(true);
 		messagesList.setListData(currentConversation.getMessages().toArray(new Message[0]));
 		updateConversationInfoLabel();
 		if (currentConversation.getMessages().isEmpty()) {
