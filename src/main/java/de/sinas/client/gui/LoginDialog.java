@@ -32,13 +32,14 @@ public class LoginDialog extends JDialog {
 	private JButton registerButton;
 	private Language lang;
 	private AppClient appClient;
+	private boolean openingGUI;
 
 	public LoginDialog(Language lang) {
 		this.lang = lang;
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				if (appClient != null) {
+				if (appClient != null && !openingGUI) {
 					appClient.close();
 				}
 			}
@@ -229,6 +230,10 @@ public class LoginDialog extends JDialog {
 	}
 
 	private void openGUI(AppClient appClient) {
+		if (openingGUI) {
+			return;
+		}
+		openingGUI = true;
 		new Thread(() -> {
 			dispose();
 			appClient.removeAllUpdateListeners();
