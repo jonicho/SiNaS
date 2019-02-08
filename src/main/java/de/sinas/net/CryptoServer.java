@@ -100,7 +100,8 @@ public abstract class CryptoServer extends Server {
      */
     protected void send(User user, Object... message) {
         String msg = PROTOCOL.buildMessage(message);
-        byte[] cryp = aesHandler.encrypt(msg.getBytes(), aesKeys.get(user));
+        byte[] cryp = aesHandler.encrypt(msg.getBytes(),
+                user instanceof TempUser ? ((TempUser) user).getAesKey() : aesKeys.get(user));
         String enc = Encoder.b64Encode(cryp);
         send(user.getIp(), user.getPort(), enc);
     }
