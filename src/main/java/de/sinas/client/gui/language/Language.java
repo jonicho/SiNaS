@@ -3,6 +3,7 @@ package de.sinas.client.gui.language;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -58,7 +59,12 @@ public class Language {
 		if (is == null) {
 			throw new IllegalArgumentException("The language with the language id \"" + langId + "\" is not supported!");
 		}
-		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 		langMap.clear();
 		br.lines().forEach(line -> {
 			String[] string = line.split(": ", -1);
