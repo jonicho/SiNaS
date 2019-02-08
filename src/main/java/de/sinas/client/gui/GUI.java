@@ -37,6 +37,8 @@ import de.sinas.Message;
 import de.sinas.client.AppClient;
 import de.sinas.client.gui.language.Language;
 import de.sinas.net.PROTOCOL;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class GUI extends JFrame {
 	private JPanel contentPane;
@@ -55,7 +57,14 @@ public class GUI extends JFrame {
 		this.lang = lang;
 		this.appClient = appClient;
 		setTitle("SiNaS");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				appClient.close();
+				System.exit(0);
+			}
+		});
 		setBounds(100, 100, 600, 300);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
