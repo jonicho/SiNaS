@@ -20,6 +20,8 @@ import javax.swing.border.EmptyBorder;
 import de.sinas.client.AppClient;
 import de.sinas.client.gui.language.Language;
 import de.sinas.net.PROTOCOL;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class LoginDialog extends JDialog {
 	private final JPanel contentPanel = new JPanel();
@@ -29,9 +31,18 @@ public class LoginDialog extends JDialog {
 	private JLabel statusLabel;
 	private JButton registerButton;
 	private Language lang;
+	private AppClient appClient;
 
 	public LoginDialog(Language lang) {
 		this.lang = lang;
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				if (appClient != null) {
+					appClient.close();
+				}
+			}
+		});
 		setMinimumSize(new Dimension(600, 150));
 		setBounds(0, 0, 700, 200);
 		setAlwaysOnTop(true);
@@ -132,7 +143,6 @@ public class LoginDialog extends JDialog {
 		}
 		setGuiEnabled(false);
 		statusLabel.setText(lang.getString("logging_in"));
-		AppClient appClient;
 		appClient = new AppClient(PROTOCOL.IP, PROTOCOL.PORT, innerAppClient -> {
 			innerAppClient.addErrorListener(errorCode -> {
 				switch (errorCode) {
@@ -173,7 +183,6 @@ public class LoginDialog extends JDialog {
 		}
 		setGuiEnabled(false);
 		statusLabel.setText(lang.getString("registering"));
-		AppClient appClient;
 		appClient = new AppClient(PROTOCOL.IP, PROTOCOL.PORT, innerAppClient -> {
 			innerAppClient.addErrorListener(errorCode -> {
 				switch (errorCode) {
@@ -206,6 +215,9 @@ public class LoginDialog extends JDialog {
 
 	private void onExitButton() {
 		dispose();
+		if (appClient != null) {
+			appClient.close();
+		}
 		System.exit(0);
 	}
 
