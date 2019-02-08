@@ -125,7 +125,7 @@ public class AppServer extends CryptoServer {
 			users.addUser(user);
 			send(user, PROTOCOL.SC.LOGIN_OK, user.getUsername());
 		} else {
-			sendError(user, PROTOCOL.ERRORCODES.LOGIN_FAILED);
+			sendError(tUser, PROTOCOL.ERRORCODES.LOGIN_FAILED);
 		}
 
 	}

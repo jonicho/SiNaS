@@ -138,7 +138,7 @@ public abstract class CryptoServer extends Server {
      * Sends the given error code to the given user.
      */
     protected void sendError(User user, int errorCode) {
-        send(user.getIp(), user.getPort(), PROTOCOL.getErrorMessage(errorCode));
+        send(user, new Object[] { PROTOCOL.getErrorMessage(errorCode) });
     }
 
     protected void addUserKeys(User user, PublicKey publicKey, SecretKey aesKey) {
