@@ -77,6 +77,13 @@ public abstract class CryptoServer extends Server {
         }
     }
 
+    /**
+     * Handles the request to create a secure conversation. <br>
+     * Uses the RSA public key that was received with the request to send <br>
+     * an RSA encrypted AES256 key that can be used for further conversation.
+     * @param tUser the Temporary User who sent the Request
+     * @param msgParts the Request
+     */
     private void handleCreateSecConnection(TempUser tUser, String[] msgParts) {
         X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Encoder.b64Decode(msgParts[1]));
         try {
@@ -116,6 +123,11 @@ public abstract class CryptoServer extends Server {
         send(user.getIp(), user.getPort(), enc);
     }
 
+    /**
+     * Sends a given message to all participants of a conversation.
+     * @param con the target conversation
+     * @param message the message to be sent
+     */
     protected void sendToConversation(Conversation con, Object... message) {
         for (String username : con.getUsers()) {
             User user = users.getUser(username);
@@ -140,6 +152,12 @@ public abstract class CryptoServer extends Server {
         send(user.getIp(), user.getPort(), PROTOCOL.getErrorMessage(errorCode));
     }
 
+    /**
+     * Adds the Cryptographic Keys to a User object.
+     * @param user The target user
+     * @param publicKey the RSA public key
+     * @param aesKey the AES256 main key
+     */
     protected void addUserKeys(User user, PublicKey publicKey, SecretKey aesKey) {
         publicKeys.put(user, publicKey);
         aesKeys.put(user, aesKey);
@@ -153,6 +171,13 @@ public abstract class CryptoServer extends Server {
         tempUsers.remove(tempUser);
     }
 
+    /**
+     * Gets the AES256 Conversation key for a specified conversation and client.
+     * @param clientIP the clients IP
+     * @param clientPort the clients Ports
+     * @param conversationId the Conversations ID
+     * @return
+     */
     public SecretKey getConversationUserKey(String clientIP, int clientPort, String conversationId) {
         SecretKey key = conversationUserKeys.get(clientIP + ":" + clientPort + "@" + conversationId);
         if (key == null) {
