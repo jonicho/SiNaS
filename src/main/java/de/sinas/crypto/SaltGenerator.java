@@ -52,7 +52,7 @@ public class SaltGenerator {
             result[count] = b;
             count++;
         }
-               
+        return result;     
     }
 
     private static byte[] xorArray(byte[] a, byte[] b) {
