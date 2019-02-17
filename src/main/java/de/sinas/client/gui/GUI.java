@@ -11,10 +11,8 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import javax.swing.DefaultListCellRenderer;
@@ -376,9 +374,13 @@ public class GUI extends JFrame {
 			gbc_scrollPane_1.insets = new Insets(0, 0, 5, 0);
 			gbc_scrollPane_1.gridx = 1;
 			gbc_scrollPane_1.gridy = 2;
-			contentPane.add(messagesScrollPane, gbc_scrollPane_1);
-
-			messagesList = new JList<>();
+	
+			messagesList = new JList<>() {
+				@Override
+				public boolean getScrollableTracksViewportWidth() {
+					return true;
+				}
+			};
 			messagesList.setSelectionModel(new DefaultListSelectionModel() {
 				@Override
 				public void setSelectionInterval(int index0, int index1) {
@@ -386,18 +388,14 @@ public class GUI extends JFrame {
 				}
 			});
 			messagesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			messagesList.setSelectionBackground(new Color(230, 230, 230));
-			messagesList.setCellRenderer(new DefaultListCellRenderer() {
+			messagesList.setBackground(Color.WHITE);
+			messagesList.setCellRenderer(new MessageCellRenderer(appClient.getThisUser().getUsername()));
+			messagesList.addComponentListener(new ComponentAdapter() {
 				@Override
-				public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-					Message message = (Message) value;
-					boolean isOwnMessage = message.getSender().equals(appClient.getThisUser().getUsername());
-					setHorizontalAlignment(isOwnMessage ? RIGHT : LEFT);
-					String string = String.format(
-							"<html><div style=\"margin: 5; padding: 5; background: #aaaaaa; color: black; text-align: %s;\">%s<br>%s<br>%s</div></html>",
-							isOwnMessage ? "right" : "left", message.getSender(), message.getContent(),
-							DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(message.getTimestamp())));
-					return super.getListCellRendererComponent(list, string, index, index % 2 == 0, cellHasFocus);
+				public void componentResized(ComponentEvent e) {
+					// force cache invalidation by temporarily setting fixed height
+					messagesList.setFixedCellHeight(10);
+					messagesList.setFixedCellHeight(-1);
 				}
 			});
 			messagesScrollPane.setViewportView(messagesList);
