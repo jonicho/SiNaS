@@ -7,10 +7,14 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.AdjustmentEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Hashtable;
 import java.util.List;
 
 import javax.swing.DefaultListCellRenderer;
@@ -37,8 +41,6 @@ import de.sinas.Message;
 import de.sinas.client.AppClient;
 import de.sinas.client.gui.language.Language;
 import de.sinas.net.PROTOCOL;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 public class GUI extends JFrame {
 	private JPanel contentPane;
@@ -46,12 +48,10 @@ public class GUI extends JFrame {
 	private JList<Conversation> conversationsList;
 	private Language lang;
 	private AppClient appClient;
-	private Conversation currentConversation;
-	private JList<Message> messagesList;
-	private JScrollPane messagesScrollPane;
+	private GUIConversation currentConversation;
 	private JLabel conversationInfoLabel;
 	private boolean messagesUpdating = false;
-	private Hashtable<String, Message> scrollPositionTable = new Hashtable<>();
+	private List<GUIConversation> guiConversations = new ArrayList<>();
 	private JButton sendButton;
 
 	public GUI(AppClient appClient, Language lang) {
@@ -126,40 +126,6 @@ public class GUI extends JFrame {
 		gbc_editButton.gridy = 1;
 		contentPane.add(editButton, gbc_editButton);
 
-		messagesScrollPane = new JScrollPane();
-		messagesScrollPane.getVerticalScrollBar().addAdjustmentListener(e -> onMessagesScrolled(e));
-		GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
-		gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane_1.gridwidth = 2;
-		gbc_scrollPane_1.insets = new Insets(0, 0, 5, 0);
-		gbc_scrollPane_1.gridx = 1;
-		gbc_scrollPane_1.gridy = 2;
-		contentPane.add(messagesScrollPane, gbc_scrollPane_1);
-
-		messagesList = new JList<>();
-		messagesList.setSelectionModel(new DefaultListSelectionModel() {
-			@Override
-			public void setSelectionInterval(int index0, int index1) {
-				super.setSelectionInterval(-1, -1);
-			}
-		});
-		messagesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		messagesList.setSelectionBackground(new Color(230, 230, 230));
-		messagesList.setCellRenderer(new DefaultListCellRenderer() {
-			@Override
-			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-				Message message = (Message) value;
-				boolean isOwnMessage = message.getSender().equals(appClient.getThisUser().getUsername());
-				setHorizontalAlignment(isOwnMessage ? RIGHT : LEFT);
-				String string = String.format(
-						"<html><div style=\"margin: 5; padding: 5; background: #aaaaaa; color: black; text-align: %s;\">%s<br>%s<br>%s</div></html>",
-						isOwnMessage ? "right" : "left", message.getSender(), message.getContent(),
-						DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(message.getTimestamp())));
-				return super.getListCellRendererComponent(list, string, index, index % 2 == 0, cellHasFocus);
-			}
-		});
-		messagesScrollPane.setViewportView(messagesList);
-
 		JMenuBar menuBar = new JMenuBar();
 		GridBagConstraints gbc_menuBar = new GridBagConstraints();
 		gbc_menuBar.anchor = GridBagConstraints.WEST;
@@ -223,7 +189,7 @@ public class GUI extends JFrame {
 		if (conversationsList.getSelectedValue() == null) {
 			return;
 		}
-		if (conversationsList.getSelectedValue().equals(currentConversation)) {
+		if (currentConversation != null && conversationsList.getSelectedValue().equals(currentConversation.conversation)) {
 			return;
 		}
 		if (messagesUpdating) { // if the messages are being updated, try again later
@@ -233,24 +199,28 @@ public class GUI extends JFrame {
 			return;
 		}
 		messagesUpdating = true;
-		currentConversation = conversationsList.getSelectedValue();
+		if (currentConversation != null) {
+			currentConversation.hide();
+		}
+		currentConversation = getGUIConversation(conversationsList.getSelectedValue());
+		currentConversation.show();
 		sendButton.setEnabled(true);
 		messageTextField.setEnabled(true);
-		messagesList.setListData(currentConversation.getMessages().toArray(new Message[0]));
 		updateConversationInfoLabel();
-		if (currentConversation.getMessages().isEmpty()) {
-			appClient.requestMessages(currentConversation.getId(), System.currentTimeMillis(), 20);
+		if (currentConversation.conversation.getMessages().isEmpty()) {
+			appClient.requestMessages(currentConversation.conversation.getId(), System.currentTimeMillis(), 20);
 		}
-		scrollToMessage(scrollPositionTable.get(currentConversation.getId()), () -> messagesUpdating = false);
+		contentPane.revalidate();
+		contentPane.repaint();
+		messagesUpdating = false;
 	}
 
 	private void onMessagesScrolled(AdjustmentEvent e) {
-		if (currentConversation == null || currentConversation.getMessages().isEmpty() || messagesUpdating) {
+		if (currentConversation == null || currentConversation.conversation.getMessages().isEmpty() || messagesUpdating) {
 			return;
 		}
-		scrollPositionTable.put(currentConversation.getId(), messagesList.getModel().getElementAt(messagesList.getLastVisibleIndex()));
-		if (messagesScrollPane.getVerticalScrollBar().getValue() == 0 && !e.getValueIsAdjusting()) {
-			appClient.requestMessages(currentConversation.getId(), currentConversation.getMessages().get(0).getTimestamp(), 20);
+		if (currentConversation.messagesScrollPane.getVerticalScrollBar().getValue() == 0 && !e.getValueIsAdjusting()) {
+			appClient.requestMessages(currentConversation.conversation.getId(), currentConversation.conversation.getMessages().get(0).getTimestamp(), 20);
 		}
 	}
 
@@ -258,23 +228,23 @@ public class GUI extends JFrame {
 		if (currentConversation == null) {
 			return;
 		}
-		ConversationEditDialog dialog = new ConversationEditDialog(this, appClient, currentConversation, lang);
+		ConversationEditDialog dialog = new ConversationEditDialog(this, appClient, currentConversation.conversation, lang);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		if (!dialog.showDialog()) {
 			return;
 		}
-		if (!currentConversation.getName().equals(dialog.getConversationName())) {
-			appClient.renameConversation(currentConversation.getId(), dialog.getConversationName());
+		if (!currentConversation.conversation.getName().equals(dialog.getConversationName())) {
+			appClient.renameConversation(currentConversation.conversation.getId(), dialog.getConversationName());
 		}
 		List<String> newUsers = Arrays.asList(dialog.getUsers());
-		for (String user : currentConversation.getUsers()) {
+		for (String user : currentConversation.conversation.getUsers()) {
 			if (!newUsers.contains(user)) {
-				appClient.removeUserFromConversation(currentConversation.getId(), user);
+				appClient.removeUserFromConversation(currentConversation.conversation.getId(), user);
 			}
 		}
-		for (String user : newUsers) {
-			if (!currentConversation.getUsers().contains(user)) {
-				appClient.addUserToConversation(currentConversation.getId(), user);
+		for (String newUser : newUsers) {
+			if (!currentConversation.conversation.getUsers().contains(newUser)) {
+				appClient.addUserToConversation(currentConversation.conversation.getId(), newUser);
 			}
 		}
 	}
@@ -291,24 +261,24 @@ public class GUI extends JFrame {
 		if (currentConversation == null) {
 			return;
 		}
-		conversationInfoLabel.setText(String.format("<html><div style=\"padding: 5;\"><span style=\"font-size: 20;\">%s</span><br>%s</div></html>", currentConversation.getName(), String.join(", ", currentConversation.getUsers())));
+		conversationInfoLabel.setText(String.format("<html><div style=\"padding: 5;\"><span style=\"font-size: 20;\">%s</span><br>%s</div></html>", currentConversation.conversation.getName(), String.join(", ", currentConversation.conversation.getUsers())));
 	}
 
 	private void scrollToMessage(Message messageToScrollTo, Runnable runWhenFinishedScrolling) {
 		int index = 0;
 		if (messageToScrollTo != null) {
-			for (int i = 0; i < messagesList.getModel().getSize(); i++) {
-				if (messagesList.getModel().getElementAt(i).equals(messageToScrollTo)) {
+			for (int i = 0; i < currentConversation.messagesList.getModel().getSize(); i++) {
+				if (currentConversation.messagesList.getModel().getElementAt(i).equals(messageToScrollTo)) {
 					index = i;
 					break;
 				}
 			}
 		} else {
-			index = messagesList.getModel().getSize() - 1;
+			index = currentConversation.messagesList.getModel().getSize() - 1;
 		}
 		int indexToScrollTo = index;
 		SwingUtilities.invokeLater(() -> {
-			messagesList.ensureIndexIsVisible(indexToScrollTo);
+			currentConversation.messagesList.ensureIndexIsVisible(indexToScrollTo);
 			runWhenFinishedScrolling.run();
 		});
 	}
@@ -317,7 +287,7 @@ public class GUI extends JFrame {
 		if (currentConversation == null || messageTextField.getText().isBlank()) {
 			return;
 		}
-		appClient.sendMessage(currentConversation.getId(), messageTextField.getText());
+		appClient.sendMessage(currentConversation.conversation.getId(), messageTextField.getText());
 		messageTextField.setText("");
 	}
 
@@ -335,12 +305,22 @@ public class GUI extends JFrame {
 	}
 
 	private void onConversationUpdate() {
-		Conversation lastCurrentConversation = currentConversation;
 		conversationsList.setListData(appClient.getConversations().toArray(new Conversation[0]));
+		for (Conversation c : appClient.getConversations()) {
+			if (getGUIConversation(c) == null) {
+				guiConversations.add(new GUIConversation(c));
+			}
+		}
+		Conversation lastCurrentConversation;
+		if (currentConversation == null) {
+			lastCurrentConversation = null;
+		} else {
+			lastCurrentConversation = currentConversation.conversation;
+		}
 		for (int i = 0; i < conversationsList.getModel().getSize(); i++) {
 			if (conversationsList.getModel().getElementAt(i).equals(lastCurrentConversation)) {
 				conversationsList.setSelectedIndex(i);
-				currentConversation = conversationsList.getModel().getElementAt(i);
+				currentConversation = getGUIConversation(conversationsList.getModel().getElementAt(i));
 				updateConversationInfoLabel();
 				break;
 			}
@@ -357,17 +337,79 @@ public class GUI extends JFrame {
 			}
 			messagesUpdating = true;
 			Message messageToScrollTo = null;
-			if (messagesList.getModel().getSize() > 0 && messagesList.getLastVisibleIndex() != messagesList.getModel().getSize() - 1) {
-				messageToScrollTo = messagesList.getModel().getElementAt(messagesList.getFirstVisibleIndex());
+			if (currentConversation.messagesList.getModel().getSize() > 0 && currentConversation.messagesList.getLastVisibleIndex() != currentConversation.messagesList.getModel().getSize() - 1) {
+				messageToScrollTo = currentConversation.messagesList.getModel().getElementAt(currentConversation.messagesList.getFirstVisibleIndex());
 			}
-			messagesList.setListData(currentConversation.getMessages().toArray(new Message[0]));
+			currentConversation.messagesList.setListData(currentConversation.conversation.getMessages().toArray(new Message[0]));
 			scrollToMessage(messageToScrollTo, () -> messagesUpdating = false);
 		}
 	}
-
+	
 	private void createErrorListener() {
 		appClient.addErrorListener(errorCode -> {
 			JOptionPane.showMessageDialog(this, lang.getString("error_code") + ": " + errorCode, lang.getString("some_error_occurred"), JOptionPane.ERROR_MESSAGE);
 		});
+	}
+
+	private GUIConversation getGUIConversation(Conversation conversation) {
+		for (GUIConversation gConv : guiConversations) {
+			if (gConv.conversation.equals(conversation)) {
+				return gConv;
+			}
+		}
+		return null;
+	}
+
+	private class GUIConversation {
+		private final Conversation conversation;
+		private final JList<Message> messagesList;
+		private final JScrollPane messagesScrollPane;
+		private final GridBagConstraints gbc_scrollPane_1;
+
+		private GUIConversation(Conversation conversation) {
+			this.conversation = conversation;
+			messagesScrollPane = new JScrollPane();
+			messagesScrollPane.getVerticalScrollBar().addAdjustmentListener(e -> onMessagesScrolled(e));
+			gbc_scrollPane_1 = new GridBagConstraints();
+			gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
+			gbc_scrollPane_1.gridwidth = 2;
+			gbc_scrollPane_1.insets = new Insets(0, 0, 5, 0);
+			gbc_scrollPane_1.gridx = 1;
+			gbc_scrollPane_1.gridy = 2;
+			contentPane.add(messagesScrollPane, gbc_scrollPane_1);
+
+			messagesList = new JList<>();
+			messagesList.setSelectionModel(new DefaultListSelectionModel() {
+				@Override
+				public void setSelectionInterval(int index0, int index1) {
+					super.setSelectionInterval(-1, -1);
+				}
+			});
+			messagesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			messagesList.setSelectionBackground(new Color(230, 230, 230));
+			messagesList.setCellRenderer(new DefaultListCellRenderer() {
+				@Override
+				public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+					Message message = (Message) value;
+					boolean isOwnMessage = message.getSender().equals(appClient.getThisUser().getUsername());
+					setHorizontalAlignment(isOwnMessage ? RIGHT : LEFT);
+					String string = String.format(
+							"<html><div style=\"margin: 5; padding: 5; background: #aaaaaa; color: black; text-align: %s;\">%s<br>%s<br>%s</div></html>",
+							isOwnMessage ? "right" : "left", message.getSender(), message.getContent(),
+							DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(message.getTimestamp())));
+					return super.getListCellRendererComponent(list, string, index, index % 2 == 0, cellHasFocus);
+				}
+			});
+			messagesScrollPane.setViewportView(messagesList);
+		}
+
+		private void show() {
+			messagesList.setListData(conversation.getMessages().toArray(new Message[0]));
+			contentPane.add(messagesScrollPane, gbc_scrollPane_1);
+		}
+
+		private void hide() {
+			contentPane.remove(messagesScrollPane);
+		}
 	}
 }
