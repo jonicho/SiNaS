@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.text.StringEscapeUtils;
-
 import de.sinas.Conversation;
 import de.sinas.Message;
 import de.sinas.User;
@@ -237,7 +235,7 @@ public class AppServer extends CryptoServer {
 		long ms = System.currentTimeMillis();
 		String convID = msgParts[1];
 		boolean isFile = Boolean.parseBoolean(msgParts[2]);
-		String content = StringEscapeUtils.escapeHtml4(msgParts[3]).strip();
+		String content = msgParts[3].strip();
 		if (content.isBlank()) {
 			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
 			return;
