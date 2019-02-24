@@ -276,7 +276,10 @@ public class GUI extends JFrame {
 		}
 		int indexToScrollTo = index;
 		SwingUtilities.invokeLater(() -> {
-			currentConversation.messagesList.ensureIndexIsVisible(indexToScrollTo);
+			if (indexToScrollTo < currentConversation.messagesList.getFirstVisibleIndex()
+					|| indexToScrollTo > currentConversation.messagesList.getLastVisibleIndex()) {
+				currentConversation.messagesList.ensureIndexIsVisible(indexToScrollTo);
+			}
 			runWhenFinishedScrolling.run();
 		});
 	}
