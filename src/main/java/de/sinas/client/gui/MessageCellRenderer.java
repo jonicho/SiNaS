@@ -33,7 +33,6 @@ public class MessageCellRenderer implements ListCellRenderer<Message> {
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         panel.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5), new CompoundBorder(new LineBorder(Color.BLACK), new EmptyBorder(5, 5, 5, 5))));
-        panel.setBackground(Color.WHITE);
         panel.add(senderLabel, BorderLayout.NORTH);
         panel.add(textArea, BorderLayout.CENTER);
         panel.add(dateLabel, BorderLayout.SOUTH);
@@ -42,6 +41,8 @@ public class MessageCellRenderer implements ListCellRenderer<Message> {
     @Override
     public Component getListCellRendererComponent(JList<? extends Message> list, Message message, int index, boolean isSelected, boolean cellHasFocus) {
         boolean isOwnMessage = message.getSender().equals(ownUsername);
+        
+        panel.setBackground(list.getBackground());
         
         senderLabel.setText(message.getSender());
         textArea.setText(message.getContent());

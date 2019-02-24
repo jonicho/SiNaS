@@ -388,7 +388,6 @@ public class GUI extends JFrame {
 				}
 			});
 			messagesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			messagesList.setBackground(Color.WHITE);
 			messagesList.setCellRenderer(new MessageCellRenderer(appClient.getThisUser().getUsername()));
 			messagesList.addComponentListener(new ComponentAdapter() {
 				@Override
