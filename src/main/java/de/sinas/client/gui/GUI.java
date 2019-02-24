@@ -368,6 +368,7 @@ public class GUI extends JFrame {
 			this.conversation = conversation;
 			messagesScrollPane = new JScrollPane();
 			messagesScrollPane.getVerticalScrollBar().addAdjustmentListener(e -> onMessagesScrolled(e));
+			messagesScrollPane.getVerticalScrollBar().setUnitIncrement(16);
 			gbc_scrollPane_1 = new GridBagConstraints();
 			gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
 			gbc_scrollPane_1.gridwidth = 2;
