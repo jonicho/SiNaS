@@ -208,7 +208,7 @@ public class AppServer extends CryptoServer {
 		if (!messages.isEmpty()) {
 			int firstIndex = 0;
 			int lastIndex = messages.size() - 1;
-			while (messages.get(lastIndex).getTimestamp() >= lastTimestamp && lastIndex > 0) {
+			while (lastIndex >= 0 && messages.get(lastIndex).getTimestamp() >= lastTimestamp) {
 				lastIndex--;
 			}
 			firstIndex = Math.max(lastIndex - lastNMessages, 0);
