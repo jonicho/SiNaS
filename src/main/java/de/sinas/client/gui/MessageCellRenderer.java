@@ -24,6 +24,7 @@ public class MessageCellRenderer implements ListCellRenderer<Message> {
     private final JTextArea textArea = new JTextArea();
     private final JLabel dateLabel = new JLabel();
     private final String ownUsername;
+    private String lastMessageId = null;
 
     public MessageCellRenderer(String ownUsername) {
         this.ownUsername = ownUsername;
@@ -40,6 +41,10 @@ public class MessageCellRenderer implements ListCellRenderer<Message> {
 
     @Override
     public Component getListCellRendererComponent(JList<? extends Message> list, Message message, int index, boolean isSelected, boolean cellHasFocus) {
+    	if (message.getId().equals(lastMessageId)) {
+    		return panel;
+    	}
+    	
         boolean isOwnMessage = message.getSender().equals(ownUsername);
         
         panel.setBackground(list.getBackground());
@@ -56,6 +61,7 @@ public class MessageCellRenderer implements ListCellRenderer<Message> {
             panel.setSize(list.getWidth(), Integer.MAX_VALUE);
         }
         textArea.setSize(textArea.getPreferredSize());
+        lastMessageId = message.getId();
         return panel;
     }
 
