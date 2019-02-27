@@ -169,7 +169,9 @@ public class ConversationEditDialog extends JDialog {
 			{
 				usersList = new JList<>();
 				DefaultListModel<String> defaultListModel = new DefaultListModel<>();
-				defaultListModel.addAll(conversation.getUsers());
+				for(String user : conversation.getUsers()) {
+					defaultListModel.addElement(user);
+				}
 				usersList.setModel(defaultListModel);
 				usersList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 				scrollPane.setViewportView(usersList);
@@ -214,7 +216,7 @@ public class ConversationEditDialog extends JDialog {
 	private void updateUsersSearchList() {
 		List<String> resultsList = new ArrayList<>(Arrays.asList(userSearchResult));
 		resultsList.removeAll(Arrays.asList(getUsers()));
-		usersSearchList.setListData(resultsList.toArray(String[]::new));
+		usersSearchList.setListData(resultsList.toArray(new String[0]));
 	}
 
 	private void onUsernameSearch() {

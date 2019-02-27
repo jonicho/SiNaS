@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import de.sinas.Conversation;
 import de.sinas.Message;
 import de.sinas.User;
@@ -235,8 +237,8 @@ public class AppServer extends CryptoServer {
 		long ms = System.currentTimeMillis();
 		String convID = msgParts[1];
 		boolean isFile = Boolean.parseBoolean(msgParts[2]);
-		String content = msgParts[3].strip();
-		if (content.isBlank()) {
+		String content = StringUtils.strip(msgParts[3]);
+		if (StringUtils.isBlank(content)) {
 			sendError(user, PROTOCOL.ERRORCODES.INVALID_MESSAGE);
 			return;
 		}

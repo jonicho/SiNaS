@@ -34,6 +34,8 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
+import org.apache.commons.lang3.StringUtils;
+
 import de.sinas.Conversation;
 import de.sinas.Message;
 import de.sinas.client.AppClient;
@@ -285,7 +287,7 @@ public class GUI extends JFrame {
 	}
 
 	private void sendMessage() {
-		if (currentConversation == null || messageTextField.getText().isBlank()) {
+		if (currentConversation == null || StringUtils.isBlank(messageTextField.getText())) {
 			return;
 		}
 		appClient.sendMessage(currentConversation.conversation.getId(), messageTextField.getText());
@@ -379,7 +381,7 @@ public class GUI extends JFrame {
 			gbc_scrollPane_1.gridx = 1;
 			gbc_scrollPane_1.gridy = 2;
 	
-			messagesList = new JList<>() {
+			messagesList = new JList<Message>() {
 				@Override
 				public boolean getScrollableTracksViewportWidth() {
 					return true;
