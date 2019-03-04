@@ -41,6 +41,8 @@ import de.sinas.Message;
 import de.sinas.client.AppClient;
 import de.sinas.client.gui.language.Language;
 import de.sinas.net.PROTOCOL;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class GUI extends JFrame {
 	private JPanel contentPane;
@@ -139,6 +141,11 @@ public class GUI extends JFrame {
 		menuBar.add(mnHelp);
 
 		JMenuItem mntmAbout = new JMenuItem(lang.getString("about"));
+		mntmAbout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				onAbout();
+			}
+		});
 		mnHelp.add(mntmAbout);
 
 		messageTextField = new JTextField();
@@ -175,6 +182,12 @@ public class GUI extends JFrame {
 		createErrorListener();
 
 		appClient.requestConversations();
+	}
+
+	private void onAbout() {
+		AboutDialog dialog = new AboutDialog(lang);
+		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		dialog.setVisible(true);
 	}
 
 	private void onAddConversation() {

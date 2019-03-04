@@ -29,3 +29,5 @@ name: Name
 search: Search
 users: Users
 already_logged_in: This user is already logged in!
+ok: Ok
+developed_by: Developed by
