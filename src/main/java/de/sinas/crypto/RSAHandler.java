@@ -15,7 +15,7 @@ import javax.crypto.NoSuchPaddingException;
 public class RSAHandler {
     private Cipher cipher;
     private KeyPairGenerator kpg;
-    private final int KEY_SIZE = 2048;
+    private final int KEY_SIZE = 4096;
 
     public RSAHandler() {
         try {
