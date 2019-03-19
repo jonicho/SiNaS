@@ -101,6 +101,24 @@ public class AppClient extends CryptoClient {
 		String conversationId = msgParts[2];
 		String conversationKey = msgParts[3];
 		String[] usernames = Arrays.copyOfRange(msgParts, 4, msgParts.length);
+		boolean inConversation = false;
+		for(String name : usernames) {
+			if(name.equals(thisUser.getUsername())) {
+				inConversation = true;
+			}
+		}
+		if(!inConversation) {
+			Conversation con = null;
+			for(Conversation c : conversations) {
+				if(c.getId().equals(conversationId)) {
+					con = c;
+				}
+			}
+			if(con != null) {
+				conversations.remove(con);
+			}
+			return;
+		} 
 		addConversationKey(conversationId, conversationKey);
 		int conversationIndex = -1;
 		for (int i = 0; i < conversations.size(); i++) {
