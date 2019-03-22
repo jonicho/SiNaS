@@ -67,7 +67,7 @@ public abstract class CryptoServer extends Server {
                 }
             }
             if (tempUser == null) {
-                sendError(new TempUser(clientIP, clientPort), PROTOCOL.ERRORCODES.NOT_SEC_CONNECTED);
+                sendErrorUnencrypted(new TempUser(clientIP, clientPort), PROTOCOL.ERRORCODES.NOT_SEC_CONNECTED);
                 return;
             }
             String decodedMessage = new String(
@@ -151,6 +151,13 @@ public abstract class CryptoServer extends Server {
      */
     protected void sendError(User user, int errorCode) {
         send(user, new Object[] { PROTOCOL.getErrorMessage(errorCode) });
+    }
+
+    /**
+     * Sends the given error code to the given user without encryption.
+     */
+    private void sendErrorUnencrypted(User user, int errorCode) {
+        send(user.getIp(), user.getPort(), PROTOCOL.getErrorMessage(errorCode));
     }
 
     /**
