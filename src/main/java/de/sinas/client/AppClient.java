@@ -132,9 +132,9 @@ public class AppClient extends CryptoClient {
 			conversations.add(new Conversation(conversationId, conversationName, usernames));
 			return;
 		}
-		Conversation newConversation = new Conversation(conversationId, conversationName, usernames);
-		newConversation.addMessages(conversations.get(conversationIndex).getMessages().toArray(new Message[0]));
-		conversations.set(conversationIndex, newConversation);
+		Conversation conversation = conversations.get(conversationIndex);
+		conversation.rename(conversationName);
+		conversation.setUsers(usernames);
 	}
 
 	private void handleUser(String[] msgParts) {

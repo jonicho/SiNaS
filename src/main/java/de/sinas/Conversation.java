@@ -60,6 +60,14 @@ public class Conversation {
 	}
 
 	/**
+	 * Removes all users from this conversation and adds the given ones.
+	 */
+	public void setUsers(String... users) {
+		this.users.clear();
+		this.users.addAll(Arrays.asList(users));
+	}
+
+	/**
 	 * Adds one or more messages to the conversation. The messages in this
 	 * conversation will be sorted by time stamp.
 	 *
