@@ -43,6 +43,7 @@ public class ConversationEditDialog extends JDialog {
 		super(owner, ModalityType.APPLICATION_MODAL);
 		this.appClient = appClient;
 		setBounds(100, 100, 450, 494);
+		setLocationRelativeTo(owner);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

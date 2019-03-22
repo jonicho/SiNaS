@@ -70,6 +70,7 @@ public class GUI extends JFrame {
 			}
 		});
 		setBounds(100, 100, 600, 300);
+		setLocationRelativeTo(null);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -186,7 +187,7 @@ public class GUI extends JFrame {
 	}
 
 	private void onAbout() {
-		AboutDialog dialog = new AboutDialog(lang);
+		AboutDialog dialog = new AboutDialog(this, lang);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		dialog.setVisible(true);
 	}

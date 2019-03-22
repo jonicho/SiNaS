@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.FlowLayout;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -29,9 +30,11 @@ public class AboutDialog extends JDialog {
 	private final JPanel contentPanel = new JPanel();
 	private final String githubLink = "https://github.com/JonasRKeller/SiNaS";
 
-	public AboutDialog(Language lang) {
+	public AboutDialog(Frame owner, Language lang) {
+		super(owner, ModalityType.APPLICATION_MODAL);
 		setTitle("SiNaS - " + lang.getString("about"));
 		setBounds(100, 100, 450, 300);
+		setLocationRelativeTo(owner);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
