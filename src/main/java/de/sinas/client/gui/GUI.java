@@ -14,6 +14,7 @@ import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListSelectionModel;
@@ -223,8 +224,6 @@ public class GUI extends JFrame {
 		if (currentConversation.conversation.getMessages().isEmpty()) {
 			appClient.requestMessages(currentConversation.conversation.getId(), System.currentTimeMillis(), 20);
 		}
-		contentPane.revalidate();
-		contentPane.repaint();
 		messagesUpdating = false;
 	}
 
@@ -272,6 +271,7 @@ public class GUI extends JFrame {
 
 	private void updateConversationInfoLabel() {
 		if (currentConversation == null) {
+			conversationInfoLabel.setText("");
 			return;
 		}
 		conversationInfoLabel.setText(String.format("<html><div style=\"padding: 5;\"><span style=\"font-size: 20;\">%s</span><br>%s</div></html>", currentConversation.conversation.getName(), String.join(", ", currentConversation.conversation.getUsers())));
@@ -327,6 +327,7 @@ public class GUI extends JFrame {
 				guiConversations.add(new GUIConversation(c));
 			}
 		}
+		guiConversations.removeAll(guiConversations.stream().filter(gC -> !appClient.getConversations().contains(gC.conversation)).collect(Collectors.toList()));
 		Conversation lastCurrentConversation;
 		if (currentConversation == null) {
 			lastCurrentConversation = null;
@@ -340,6 +341,11 @@ public class GUI extends JFrame {
 				updateConversationInfoLabel();
 				break;
 			}
+		}
+		if (currentConversation != null && !guiConversations.contains(currentConversation)) {
+			currentConversation.hide();
+			currentConversation = null;
+			updateConversationInfoLabel();
 		}
 	}
 
@@ -422,10 +428,16 @@ public class GUI extends JFrame {
 		private void show() {
 			messagesList.setListData(conversation.getMessages().toArray(new Message[0]));
 			contentPane.add(messagesScrollPane, gbc_scrollPane_1);
+
+			contentPane.revalidate();
+			contentPane.repaint();
 		}
 
 		private void hide() {
 			contentPane.remove(messagesScrollPane);
+
+			contentPane.revalidate();
+			contentPane.repaint();
 		}
 	}
 }
