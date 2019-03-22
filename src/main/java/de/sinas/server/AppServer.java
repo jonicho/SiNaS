@@ -352,7 +352,9 @@ public class AppServer extends CryptoServer {
 		}
 		conversation.removeUser(msgParts[2]);
 		db.removeUserFromConversation(conversation, msgParts[2]);
-		for (User u : users.getLoggedInUsers(conversation.getUsers())) {
+		List<User> usersToSendUpdateTo = users.getLoggedInUsers(conversation.getUsers());
+		usersToSendUpdateTo.add(users.getUser(msgParts[2]));
+		for (User u : usersToSendUpdateTo) {
 			sendConversationToUser(conversation, u);
 		}
 	}
