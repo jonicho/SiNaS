@@ -10,3 +10,5 @@
 .classpath
 .project
 *.db
+SiNaS-Server_log_*.txt
+SiNaS-Client_log_*.txt
