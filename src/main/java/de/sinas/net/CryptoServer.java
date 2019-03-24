@@ -9,6 +9,7 @@ import java.util.Hashtable;
 import javax.crypto.SecretKey;
 
 import de.sinas.Conversation;
+import de.sinas.Logger;
 import de.sinas.User;
 import de.sinas.Users;
 import de.sinas.crypto.AESHandler;
@@ -31,7 +32,6 @@ public abstract class CryptoServer extends Server {
 
     @Override
     public void processMessage(String clientIP, int clientPort, String message) {
-        System.out.println("(SERVER) New message: " + clientIP + ":" + clientPort + ", " + message);
         String[] msgParts = message.split(PROTOCOL.SPLIT, -1);
         User user = users.getUser(clientIP, clientPort);
         if (user != null && aesKeys.get(user) != null) {
@@ -45,7 +45,7 @@ public abstract class CryptoServer extends Server {
                 encodedMessage = msgParts[1];
             }
             String decodedMessage = new String(aesHandler.decrypt(Encoder.b64Decode(encodedMessage), key));
-            System.out.println("(SERVER) Decoded message: " + clientIP + ":" + clientPort + ", " + decodedMessage);
+            Logger.logMessage(decodedMessage, true, clientIP, clientPort);
             processDecryptedMessage(user, decodedMessage);
             return;
         }
@@ -72,7 +72,7 @@ public abstract class CryptoServer extends Server {
             }
             String decodedMessage = new String(
                     aesHandler.decrypt(Encoder.b64Decode(msgParts[0]), tempUser.getAesKey()));
-            System.out.println("(SERVER) Decoded message: " + clientIP + ":" + clientPort + ", " + decodedMessage);
+            Logger.logMessage(decodedMessage, true, clientIP, clientPort);
             processDecryptedMessage(tempUser, decodedMessage);
         }
     }
@@ -110,6 +110,7 @@ public abstract class CryptoServer extends Server {
         byte[] cryp = aesHandler.encrypt(msg.getBytes(),
                 user instanceof TempUser ? ((TempUser) user).getAesKey() : aesKeys.get(user));
         String enc = Encoder.b64Encode(cryp);
+        Logger.logMessage(msg, false, user.getIp(), user.getPort());
         send(user.getIp(), user.getPort(), enc);
     }
 
@@ -121,6 +122,7 @@ public abstract class CryptoServer extends Server {
         String msg = PROTOCOL.buildMessage(message);
         byte[] cryp = rsaHandler.encrypt(msg.getBytes(), key);
         String enc = Encoder.b64Encode(cryp);
+        Logger.logMessage(msg, false, user.getIp(), user.getPort());
         send(user.getIp(), user.getPort(), enc);
     }
 
@@ -142,6 +144,7 @@ public abstract class CryptoServer extends Server {
             String msg = PROTOCOL.buildMessage(message);
             byte[] cryp = aesHandler.encrypt(msg.getBytes(), key);
             String enc = Encoder.b64Encode(cryp);
+            Logger.logMessage(con.getId() + PROTOCOL.SPLIT + msg, false, user.getIp(), user.getPort());
             send(user.getIp(), user.getPort(), con.getId() + PROTOCOL.SPLIT + enc);
         }
     }
@@ -157,7 +160,9 @@ public abstract class CryptoServer extends Server {
      * Sends the given error code to the given user without encryption.
      */
     private void sendErrorUnencrypted(User user, int errorCode) {
-        send(user.getIp(), user.getPort(), PROTOCOL.getErrorMessage(errorCode));
+        String msg = PROTOCOL.getErrorMessage(errorCode);
+        Logger.logMessage(msg, false, user.getIp(), user.getPort());
+        send(user.getIp(), user.getPort(), msg);
     }
 
     /**

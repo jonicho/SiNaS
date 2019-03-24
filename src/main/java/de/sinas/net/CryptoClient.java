@@ -8,6 +8,7 @@ import java.util.Hashtable;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import de.sinas.Logger;
 import de.sinas.crypto.AESHandler;
 import de.sinas.crypto.Encoder;
 import de.sinas.crypto.RSAHandler;
@@ -27,22 +28,21 @@ public abstract class CryptoClient extends Client {
 
     @Override
     protected void processMessage(String message) {
-        System.out.println("(CLIENT) New message: " + message);
         String[] msgParts = message.split(PROTOCOL.SPLIT, -1);
         if (isRSA) {
             String plainText = new String(rsaHandler.decrypt(Encoder.b64Decode(msgParts[0]), rsaPrivateKey));
-            System.out.println("(CLIENT) Decrypted message: " + plainText);
+            Logger.logMessage(plainText, true);
             processRSAMessage(plainText);
         } else {
             if (msgParts.length == 1) {
                 String plainText = new String(aesHandler.decrypt(Encoder.b64Decode(msgParts[0]), mainAESKey));
-                System.out.println("(CLIENT) Decrypted message: " + plainText);
+                Logger.logMessage(plainText, true);
                 processDecryptedMessage(plainText);
             } else {
                 SecretKey cKey = conversationKeyTable.get(msgParts[0]);
                 if (cKey != null) {
                     String plainText = new String(aesHandler.decrypt(Encoder.b64Decode(msgParts[1]), cKey));
-                    System.out.println("(CLIENT) Decrypted message: " + plainText);
+                    Logger.logMessage(plainText, true);
                     processDecryptedMessage(plainText);
                 }
             }
@@ -70,13 +70,15 @@ public abstract class CryptoClient extends Client {
         String msg = PROTOCOL.buildMessage(message);
         byte[] cryp = aesHandler.encrypt(msg.getBytes(), mainAESKey);
         String enc = Encoder.b64Encode(cryp);
+        Logger.logMessage(msg, false);
         super.send(enc);
     }
 
     public void sendMessage(String convID, String message) {
-        String content = PROTOCOL.buildMessage(PROTOCOL.CS.MESSAGE, convID, false, message);
-        byte[] cryp = aesHandler.encrypt(content.getBytes(), conversationKeyTable.get(convID));
+        String msg = PROTOCOL.buildMessage(PROTOCOL.CS.MESSAGE, convID, false, message);
+        byte[] cryp = aesHandler.encrypt(msg.getBytes(), conversationKeyTable.get(convID));
         String enc = Encoder.b64Encode(cryp);
+        Logger.logMessage(convID + PROTOCOL.SPLIT + msg, false);
         super.send(convID + PROTOCOL.SPLIT + enc);
     }
 
@@ -88,7 +90,9 @@ public abstract class CryptoClient extends Client {
         rsaPrivateKey = keyPair.getPrivate();
         PublicKey rsaPubKey = keyPair.getPublic();
         isRSA = true;
-        super.send(PROTOCOL.buildMessage(PROTOCOL.CS.CREATE_SEC_CONNECTION, Encoder.b64Encode(rsaPubKey.getEncoded())));
+        String msg = PROTOCOL.buildMessage(PROTOCOL.CS.CREATE_SEC_CONNECTION, Encoder.b64Encode(rsaPubKey.getEncoded()));
+        Logger.logMessage(msg, false);
+        super.send(msg);
     }
 
     protected void addConversationKey(String conversationID, String conversationKey) {

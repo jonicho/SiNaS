@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import de.sinas.Conversation;
+import de.sinas.Logger;
 import de.sinas.Message;
 import de.sinas.User;
 import de.sinas.crypto.Encoder;
@@ -29,7 +30,7 @@ public class AppServer extends CryptoServer {
 
 	@Override
 	public void processNewConnection(String clientIP, int clientPort) {
-		System.out.println("New connection: " + clientIP + ":" + clientPort);
+		Logger.log("New connection: " + clientIP + ":" + clientPort);
 	}
 
 	@Override
@@ -428,7 +429,7 @@ public class AppServer extends CryptoServer {
 
 	@Override
 	public void processClosingConnection(String pClientIP, int pClientPort) {
-		System.out.println("Closing connection: " + pClientIP + ":" + pClientPort);
+		Logger.log("Closing connection: " + pClientIP + ":" + pClientPort);
 		users.removeUser(users.getUser(pClientIP, pClientPort));
 	}
 }
