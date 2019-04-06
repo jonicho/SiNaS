@@ -2,6 +2,8 @@ package de.sinas.crypto;
 
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 public class SaltGenerator {
 
     private SaltGenerator() {
@@ -12,25 +14,25 @@ public class SaltGenerator {
         byte[] pHash = hashHandler.getCheckSum(password.getBytes());
         byte[][] xorTable = new byte[16][uHash.length];
         xorTable[0] = uHash;
-        for(int i = 0; i < xorTable.length; i++) {
-            if(i % 2 == 0) {
+        for (int i = 0; i < xorTable.length; i++) {
+            if (i % 2 == 0) {
                 xorTable[i] = uHash;
-            } else{
+            } else {
                 xorTable[i] = pHash;
-            } 
+            }
         }
         byte[] roundKey = pHash;
-        for(int i= 0; i < 16; i++) {
-            for(byte[] arr : xorTable) {
-                for(byte b : arr) {
-                    int byteIndex = org.apache.commons.lang3.ArrayUtils.indexOf(arr, b);
-                    int rowIndex = org.apache.commons.lang3.ArrayUtils.indexOf(xorTable,arr);
-                    if(byteIndex > 1 && byteIndex < uHash.length){
-                        b = xor(b, arr[byteIndex-1]);
+        for (int i = 0; i < 16; i++) {
+            for (byte[] arr : xorTable) {
+                for (byte b : arr) {
+                    int byteIndex = ArrayUtils.indexOf(arr, b);
+                    int rowIndex = ArrayUtils.indexOf(xorTable, arr);
+                    if (byteIndex > 1 && byteIndex < uHash.length) {
+                        b = xor(b, arr[byteIndex - 1]);
                     }
-                    if(i > 1 && rowIndex > 1) {
-                        b = xor(b,xorTable[rowIndex-1][byteIndex]);
-                        arr = xorArray(xorTable[rowIndex-1],arr);
+                    if (i > 1 && rowIndex > 1) {
+                        b = xor(b, xorTable[rowIndex - 1][byteIndex]);
+                        arr = xorArray(xorTable[rowIndex - 1], arr);
                     }
                 }
             }
@@ -39,11 +41,11 @@ public class SaltGenerator {
         byte state = 0;
         int stepCounter = 0;
         ArrayList<Byte> derivate = new ArrayList<Byte>();
-        for(byte[] arr : xorTable) {
-            for(byte b : arr) {
+        for (byte[] arr : xorTable) {
+            for (byte b : arr) {
                 state += b;
                 state %= 256;
-                if(stepCounter == 4) {
+                if (stepCounter == 4) {
                     derivate.add(state);
                     state = 0;
                     stepCounter = 0;
@@ -54,11 +56,11 @@ public class SaltGenerator {
         }
         byte[] result = new byte[derivate.size()];
         int count = 0;
-        for(byte b : derivate) {
+        for (byte b : derivate) {
             result[count] = b;
             count++;
         }
-        return result;     
+        return result;
     }
 
     private static byte[] xorArray(byte[] a, byte[] b) {
