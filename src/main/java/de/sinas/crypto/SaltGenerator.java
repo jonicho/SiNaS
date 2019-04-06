@@ -11,15 +11,13 @@ public class SaltGenerator {
         byte[] uHash = hashHandler.getCheckSum(username.getBytes());
         byte[] pHash = hashHandler.getCheckSum(password.getBytes());
         byte[][] xorTable = new byte[16][uHash.length];
-        int index = 1;
         xorTable[0] = uHash;
-        for(byte[] arr : xorTable) {
-            if(index % 2 == 0) {
-                xorTable[index-1] = uHash;
+        for(int i = 0; i < xorTable.length; i++) {
+            if(i % 2 == 0) {
+                xorTable[i] = uHash;
             } else{
-                xorTable[index-1] = pHash;
+                xorTable[i] = pHash;
             } 
-            index++;
         }
         byte[] roundKey = pHash;
         for(int i= 0; i < 16; i++) {
